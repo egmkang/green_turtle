@@ -33,18 +33,21 @@
 #define __UNORDERED_LIST__
 #include <vector>
 #include <cstddef>
+#include <assert.h>
 
 namespace green_turtle{ namespace collections{
 
 template<class T>
 class unordered_list
 {
+ public:
   unordered_list():
       list_(NULL)
       ,deleted_()
       ,size_(0)
       ,bound_(0)
       ,capability_(32)
+      ,setted_deleted_(false)
   {
     list_ = new T[capability_]();
   }
@@ -52,31 +55,105 @@ class unordered_list
   {
     delete[] list_;
   }
-  //TODO:
-  //impl the copy construtor
   unordered_list(const unordered_list& other)
-  {}
+  {
+    if(capability() < other.capability())
+    {
+      delete[] list_;
+      list_ = new T[other.capability()]();
+    }
+    copy_from(other);
+  }
   unordered_list& operator = (const unordered_list& other)
   {
+    if(capability() < other.capability())
+    {
+      delete[] list_;
+      list_ = new T[other.capability()]();
+    }
+    copy_from(other);
     return *this;
   }
   size_t insert(const T& value)
   {
-    //TODO:
     //if full then increase the capability
     //else insert the value into the back or one slot that deleted
+    size_t index = 0;
+    if(full())
+      increase_capability();
+    if(deleted_index_.empty())
+    {
+      index = bound_;
+    }
+    else
+    {
+      index = deleted_index_.back();
+      deleted_index_.pop_back();
+    }
+
+    list_[index] = value;
+    ++size_;
+    if(size_ > bound_) bound_ = size_;
+
     return 0;
   }
   void erase(size_t index)
   {
-    //TODO:
-    //if the slot is deleted,ignore
-    //else set the value is deleted 
-    //and push the index into the container deleted_index_
+    assert(setted_deleted_ && "you must set a delelted value before erase!");
+    if(list_[index] != deleted_)
+    {
+      list_[index] = deleted_;
+      --size_;
+      deleted_index_.push_back(index);
+    }
   }
 
+  void swap(unordered_list &other)
+  {
+    std::swap(list_,other.list_);
+    std::swap(size_,other.size_);
+    std::swap(bound_,other.bound_);
+    std::swap(capability_,other.capability_);
+    std::swap(deleted_index_,other.deleted_index_);
+  }
+
+  template<class Fn>
+  void for_each(Fn& f)
+  {
+    for(size_t idx = 0; idx < bound_; ++idx)
+    {
+      if(list_[idx] == deleted_) continue;
+      if(!f(list_[idx])) break;
+    }
+  }
+  inline void set_deleted(const T& v) 
+  {
+    if(!setted_deleted_)
+    {
+      deleted_ = v;
+      setted_deleted_ = true;
+    }
+    else
+    {
+      assert(v == deleted_ && "you cannot changed deleted");
+    }
+  }
+
+  void clear()
+  {
+    size_ = 0;
+    bound_ = 0;
+    deleted_index_.clear();
+    T tmp();
+    for(size_t idx = 0; idx < bound_; ++idx)
+    {
+      list_[idx] = tmp;
+    }
+  }
   inline size_t size() const { return size_; }
+  inline size_t capability() const { return capability_; }
   inline bool empty() const { return size_ == 0; }
+  inline bool full() const { return size_ == capability_; }
  private:
   void increase_capability()
   {
@@ -92,6 +169,23 @@ class unordered_list
     delete[] t_;
     capability_ *= 2;
   }
+  void copy_from(const unordered_list &other)
+  {
+    clear();
+    size_ = other.size_;
+    bound_ = other.bound_;
+    capability_ = other.capability_;
+    deleted_ = other.deleted_;
+    deleted_index_ = other.deleted_index_;
+
+    for(size_t idx = 0; idx < capability_; idx += 4)
+    {
+      list_[idx+0] = other.list_[idx+0];
+      list_[idx+1] = other.list_[idx+1];
+      list_[idx+2] = other.list_[idx+2];
+      list_[idx+3] = other.list_[idx+3];
+    }
+  }
  private:
   T		      *list_;
   T         deleted_;
@@ -99,6 +193,7 @@ class unordered_list
   size_t    bound_;
   size_t    capability_;
   std::vector<size_t> deleted_index_;
+  bool      setted_deleted_;
 };
 
 };//end namespace collections 
