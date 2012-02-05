@@ -21,5 +21,6 @@ int main()
   test_container.insert(1212);
   for_each_list e;
   test_container.for_each(e);
+  
   return 0;
 }

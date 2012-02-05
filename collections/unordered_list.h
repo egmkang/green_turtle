@@ -37,6 +37,9 @@
 
 namespace green_turtle{ namespace collections{
 
+//fast insert/earse/for_each operations
+//when inserted or deleted too many times,
+//you'd better to rebuild it if the capability is large enough.
 template<class T>
 class unordered_list
 {
@@ -95,16 +98,21 @@ class unordered_list
     ++size_;
     if(size_ > bound_) bound_ = size_;
 
-    return 0;
+    return index;
   }
   void erase(size_t index)
   {
     assert(setted_deleted_ && "you must set a delelted value before erase!");
-    if(list_[index] != deleted_)
+    if(size() && list_[index] != deleted_)
     {
       list_[index] = deleted_;
-      --size_;
       deleted_index_.push_back(index);
+      --size_;
+      //consider to decrease the bound_
+      while(list_[bound_-1] == deleted_)
+      {
+        --bound_;
+      }
     }
   }
 
