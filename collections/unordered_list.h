@@ -84,14 +84,18 @@ class unordered_list
     size_t index = 0;
     if(full())
       increase_capability();
-    if(deleted_index_.empty())
-    {
-      index = bound_;
-    }
-    else
+    while(!deleted_index_.empty())
     {
       index = deleted_index_.back();
       deleted_index_.pop_back();
+      if(index < bound_)
+        break;
+      else
+        index = 0;
+    }
+    if(!index)
+    {
+      index = bound_;
     }
 
     list_[index] = value;
