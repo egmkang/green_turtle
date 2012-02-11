@@ -52,6 +52,8 @@ class unordered_list
       ,capability_(32)
       ,setted_deleted_(false)
   {
+    //must be 2^n
+    assert( ! (capability_ & (capability_ -1)) );
     list_ = new T[capability_]();
   }
   ~unordered_list()
@@ -162,10 +164,12 @@ class unordered_list
       list_[idx] = tmp;
     }
   }
+  inline const T& get(size_t idx) const {return list_[idx]; }
   inline size_t size() const { return size_; }
   inline size_t capability() const { return capability_; }
   inline bool empty() const { return size_ == 0; }
   inline bool full() const { return size_ == capability_; }
+  inline bool is_deleted(size_t idx) const {return list_[idx] == deleted_; }
  private:
   void increase_capability()
   {
