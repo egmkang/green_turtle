@@ -31,6 +31,65 @@
 
 #ifndef __MY_HASH_TABLE__
 #define __MY_HASH_TABLE__
-//TODO:
+#include <utility>
+#include <functional>
+#include <cstddef>
+#include "../util/hash_function.h"
+namespace green_turtle{namespace collections{
+
 //hash_table with linear probing
+template<class Key,class T,class Hash = util::hash<Key>,class KeyEqual = std::equal_to<Key> >
+class hash_map
+{
+ public:
+  typedef Key                     key_type;
+  typedef T                       mapped_type;
+  typedef std::pair<const Key,T>  value_type;
+  typedef size_t                  size_type;
+  typedef Hash                    hash_fn;
+  typedef KeyEqual                equal_fn;
+
+  //TODO:egmlang
+  //a lot function to impl
+  //find,operator [],erase,insert
+  //increase/decrease capability
+  //for_each,etc
+ private:
+  value_type* find_positon(const key_type& key)
+  {
+    size_type hash_value_ = hasher_(key);
+    size_type mark_ = capability_ - 1;
+    size_type begin_ = hash_value_ & mark_;
+    size_type times_ = 0;
+    value_type *first_deleted_ = NULL;
+    while(true)
+    {
+      if(is_key_deleted(buckets_[begin_]) && !first_deleted_)
+        first_deleted_ = &buckets_[begin_];
+      else if(is_key_empty(buckets_[begin_]))
+        return first_deleted_;
+      else if(equaler_(key,buckets_[begin_]))
+        return &buckets_[begin_];
+
+      begin_ = (++begin_) &  mark_;
+      assert(times_++ <= capability_);
+
+    }
+    return NULL;
+  }
+  inline bool is_key_deleted(const key_type& key) const { return equaler_(key,deleted_key_); }
+  inline bool is_key_empty(const key_type& key) const { return equaler_(key,empty_key_); }
+
+ private:
+  key_type    empty_key_;
+  key_type    deleted_key_;
+  size_type   size_;
+  size_type   capability_;
+  value_type  *buckets_;
+  hash_fn     hasher_;
+  equal_fn    equaler_;
+};
+
+};//end namepsace collections
+};//end namespace green_turtle
 #endif//__MY_HASH_TABLE__
