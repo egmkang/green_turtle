@@ -38,7 +38,10 @@
 namespace green_turtle{namespace collections{
 
 //hash_table with linear probing
-template<class Key,class T,class Hash = util::hash<Key>,class KeyEqual = std::equal_to<Key> >
+template<class Key,
+        class T,
+        class Hash = util::hash<Key>,
+        class KeyEqual = std::equal_to<Key> >
 class hash_map
 {
  public:
@@ -97,6 +100,7 @@ class hash_map
   template<class Fn>
   void for_each(Fn& f)
   {
+    if(empty()) return;
     for(size_t idx = 0; idx < capability_; ++idx)
     {
       if(is_key_deleted(buckets_[idx]) ||
@@ -107,6 +111,7 @@ class hash_map
     }
   }
 
+  inline bool empty() const { return size_ == 0; }
   inline size_type size() const { return size_; }
   inline size_type capability() const { return capability_; }
  private:
