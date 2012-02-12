@@ -32,16 +32,75 @@
 #ifndef __HASH_FUCTION__
 #define __HASH_FUCTION__
 #include <cstddef>
-//hash function impl
+#include <string>
+#include <stdint.h>
+#include "common_hash_function.h"
 
+//hash function impl
 namespace green_turtle{namespace util{
 
 template<class T>
 struct hash
 {
-  size_t operator()(const T& value) const
+  //size_t operator()(const T& value) const
+  //{
+  //  return 0;
+  //}
+};
+#define TEMPLATE_RETURN_SELF(T) \
+template<>                                \
+struct hash<T>                            \
+{                                         \
+  size_t operator()(const T& c) const     \
+  {                                       \
+    return static_cast<size_t>(c);        \
+  }                                       \
+};
+//signed char,unsigned char
+//signed short,unsigned short
+//signed int,unsigned int
+//signed long,unsigned long
+TEMPLATE_RETURN_SELF(signed char);
+TEMPLATE_RETURN_SELF(unsigned char);
+TEMPLATE_RETURN_SELF(signed short);
+TEMPLATE_RETURN_SELF(unsigned short);
+TEMPLATE_RETURN_SELF(signed int);
+TEMPLATE_RETURN_SELF(unsigned int);
+TEMPLATE_RETURN_SELF(signed long);
+TEMPLATE_RETURN_SELF(unsigned long);
+TEMPLATE_RETURN_SELF(signed long long);
+TEMPLATE_RETURN_SELF(unsigned long long);
+
+template<class T>
+struct hash<T*>
+{
+  size_t operator()(const T* &p) const
   {
-    return 0;
+    return static_cast<size_t>(p);
+  }
+};
+template<>
+struct hash<float>
+{
+  size_t operator()(const float& f) const
+  {
+    return static_cast<size_t>(burtle_hash((uint8_t*)&f,sizeof(f),0));
+  }
+};
+template<>
+struct hash<double>
+{
+  size_t operator()(const double& f) const
+  {
+    return static_cast<size_t>(burtle_hash((uint8_t*)&f,sizeof(f),0));
+  }
+};
+template<>
+struct hash<std::string>
+{
+  size_t operator()(const std::string& s) const
+  {
+    return static_cast<size_t>(burtle_hash((uint8_t*)s.data(),s.length(),0));
   }
 };
 

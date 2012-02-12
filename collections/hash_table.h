@@ -49,17 +49,75 @@ class hash_map
   typedef Hash                    hash_fn;
   typedef KeyEqual                equal_fn;
 
-  //TODO:egmlang
-  //a lot function to impl
-  //find,operator [],erase,insert
+  //TODO:egmkang
   //increase/decrease capability
-  //for_each,etc
+  //swap,copy_from
+  
+  value_type* find(const key_type& key)
+  {
+    if(is_key_empty(key) || is_key_deleted(key))
+      return NULL;
+    value_type *pair_ = find_positon(key);
+    if(!pair_ || !equaler_(key,pair_->first))
+      return NULL;
+    return pair_;
+  }
+
+  value_type* insert(const key_type& key,const mapped_type& value)
+  {
+    if(is_key_deleted(key) || is_key_empty(key))
+      return NULL;
+    value_type *pair_ = find_positon(key);
+    if(!value || !equaler_(key,pair_->first))
+      return NULL;
+    pair_->second = value;
+    return pair_;
+  }
+  mapped_type& operator[](const key_type& key)
+  {
+    value_type *pair_ = find(key);
+    if(!pair_)
+    {
+      pair_ = insert(key,mapped_type());
+    }
+    return pair_->second;
+  }
+  void erase(const key_type& key)
+  {
+    value_type *pair = find(key);
+    if(pair && equaler_(key,pair->first))
+      set_key_deleted(pair);
+  }
+  void erase(const value_type* value)
+  {
+    if(value && find(value->first) == value)
+      set_key_deleted(*value);
+  }
+  //bool (const value_type&);
+  template<class Fn>
+  void for_each(Fn& f)
+  {
+    for(size_t idx = 0; idx < capability_; ++idx)
+    {
+      if(is_key_deleted(buckets_[idx]) ||
+         is_key_empty(buckets_[idx]))
+        continue;
+      if(!f(buckets_[idx]))
+        break;
+    }
+  }
+
+  inline size_type size() const { return size_; }
+  inline size_type capability() const { return capability_; }
  private:
+  //return key equal position
+  //or first deleted postion
+  //or empty postion
   value_type* find_positon(const key_type& key)
   {
-    size_type hash_value_ = hasher_(key);
+    size_type hash_pair_ = hasher_(key);
     size_type mark_ = capability_ - 1;
-    size_type begin_ = hash_value_ & mark_;
+    size_type begin_ = hash_pair_ & mark_;
     size_type times_ = 0;
     value_type *first_deleted_ = NULL;
     while(true)
@@ -67,19 +125,25 @@ class hash_map
       if(is_key_deleted(buckets_[begin_]) && !first_deleted_)
         first_deleted_ = &buckets_[begin_];
       else if(is_key_empty(buckets_[begin_]))
-        return first_deleted_;
+      {
+        if(first_deleted_) return first_deleted_;
+        return &buckets_[begin_];
+      }
       else if(equaler_(key,buckets_[begin_]))
         return &buckets_[begin_];
 
       begin_ = (++begin_) &  mark_;
       assert(times_++ <= capability_);
-
     }
     return NULL;
   }
+  void set_key_deleted(value_type& pair)
+  {
+      pair.first = deleted_key_;
+      pair.second = mapped_type();
+  }
   inline bool is_key_deleted(const key_type& key) const { return equaler_(key,deleted_key_); }
   inline bool is_key_empty(const key_type& key) const { return equaler_(key,empty_key_); }
-
  private:
   key_type    empty_key_;
   key_type    deleted_key_;
