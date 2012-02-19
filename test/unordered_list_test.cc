@@ -1,8 +1,9 @@
 #include "../collections/unordered_list.h"
+#include "../collections/hash_table.h"
 #include <stdint.h>
 #include <iostream>
 
-using green_turtle::collections::unordered_list;
+using namespace green_turtle::collections;
 
 struct for_each_list
 {
@@ -21,6 +22,11 @@ int main()
   test_container.insert(1212);
   for_each_list e;
   test_container.for_each(e);
+
+  hash_map<int,int> table;
+
+  table.insert(1,1);
+  table.insert(2,2);
   
   return 0;
 }

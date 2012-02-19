@@ -34,7 +34,9 @@
 #include <utility>
 #include <functional>
 #include <cstddef>
+#include <stdlib.h>
 #include "../util/hash_function.h"
+#include "../util/constructor_in_place.h"
 namespace green_turtle{namespace collections{
 
 //hash_table with linear probing
@@ -52,9 +54,64 @@ class hash_map
   typedef Hash                    hash_fn;
   typedef KeyEqual                equal_fn;
 
-  //TODO:egmkang
-  //increase/decrease capability
-  //swap,copy_from
+  hash_map(size_type capability = 32,key_type empty = key_type(),key_type deleted = key_type()):
+    empty_key_(empty)
+    ,deleted_key_(deleted)
+    ,size_(0)
+    ,capability_(capability)
+    ,buckets_()
+    ,hasher_()
+    ,equaler_()
+  {
+    buckets_ = (value_type*) malloc(sizeof(value_type) * capability_);
+    constructor_array<value_type,key_type,mapped_type>(buckets_,capability_,empty_key_,mapped_type());
+  }
+  ~hash_map()
+  {
+    delete[] buckets_;
+  }
+  hash_map(const hash_map& m,size_type capability = 32)
+  {
+    empty_key_ = m.empty_key_;
+    deleted_key_ = m.deleted_key_;
+    size_ = 0;
+    capability_ = m.capability_;
+    //to impl the increase and decrease method
+    if(capability_ !=  capability && capability >= 32)
+      capability_ = capability;
+    hasher_ = m.hasher_;
+    equaler_ = m.equaler_;
+
+    buckets_ = (value_type*)malloc(sizeof(value_type)*capability_);
+    constructor_array<value_type,key_type,mapped_type>(buckets_,capability_,empty_key_,mapped_type());
+
+    copy_from(m);
+  }
+  hash_map& operator = (const hash_map& m)
+  {
+    empty_key_ = m.empty_key_;
+    deleted_key_ = m.deleted_key_;
+    size_ = 0;
+    capability_ = m.capability_;
+    hasher_ = m.hasher_;
+    equaler_ = m.equaler_;
+    delete[] buckets_;
+
+    buckets_ = (value_type*)malloc(sizeof(value_type)*capability_);
+    constructor_array<value_type,key_type,mapped_type>(buckets_,capability_,empty_key_,mapped_type());
+
+    copy_from(m);
+  }
+  void swap(hash_map& m)
+  {
+    std::swap(empty_key_ , m.empty_key_);
+    std::swap(deleted_key_ , m.deleted_key_);
+    std::swap(size_ , m.size_);
+    std::swap(capability_ , m.capability_);
+    std::swap(hasher_ , m.hasher_);
+    std::swap(equaler_ , m.equaler_);
+    std::swap(buckets_ , m.buckets_);
+  }
   
   value_type* find(const key_type& key)
   {
@@ -70,6 +127,7 @@ class hash_map
   {
     if(is_key_deleted(key) || is_key_empty(key))
       return NULL;
+    increase_capability();
     value_type *pair_ = find_positon(key);
     if(!value || !equaler_(key,pair_->first))
       return NULL;
@@ -87,14 +145,25 @@ class hash_map
   }
   void erase(const key_type& key)
   {
+    assert(empty_key_ != deleted_key_ && "you must set a deleted key value before delete it");
     value_type *pair = find(key);
     if(pair && equaler_(key,pair->first))
       set_key_deleted(pair);
+    decrease_capability();
   }
   void erase(const value_type* value)
   {
-    if(value && find(value->first) == value)
-      set_key_deleted(*value);
+    if(value) erase(value->first);
+  }
+  void clear()
+  {
+    if(empty()) return;
+    for(size_t idx = 0; idx < capability_; ++idx)
+    {
+      buckets_[idx]->first = empty_key_;
+      buckets_[idx]->second = mapped_type();
+    }
+    size_ = 0;
   }
   //bool (const value_type&);
   template<class Fn>
@@ -103,14 +172,21 @@ class hash_map
     if(empty()) return;
     for(size_t idx = 0; idx < capability_; ++idx)
     {
-      if(is_key_deleted(buckets_[idx]) ||
-         is_key_empty(buckets_[idx]))
+      if(is_key_deleted(buckets_[idx].first) ||
+         is_key_empty(buckets_[idx].first))
         continue;
       if(!f(buckets_[idx]))
         break;
     }
   }
 
+  inline void set_deleted_key(key_type k)
+  {
+    assert(empty_key_ != k);
+    if(deleted_key_ != empty_key_)
+      assert(deleted_key_ == k);
+    deleted_key_ = k;
+  }
   inline bool empty() const { return size_ == 0; }
   inline size_type size() const { return size_; }
   inline size_type capability() const { return capability_; }
@@ -127,20 +203,47 @@ class hash_map
     value_type *first_deleted_ = NULL;
     while(true)
     {
-      if(is_key_deleted(buckets_[begin_]) && !first_deleted_)
+      if(is_key_deleted(buckets_[begin_].first) && !first_deleted_)
         first_deleted_ = &buckets_[begin_];
-      else if(is_key_empty(buckets_[begin_]))
+      else if(is_key_empty(buckets_[begin_].first))
       {
         if(first_deleted_) return first_deleted_;
         return &buckets_[begin_];
       }
-      else if(equaler_(key,buckets_[begin_]))
+      else if(equaler_(key,buckets_[begin_].first))
         return &buckets_[begin_];
 
       begin_ = (++begin_) &  mark_;
       assert(times_++ <= capability_);
     }
     return NULL;
+  }
+  void copy_from(const hash_map& m)
+  {
+    if(m.empty()) return;
+    for(size_t idx = 0; idx < capability_; ++idx)
+    {
+      if(is_key_deleted(buckets_[idx].first) ||
+         is_key_empty(buckets_[idx].first))
+        continue;
+      insert(buckets_[idx].first,buckets_[idx].second);
+    }
+  }
+  void increase_capability()
+  {
+    if(size_ > (capability_ >> 1))
+    {
+      hash_map _m(*this,capability_ >> 1);
+      swap(_m);
+    }
+  }
+  void decrease_capability()
+  {
+    if(size_ < (capability_ >> 2))
+    {
+      hash_map _m(*this,capability_ >> 2);
+      swap(_m);
+    }
   }
   void set_key_deleted(value_type& pair)
   {
