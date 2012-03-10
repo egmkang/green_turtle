@@ -113,11 +113,11 @@ class hash_map
     std::swap(buckets_ , m.buckets_);
   }
   
-  value_type* find(const key_type& key)
+  const value_type* find(const key_type& key)
   {
     if(is_key_empty(key) || is_key_deleted(key))
       return NULL;
-    value_type *pair_ = find_positon(key);
+    value_type *pair_ = find_position(key);
     if(!pair_ || !equaler_(key,pair_->first))
       return NULL;
     return pair_;
@@ -128,10 +128,13 @@ class hash_map
     if(is_key_deleted(key) || is_key_empty(key))
       return NULL;
     increase_capability();
-    value_type *pair_ = find_positon(key);
-    if(!value || !equaler_(key,pair_->first))
+    value_type *pair_ = find_position(key);
+    if(!pair_ || equaler_(key,pair_->first))
       return NULL;
-    pair_->second = value;
+    pair_->~value_type();
+    new (pair_) value_type(key,value);
+
+    ++size_;
     return pair_;
   }
   mapped_type& operator[](const key_type& key)
@@ -149,6 +152,7 @@ class hash_map
     value_type *pair = find(key);
     if(pair && equaler_(key,pair->first))
       set_key_deleted(pair);
+    --size_;
     decrease_capability();
   }
   void erase(const value_type* value)
@@ -167,7 +171,7 @@ class hash_map
   }
   //bool (const value_type&);
   template<class Fn>
-  void for_each(Fn& f)
+  void for_each(Fn& f) const
   {
     if(empty()) return;
     for(size_t idx = 0; idx < capability_; ++idx)
@@ -194,7 +198,7 @@ class hash_map
   //return key equal position
   //or first deleted postion
   //or empty postion
-  value_type* find_positon(const key_type& key)
+  value_type* find_position(const key_type& key)
   {
     size_type hash_pair_ = hasher_(key);
     size_type mark_ = capability_ - 1;
