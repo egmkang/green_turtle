@@ -1,5 +1,8 @@
 TODO:
 1. colletctions
-1) unordered_list(Almost Done)
-2) hash_map(a fast implement)
+1) unordered_list(Done)
+2) hash_map(a fast implement)(Done)
 2. network
+1) reactor(almost done)
+2) timer(using unordered_list to impl a fast one)
+3) writing some samples
