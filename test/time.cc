@@ -6,8 +6,8 @@ using namespace green_turtle::util;
 
 int main()
 {
-  SysTime::update();
-  std::cout << SysTime::getSeconds() << std::endl;
-  std::cout << SysTime::getMilliSeconds() << std::endl;
+  SysTime::Update();
+  std::cout << SysTime::GetSeconds() << std::endl;
+  std::cout << SysTime::GetMilliSeconds() << std::endl;
   return 0;
 }

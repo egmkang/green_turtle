@@ -43,15 +43,15 @@ namespace green_turtle{namespace util{
 class SysTime{
  public:
   //update the static data
-  static void       update();
-  static time_t     getSeconds();
-  static uint64_t   getMilliSeconds();
+  static void       Update();
+  static time_t     GetSeconds();
+  static uint64_t   GetMilliSeconds();
   //local time
-  static const tm&  getTime();
+  static const tm&  GetTime();
   //if s1 and s2 is the same day,than return 0
   //else return s2.days - s1.days
   //days are defined in local time
-  static int        getSecondsDiffDays(time_t s1,time_t s2);
+  static int        GetSecondsDiffDays(time_t s1,time_t s2);
 };
 
 };
