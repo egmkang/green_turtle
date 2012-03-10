@@ -38,6 +38,8 @@
 #include "../util/hash_function.h"
 #include "../util/constructor_in_place.h"
 namespace green_turtle{namespace collections{
+using green_turtle::util::constructor;
+using green_turtle::util::constructor_array;
 
 //hash_table with linear probing
 template<class Key,
@@ -132,7 +134,7 @@ class hash_map
     if(!pair_ || equaler_(key,pair_->first))
       return NULL;
     pair_->~value_type();
-    new (pair_) value_type(key,value);
+    constructor<value_type,key_type,mapped_type>(pair_,key,value);
 
     ++size_;
     return pair_;
