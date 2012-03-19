@@ -6,3 +6,5 @@ TODO:
 1) reactor(almost done)
 2) timer(using unordered_list to impl a fast one)
 3) writing some samples
+3. util
+1) RefObject and smart pointer(opterator =,*,and so on)
