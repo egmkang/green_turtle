@@ -44,6 +44,10 @@ namespace details{
     RefCountImpl(RefObject *ptr)
     {
       host_ptr_ = ptr;
+      ref_count_ = 1;
+    }
+    ~RefCountImpl()
+    {
     }
     void AddRefCount()
     {
@@ -76,7 +80,6 @@ class RefObject{
   RefObject():impl_ptr_(NULL)
   {
     impl_ptr_ = new details::RefCountImpl(this);
-    impl_ptr_->AddRefCount();
   }
   virtual ~RefObject()
   {

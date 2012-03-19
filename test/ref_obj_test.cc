@@ -1,5 +1,5 @@
 #include "../util/ref_object.h"
-#include <iostream>
+#include <stdio.h>
 
 using namespace green_turtle::util;
 
@@ -12,25 +12,27 @@ class ObjA : public RefObject
 
 int main()
 {
-  ObjA *pObjA = new ObjA;
-  pObjA->value = 100;
-  RefPtr<ObjA> ptr(pObjA);
+  {
+    ObjA *pObjA = new ObjA;
+    pObjA->value = 100;
+    RefPtr<ObjA> ptr(pObjA);
 
-  ObjA *p = ptr.Get();
-  if(p)
-  {
-    std::cout << p->value << std::endl;
-  }
-  delete pObjA;
+    ObjA *p = ptr.Get();
+    if(p)
+    {
+      printf("%d\n",p->value);
+    }
+    delete pObjA;
 
-  p = ptr.Get();
-  if(p)
-  {
-    std::cout << p->value << std::endl;
-  }
-  else
-  {
-    std::cout << "p is nil" << std::endl;
+    p = ptr.Get();
+    if(p)
+    {
+      printf("%d\n",p->value);
+    }
+    else
+    {
+      printf("p is nil\n");
+    }
   }
 
 
