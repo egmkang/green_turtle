@@ -15,23 +15,30 @@ int main()
   {
     ObjA *pObjA = new ObjA;
     pObjA->value = 100;
-    RefPtr<ObjA> ptr(pObjA);
+    RefPtr<ObjA> ptr = pObjA;
 
-    ObjA *p = ptr.Get();
-    if(p)
+    if(ptr)
     {
-      printf("%d\n",p->value);
+      printf("%d\n",ptr->value);
     }
     delete pObjA;
 
-    p = ptr.Get();
-    if(p)
+    if(ptr)
     {
-      printf("%d\n",p->value);
+      printf("%d\n",ptr->value);
     }
     else
     {
       printf("p is nil\n");
+    }
+    RefPtr<ObjA> ptr1 = ptr;
+    if(ptr1)
+    {
+      printf("%d\n",ptr1->value);
+    }
+    else
+    {
+      printf("ptr1 is nil\n");
     }
   }
 

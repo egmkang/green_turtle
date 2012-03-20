@@ -120,9 +120,42 @@ class RefPtr
     impl_ptr_ = ref_ptr.impl_ptr_;
     impl_ptr_->AddRefCount();
   }
+  RefPtr<T>& operator = (const RefPtr& ref_ptr)
+  {
+    if(impl_ptr_ != ref_ptr.impl_ptr_)
+    {
+      if(impl_ptr_)
+      {
+        impl_ptr_->SubRefCount();
+      }
+    }
+    impl_ptr_ = ref_ptr.impl_ptr_;
+    if(impl_ptr_)
+    {
+      impl_ptr_->AddRefCount();
+    }
+    return *this;
+  }
   T* Get() const
   {
     return impl_ptr_ ? (static_cast<T*>(impl_ptr_->Get())) : NULL;
+  }
+
+  T* operator->() const
+  {
+    return Get();
+  }
+  T& operator*() const
+  {
+    return *Get();
+  }
+  operator T*() const
+  {
+    return Get();
+  }
+  operator bool()
+  {
+    return Get();
   }
  private:
   details::RefCountImpl *impl_ptr_;
