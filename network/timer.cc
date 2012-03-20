@@ -1,4 +1,5 @@
 #include "timer.h"
+#include "timer_queue.h"
 
 using namespace green_turtle::network;
 using namespace green_turtle::collections;
@@ -15,14 +16,14 @@ Timer::~Timer()
 {
   if(IsInQueue())
   {
-    timer_slot_->erase(iter_pos_);
-    timer_slot_ = NULL;
+    queue_->CancelTimer(this);
   }
 }
 
 void Timer::HandleTimeOut()
 {
+  uint64_t current_time = next_handle_time_;
   next_handle_time_ += this->timer_interval_;
-  this->OnTimeOut();
+  this->OnTimeOut(current_time);
 }
 

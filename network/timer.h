@@ -33,10 +33,12 @@
 #define __TIMER_H__
 
 #include <cstddef>
-#include "../collections/unordered_list.h"
+#include <stdint.h>
 
 namespace green_turtle{namespace network
 {
+
+class TimerQueue;
 
 class Timer
 {
@@ -48,19 +50,20 @@ class Timer
  public:
   void          HandleTimeOut();
   inline size_t GetNextHandleTime() const { return next_handle_time_; }
-  inline bool   IsInQueue()         const {return timer_slot_; }
+  inline bool   IsInQueue()         const {return queue_; }
   inline size_t GetInterval()       const {return timer_interval_; }
  protected:
-  virtual void  OnTimeOut() = 0;
+  virtual void  OnTimeOut(uint64_t current_time) = 0;
  private:
   Timer(const Timer&) {}
-  Timer& operator = (const Timer&) {}
+  Timer& operator = (const Timer&) { return *this;}
   //iter data here
-  collections::unordered_list<Timer*>* timer_slot_;
-  size_t iter_pos_;
-  size_t timer_interval_;
+  TimerQueue  *queue_;
+  size_t      iter_slot_;
+  size_t      iter_pos_;
+  size_t      timer_interval_;
   //next handle time, milliseconds
-  size_t next_handle_time_;
+  size_t      next_handle_time_;
 };
 
 };

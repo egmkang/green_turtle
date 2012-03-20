@@ -52,10 +52,11 @@ class TimerQueue
   //timers loop
   void Update(uint64_t current_time);
  private:
-  typedef green_turtle::collections::unordered_list<Timer*> unordered_list;
-  typedef std::vector<unordered_list> queue_type;
+  typedef green_turtle::collections::unordered_list<Timer*> list_type;
+  typedef std::vector<list_type> queue_type;
 
   queue_type    queues_;
+  uint64_t      last_update_time_;
   const size_t  interval_;  //must be 2^n ms
   size_t        current_slot_;
 };
