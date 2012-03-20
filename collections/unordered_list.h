@@ -158,7 +158,7 @@ class unordered_list
     size_ = 0;
     bound_ = 0;
     deleted_index_.clear();
-    T tmp();
+    T tmp = T();
     for(size_t idx = 0; idx < bound_; ++idx)
     {
       list_[idx] = tmp;

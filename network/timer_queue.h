@@ -29,40 +29,38 @@
 //
 // auhor: egmkang (egmkang@gmail.com)
 
-#ifndef __TIMER_H__
-#define __TIMER_H__
-
-#include <cstddef>
+#ifndef __TIMER_QUEUE_H__
+#define __TIMER_QUEUE_H__
+#include <stdint.h>
+#include <vector>
 #include "../collections/unordered_list.h"
 
-namespace green_turtle{namespace network
-{
+namespace green_turtle{namespace network{
 
-class Timer
+class Timer;
+
+//Hash Timer Queues
+class TimerQueue
 {
  public:
-  friend class TimerQueue;
-  Timer();
-  virtual ~Timer();
+  TimerQueue(size_t slot_size,size_t interval);
 
- public:
-  void          HandleTimeOut();
-  inline size_t GetNextHandleTime() const { return next_handle_time_; }
-  inline bool   IsInQueue()         const {return timer_slot_; }
-  inline size_t GetInterval()       const {return timer_interval_; }
- protected:
-  virtual void  OnTimeOut() = 0;
+  //register a timer,unit ms
+  void ScheduleTimer(Timer *timer_ptr,uint64_t timer_interval,uint64_t time_delay = 0);
+  //unregister a timer
+  void CancelTimer(Timer *timer_ptr);
+  //timers loop
+  void Update(uint64_t current_time);
  private:
-  Timer(const Timer&) {}
-  Timer& operator = (const Timer&) {}
-  //iter data here
-  collections::unordered_list<Timer*>* timer_slot_;
-  size_t iter_pos_;
-  size_t timer_interval_;
-  //next handle time, milliseconds
-  size_t next_handle_time_;
+  typedef green_turtle::collections::unordered_list<Timer*> unordered_list;
+  typedef std::vector<unordered_list> queue_type;
+
+  queue_type    queues_;
+  const size_t  interval_;  //must be 2^n ms
+  size_t        current_slot_;
 };
 
 };
 };
+
 #endif
