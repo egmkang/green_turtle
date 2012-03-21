@@ -153,7 +153,7 @@ class RefPtr
   {
     return Get();
   }
-  operator bool()
+  operator bool() const
   {
     return Get();
   }
