@@ -109,13 +109,13 @@ class unordered_list
   void erase(size_t index)
   {
     assert(setted_deleted_ && "you must set a delelted value before erase!");
-    if(size() && list_[index] != deleted_)
+    if(size() && index < bound_ && list_[index] != deleted_)
     {
       list_[index] = deleted_;
       deleted_index_.push_back(index);
       --size_;
       //consider to decrease the bound_
-      while(list_[bound_-1] == deleted_)
+      while(bound_ && list_[bound_-1] == deleted_)
       {
         --bound_;
       }
@@ -134,7 +134,7 @@ class unordered_list
   template<class Fn>
   void for_each(Fn& f)
   {
-    for(size_t idx = 0; idx < bound_; ++idx)
+    for(size_t idx = 0; idx < bound_ && idx < capability_; ++idx)
     {
       if(list_[idx] == deleted_) continue;
       if(!f(list_[idx])) break;
