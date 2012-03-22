@@ -49,7 +49,7 @@ class unordered_list
       ,deleted_()
       ,size_(0)
       ,bound_(0)
-      ,capability_(32)
+      ,capability_(8)
       ,setted_deleted_(false)
   {
     //must be 2^n
@@ -83,26 +83,26 @@ class unordered_list
   {
     //if full then increase the capability
     //else insert the value into the back or one slot that deleted
-    size_t index = 0;
+    long long index = -1;
     if(full())
       increase_capability();
     while(!deleted_index_.empty())
     {
       index = deleted_index_.back();
       deleted_index_.pop_back();
-      if(index < bound_)
+      if(index < (long long)bound_)
         break;
       else
         index = 0;
     }
-    if(!index)
+    if(index < 0)
     {
       index = bound_;
     }
 
     list_[index] = value;
     ++size_;
-    if(index > bound_) bound_ = index + 1;
+    if(index >= (long long)bound_) bound_ = index + 1;
 
     return index;
   }

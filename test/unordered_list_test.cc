@@ -29,9 +29,23 @@ int main()
 
   unordered_list<uint32_t> test_container;
   test_container.set_deleted((uint32_t)-1);
-  test_container.insert(100);
-  test_container.insert(1212);
+  test_container.insert(1);
+  test_container.insert(3);
+  test_container.insert(4);
+  test_container.insert(5);
+  test_container.insert(6);
+  test_container.insert(7);
+  test_container.insert(8);
+  test_container.insert(9);
+
   for_each_list e;
+  test_container.for_each(e);
+
+  std::cout << std::endl;
+
+  test_container.erase(0);
+  test_container.insert(9);
+
   test_container.for_each(e);
 
   std::cout << "hash_table test" << std::endl;
