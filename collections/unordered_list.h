@@ -102,7 +102,7 @@ class unordered_list
 
     list_[index] = value;
     ++size_;
-    if(size_ > bound_) bound_ = size_;
+    if(index > bound_) bound_ = size_;
 
     return index;
   }
