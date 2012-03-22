@@ -31,7 +31,7 @@
 
 #ifndef __UNORDERED_LIST__
 #define __UNORDERED_LIST__
-#include <vector>
+#include <deque>
 #include <cstddef>
 #include <assert.h>
 
@@ -88,8 +88,8 @@ class unordered_list
       increase_capability();
     while(!deleted_index_.empty())
     {
-      index = deleted_index_.back();
-      deleted_index_.pop_back();
+      index = deleted_index_.front();
+      deleted_index_.pop_front();
       if(index < (long long)bound_)
         break;
       else
@@ -208,7 +208,7 @@ class unordered_list
   size_t    size_;
   size_t    bound_;
   size_t    capability_;
-  std::vector<size_t> deleted_index_;
+  std::deque<size_t> deleted_index_;
   bool      setted_deleted_;
 };
 
