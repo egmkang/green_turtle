@@ -7,7 +7,7 @@ using namespace green_turtle::collections;
 
 struct for_each_list
 {
-  bool operator ()(uint32_t &v)
+  bool operator ()(uint32_t &v,size_t idx)
   {
     std::cout << v << std::endl;
     return true;
@@ -45,6 +45,15 @@ int main()
 
   test_container.erase(0);
   test_container.insert(9);
+
+  test_container.for_each(e);
+
+  test_container.clear();
+  test_container.insert(1);
+  test_container.insert(2);
+  test_container.insert(3);
+  test_container.erase(2);
+  test_container.insert(3);
 
   test_container.for_each(e);
 

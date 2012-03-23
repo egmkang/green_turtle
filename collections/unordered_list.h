@@ -83,7 +83,7 @@ class unordered_list
   {
     //if full then increase the capability
     //else insert the value into the back or one slot that deleted
-    long long index = -1;
+    long long index = INVALID_POS;
     if(full())
       increase_capability();
     while(!deleted_index_.empty())
@@ -93,9 +93,9 @@ class unordered_list
       if(index < (long long)bound_)
         break;
       else
-        index = 0;
+        index = INVALID_POS;
     }
-    if(index < 0)
+    if(index == INVALID_POS)
     {
       index = bound_;
     }
@@ -131,13 +131,14 @@ class unordered_list
     std::swap(deleted_index_,other.deleted_index_);
   }
 
+  //bool (T& entry,size_t idx);
   template<class Fn>
   void for_each(Fn& f)
   {
     for(size_t idx = 0; idx < bound_ && idx < capability_; ++idx)
     {
       if(list_[idx] == deleted_) continue;
-      if(!f(list_[idx])) break;
+      if(!f(list_[idx],idx)) break;
     }
   }
   inline void set_deleted(const T& v) 
@@ -203,6 +204,7 @@ class unordered_list
     }
   }
  private:
+  enum { INVALID_POS   = (size_t)-1 };
   T         *list_;
   T         deleted_;
   size_t    size_;

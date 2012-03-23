@@ -59,6 +59,7 @@ class TimerQueue
   uint64_t      last_update_time_;
   const size_t  interval_;  //must be 2^n ms
   size_t        current_slot_;
+  uint8_t       interval_exponent_;//2^interval_exponent_ = interval_
 };
 
 };
