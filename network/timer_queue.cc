@@ -20,6 +20,7 @@ TimerQueue::TimerQueue(size_t slot_size,size_t interval):
   {
     ++interval_exponent_;
   }
+  --interval_exponent_;
 }
 void TimerQueue::CancelTimer(Timer *timer_ptr)
 {
@@ -42,7 +43,10 @@ void TimerQueue::ScheduleTimer(Timer *timer_ptr,uint64_t timer_interval,uint64_t
     CancelTimer(timer_ptr);
 
   uint64_t  next_time = time_delay + timer_interval + last_update_time_;
-  size_t    to_slot = current_slot_ + ((next_time + interval_ - 1) >> interval_exponent_);
+  size_t    slot_mark = queues_.size() - 1;
+  size_t    to_slot = current_slot_
+                      + (((time_delay + interval_ + interval_ - 1) >> interval_exponent_) & slot_mark)
+                      + 1;
   to_slot   = to_slot & (queues_.size() - 1);
 
   list_type& list_            = queues_[to_slot];
@@ -85,13 +89,16 @@ void TimerQueue::Update(uint64_t current_time)
   if(!last_update_time_) last_update_time_ = current_time;
   uint64_t delta = this->interval_ / 2;
   uint64_t delta_time = current_time + delta;
+  size_t   slot_mark = queues_.size() - 1;
   while(last_update_time_ < delta_time)
   {
     list_type& list_ = queues_[current_slot_];
+
+    current_slot_ = (current_slot_ + 1) & slot_mark;
+    last_update_time_ += interval_;   
+
     ForEachInList for_each(*this,list_,delta_time);
     list_.for_each(for_each);
     
-    current_slot_ = (current_slot_ + 1) & (queues_.size() - 1);
-    last_update_time_ += interval_;   
   }
 }

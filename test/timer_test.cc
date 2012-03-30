@@ -25,7 +25,7 @@ int main()
   SysTime::Update();
   uint64_t current_time = SysTime::GetMilliSeconds();
 
-  TimerQueue queue(16,10);
+  TimerQueue queue(16,4);
   queue.Update(current_time);
 
   TestTimer *timer = new TestTimer;
