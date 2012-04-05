@@ -32,9 +32,11 @@
 #ifndef __REF_OBJECT_H__
 #define __REF_OBJECT_H__
 #include <cstddef>
+#include <type_traits>
 
 namespace green_turtle{namespace util{
 
+//a smart pointer just like std::weak_ptr
 class RefObject;
 
 namespace details{
@@ -105,14 +107,15 @@ class RefPtr
       impl_ptr_->SubRefCount();
     }
   }
-  RefPtr(const RefObject *ref_obj)
+  RefPtr(RefObject *ref_obj)
   {
     impl_ptr_ = ref_obj->GetRefCountImpl();
     impl_ptr_->AddRefCount();
   }
-  RefPtr(const RefObject& ref_obj)
+  RefPtr(const RefObject *ref_obj)
   {
-    impl_ptr_ = ref_obj.GetRefCountImpl();
+    static_assert(std::is_const<T>::value,"const RefObjct* cannot be converted to RefPtr<T>,T is non const");
+    impl_ptr_ = ref_obj->GetRefCountImpl();
     impl_ptr_->AddRefCount();
   }
   RefPtr(const RefPtr& ref_ptr)

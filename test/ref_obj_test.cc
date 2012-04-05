@@ -17,6 +17,12 @@ int main()
     pObjA->value = 100;
     RefPtr<ObjA> ptr = pObjA;
 
+    RefPtr<const ObjA> pConst = (const ObjA*)(pObjA);
+    RefPtr<const ObjA> pConst1 = pObjA;
+    //Fail
+    //const Ptr convert to non const Ptr,
+    //RefPtr<ObjA> pConst2 = (const ObjA*)(pObjA);
+
     if(ptr)
     {
       printf("%d\n",ptr->value);
