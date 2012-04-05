@@ -16,11 +16,10 @@ TimerQueue::TimerQueue(size_t slot_size,size_t interval):
   queues_.resize(slot_size);
   for(size_t idx = 0; idx < slot_size; ++idx)
     queues_[idx].set_deleted((Timer*)(void*)(-1l));
-  for(uint64_t i = interval_; i != 0; i /= 2)
+  for(uint64_t i = interval_; i != 1; i /= 2)
   {
     ++interval_exponent_;
   }
-  --interval_exponent_;
 }
 void TimerQueue::CancelTimer(Timer *timer_ptr)
 {
@@ -39,14 +38,18 @@ void TimerQueue::CancelTimer(Timer *timer_ptr)
 }
 void TimerQueue::ScheduleTimer(Timer *timer_ptr,uint64_t timer_interval,uint64_t time_delay)
 {
-  if(timer_ptr->IsInQueue())
-    CancelTimer(timer_ptr);
-
   uint64_t  next_time = time_delay + timer_interval + last_update_time_;
+  uint64_t next_handle_time = next_time;
+
+  if(timer_ptr->IsInQueue())
+  {
+    next_handle_time = timer_ptr->next_handle_time_;
+    CancelTimer(timer_ptr);
+  }
+
   size_t    slot_mark = queues_.size() - 1;
   size_t    to_slot = current_slot_
-                      + (((time_delay + interval_ + interval_ - 1) >> interval_exponent_) & slot_mark)
-                      + 1;
+                      + ((time_delay + timer_interval + next_handle_time - next_time + interval_ - 1) >> interval_exponent_);
   to_slot   = to_slot & (queues_.size() - 1);
 
   list_type& list_            = queues_[to_slot];
@@ -54,7 +57,7 @@ void TimerQueue::ScheduleTimer(Timer *timer_ptr,uint64_t timer_interval,uint64_t
   timer_ptr->iter_slot_       = to_slot;
   timer_ptr->queue_           = this;
   timer_ptr->timer_interval_  = timer_interval;
-  timer_ptr->next_handle_time_= next_time;
+  timer_ptr->next_handle_time_= next_handle_time;
 }
 //TODO:egmkang
 //change it with lambda expression when clang 3.1 release
@@ -72,7 +75,7 @@ struct ForEachInList{
         timer = list_.get(iter);
       }
       if(timer)
-        queue_.ScheduleTimer(timer,timer->GetInterval(),0);
+       queue_.ScheduleTimer(timer,timer->GetInterval(),0);
     }
     else
     {
@@ -96,9 +99,8 @@ void TimerQueue::Update(uint64_t current_time)
 
     current_slot_ = (current_slot_ + 1) & slot_mark;
     last_update_time_ += interval_;   
-
+    
     ForEachInList for_each(*this,list_,delta_time);
     list_.for_each(for_each);
-    
   }
 }

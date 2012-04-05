@@ -9,15 +9,23 @@ using namespace green_turtle::network;
 
 class TestTimer:public Timer
 {
+ public:
+  TestTimer():begin_time_(0),count_(0)
+  {
+  }
  protected:
   void OnTimeOut(uint64_t current_time)
   {
-    std::cout 
-        << "Internal : " << this->GetInterval()
-        << "ms , Tick Time : " << current_time
-        << " , Real Time : " << SysTime::GetMilliSeconds() 
+    count_++;
+    std::cout << this->GetInterval() 
+        << "ms , count " << count_
+        << " , Diff Time :  " << SysTime::GetMilliSeconds()-begin_time_ 
+        << " , current Time : " << current_time
         << std::endl;
   }
+ public:
+  uint64_t begin_time_;
+  uint64_t count_;
 };
 
 int main()
@@ -25,23 +33,27 @@ int main()
   SysTime::Update();
   uint64_t current_time = SysTime::GetMilliSeconds();
 
-  TimerQueue queue(16,4);
+  TimerQueue queue(16,8);
   queue.Update(current_time);
 
   TestTimer *timer = new TestTimer;
-  queue.ScheduleTimer(timer, 10);
+  timer->begin_time_ = current_time;
+  queue.ScheduleTimer(timer, 50);
   timer = new TestTimer;
+  timer->begin_time_ = current_time;
   queue.ScheduleTimer(timer, 12);
 
 
-  for(size_t idx = 0; idx < 100; ++idx)
+  for(size_t idx = 0; idx < 200; ++idx)
   {
     SysTime::Update();
     uint64_t current_time = SysTime::GetMilliSeconds();
     queue.Update(current_time);
     ::usleep(4000);
-    std::cout << "RealTime " << SysTime::GetMilliSeconds()
-        << " * "<< idx << std::endl;
   }
+  uint64_t diff_time = SysTime::GetMilliSeconds() - current_time;
+
+  std::cout << diff_time << std::endl;
+
   return 0;
 }
