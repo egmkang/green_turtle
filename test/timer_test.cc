@@ -20,8 +20,9 @@ class TestTimer:public Timer
     std::cout << this->GetInterval() 
         << "ms , count " << count_
         << " , Diff Time :  " << SysTime::GetMilliSeconds()-begin_time_ 
-        << " , current Time : " << current_time
         << std::endl;
+
+    begin_time_ = SysTime::GetMilliSeconds();
   }
  public:
   uint64_t begin_time_;
@@ -38,13 +39,13 @@ int main()
 
   TestTimer *timer = new TestTimer;
   timer->begin_time_ = current_time;
-  queue.ScheduleTimer(timer, 50);
+  queue.ScheduleTimer(timer, 16);
   timer = new TestTimer;
   timer->begin_time_ = current_time;
-  queue.ScheduleTimer(timer, 12);
+  queue.ScheduleTimer(timer, 50);
 
 
-  for(size_t idx = 0; idx < 200; ++idx)
+  for(size_t idx = 0; idx < 100; ++idx)
   {
     SysTime::Update();
     uint64_t current_time = SysTime::GetMilliSeconds();

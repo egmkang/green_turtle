@@ -10,6 +10,7 @@ TimerQueue::TimerQueue(size_t slot_size,size_t interval):
     ,interval_(interval)
     ,current_slot_(0)
     ,interval_exponent_(0)
+    ,circle_time_(0)
 {
   assert( ~(slot_size & (slot_size - 1)) && "Slot Size must be 2^n" );
   assert( ~(interval_ & (interval_ - 1)) && "Interval must be 2^n" );
@@ -20,6 +21,7 @@ TimerQueue::TimerQueue(size_t slot_size,size_t interval):
   {
     ++interval_exponent_;
   }
+  circle_time_ = slot_size * interval_;
 }
 void TimerQueue::CancelTimer(Timer *timer_ptr)
 {
@@ -36,20 +38,19 @@ void TimerQueue::CancelTimer(Timer *timer_ptr)
     timer_ptr->queue_ = NULL;
   }
 }
-void TimerQueue::ScheduleTimer(Timer *timer_ptr,uint64_t timer_interval,uint64_t time_delay)
+void TimerQueue::ScheduleTimer(Timer *timer_ptr,uint64_t timer_interval,int64_t time_delay)
 {
-  uint64_t  next_time = time_delay + timer_interval + last_update_time_;
-  uint64_t next_handle_time = next_time;
+  uint64_t  next_handle_time = time_delay + timer_interval + last_update_time_;
 
   if(timer_ptr->IsInQueue())
   {
-    next_handle_time = timer_ptr->next_handle_time_;
     CancelTimer(timer_ptr);
   }
 
   size_t    slot_mark = queues_.size() - 1;
   size_t    to_slot = current_slot_
-                      + ((time_delay + timer_interval + next_handle_time - next_time + interval_ - 1) >> interval_exponent_);
+                      + ((time_delay + circle_time_ + timer_interval) >> interval_exponent_);
+
   to_slot   = to_slot & (queues_.size() - 1);
 
   list_type& list_            = queues_[to_slot];
@@ -75,7 +76,10 @@ struct ForEachInList{
         timer = list_.get(iter);
       }
       if(timer)
-       queue_.ScheduleTimer(timer,timer->GetInterval(),0);
+      {
+        int64_t  delay = timer->GetNextHandleTime() - (timer->GetInterval() + queue_.GetLastUpdateTime());
+        queue_.ScheduleTimer(timer,timer->GetInterval(),delay);
+      }
     }
     else
     {
@@ -89,18 +93,19 @@ struct ForEachInList{
 };
 void TimerQueue::Update(uint64_t current_time)
 {
-  if(!last_update_time_) last_update_time_ = current_time;
-  uint64_t delta = this->interval_ / 2;
-  uint64_t delta_time = current_time + delta;
+  if(!last_update_time_)
+    last_update_time_ = current_time;
+
+  uint64_t delta_time = current_time + this->interval_;
   size_t   slot_mark = queues_.size() - 1;
   while(last_update_time_ < delta_time)
   {
     list_type& list_ = queues_[current_slot_];
-
+    
     current_slot_ = (current_slot_ + 1) & slot_mark;
     last_update_time_ += interval_;   
-    
-    ForEachInList for_each(*this,list_,delta_time);
+
+    ForEachInList for_each(*this,list_,last_update_time_);
     list_.for_each(for_each);
   }
 }

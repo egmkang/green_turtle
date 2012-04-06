@@ -46,11 +46,12 @@ class TimerQueue
   TimerQueue(size_t slot_size,size_t interval);
 
   //register a timer,unit ms
-  void ScheduleTimer(Timer *timer_ptr,uint64_t timer_interval,uint64_t time_delay = 0);
+  void ScheduleTimer(Timer *timer_ptr,uint64_t timer_interval,int64_t time_delay = 0);
   //unregister a timer
   void CancelTimer(Timer *timer_ptr);
   //timers loop
   void Update(uint64_t current_time);
+  inline uint64_t GetLastUpdateTime() const { return last_update_time_; }
  private:
   typedef green_turtle::collections::unordered_list<Timer*> list_type;
   typedef std::vector<list_type> queue_type;
@@ -60,6 +61,7 @@ class TimerQueue
   const size_t  interval_;  //must be 2^n ms
   size_t        current_slot_;
   uint8_t       interval_exponent_;//2^interval_exponent_ = interval_
+  uint64_t      circle_time_;
 };
 
 };
