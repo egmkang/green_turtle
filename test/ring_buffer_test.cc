@@ -20,6 +20,18 @@ int main()
     printf(message_out);
     printf("\n");
   }
+  buffer.Write(message_in,strlen(message_in));
+  memset(message_out,0,sizeof(message_out));
+  buffer.Reset();
+  buffer.Read(&message_out[0], sizeof(message_out));
+  printf(message_out);
+  printf("\n");
+  buffer.Write(message_in,strlen(message_in));
+  memset(message_out,0,sizeof(message_out));
+  buffer.Reset();
+  buffer.Read(&message_out[0], sizeof(message_out));
+  printf(message_out);
+  printf("\n");
 
   return 0;
 }

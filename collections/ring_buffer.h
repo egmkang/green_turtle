@@ -35,7 +35,6 @@
 #include <cstring>
 #include <algorithm>
 #include <cstddef>
-#include <vector>
 
 namespace green_turtle{namespace collections{
 
@@ -54,11 +53,12 @@ class RingBuffer{
   T*      GetEnd() const;
   size_t  GetSize() const;
   size_t  GetTailSpace() const;
+  size_t  GetCapacity() const;
  private:
   size_t          write_;
   size_t          read_;
   size_t          index_mark_;
-  std::vector<T>  array_;
+  T               *array_;
 };
 template<class T>
 RingBuffer<T>::RingBuffer(size_t buffer_size_):
@@ -68,7 +68,7 @@ RingBuffer<T>::RingBuffer(size_t buffer_size_):
 {
   assert(!(buffer_size_ & (buffer_size_-1)));
   index_mark_ = buffer_size_ - 1;
-  array_.resize(buffer_size_);
+  array_ = new  T[buffer_size_];
 }
 template<class T>
 RingBuffer<T>::~RingBuffer()
@@ -91,7 +91,7 @@ size_t  RingBuffer<T>::Read(T* dest,size_t count)
   }
   else
   {
-    size_t first_read_ = index_mark_ + 1 - from;
+    size_t first_read_ = GetCapacity() - from;
     std::memcpy(dest, &array_[from], first_read_ * sizeof(T));
     std::memcpy(dest+first_read_, &array_[0], to * sizeof(T));
   }
@@ -103,7 +103,7 @@ size_t  RingBuffer<T>::Write(const T* src,size_t count)
 {
   assert(src && count);
   assert(read_ <= write_);
-  size_t space_ = index_mark_ + 1 - GetSize();
+  size_t space_ = GetCapacity() - GetSize();
   if(count > space_)
     count = space_;
   size_t from = write_ & index_mark_;
@@ -124,9 +124,23 @@ size_t  RingBuffer<T>::Write(const T* src,size_t count)
 template<class T>
 void    RingBuffer<T>::Reset()
 {
-  size_t size_ = GetSize();
-  std::memmove(&array_[0], GetBegin(), size_ * sizeof(T));
-  write_ -= read_;
+  const size_t size_ = GetSize();
+  //0--------read--------write------end
+  if((read_ & index_mark_) <= (write_ & index_mark_))
+  {
+    std::memmove(&array_[0], GetBegin(), size_ * sizeof(T));
+  }
+  else
+  //0--------write-------read-------end
+  {
+    T array_tmp[write_];
+    std::memset(array_tmp,0,sizeof(array_tmp));
+    std::memcpy(&array_tmp[0],&array_[0],sizeof(array_tmp));
+    size_t read_index = index_mark_ + 1 - (read_ & index_mark_);
+    std::memcpy(&array_[0],GetBegin(), read_index * sizeof(T));
+    std::memcpy(&array_[read_index],&array_tmp[0],sizeof(array_tmp));
+  }
+  write_ = size_;
   read_ = 0;
 }
 template<class T>
@@ -161,6 +175,11 @@ template<class T>
 size_t  RingBuffer<T>::GetTailSpace() const
 {
   return index_mark_ - (write_ & index_mark_);
+}
+template<class T>
+size_t  RingBuffer<T>::GetCapacity() const
+{
+  return index_mark_ + 1;
 }
 
 };
