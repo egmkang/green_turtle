@@ -39,7 +39,7 @@ namespace green_turtle{ namespace collections{
 
 //fast insert/earse/for_each operations
 //when inserted or deleted too many times,
-//you'd better to rebuild it if the capability is large enough.
+//you'd better to rebuild it if the capacity is large enough.
 template<class T>
 class unordered_list
 {
@@ -49,12 +49,12 @@ class unordered_list
       ,deleted_()
       ,size_(0)
       ,bound_(0)
-      ,capability_(8)
+      ,capacity_(8)
       ,setted_deleted_(false)
   {
     //must be 2^n
-    assert( ! (capability_ & (capability_ -1)) );
-    list_ = new T[capability_]();
+    assert( ! (capacity_ & (capacity_ -1)) );
+    list_ = new T[capacity_]();
   }
   ~unordered_list()
   {
@@ -62,30 +62,30 @@ class unordered_list
   }
   unordered_list(const unordered_list& other)
   {
-    if(capability() < other.capability())
+    if(capacity() < other.capacity())
     {
       delete[] list_;
-      list_ = new T[other.capability()]();
+      list_ = new T[other.capacity()]();
     }
     copy_from(other);
   }
   unordered_list& operator = (const unordered_list& other)
   {
-    if(capability() < other.capability())
+    if(capacity() < other.capacity())
     {
       delete[] list_;
-      list_ = new T[other.capability()]();
+      list_ = new T[other.capacity()]();
     }
     copy_from(other);
     return *this;
   }
   size_t insert(const T& value)
   {
-    //if full then increase the capability
+    //if full then increase the capacity
     //else insert the value into the back or one slot that deleted
     long long index = INVALID_POS;
     if(full())
-      increase_capability();
+      increase_capacity();
     while(!deleted_index_.empty())
     {
       index = deleted_index_.front();
@@ -127,7 +127,7 @@ class unordered_list
     std::swap(list_,other.list_);
     std::swap(size_,other.size_);
     std::swap(bound_,other.bound_);
-    std::swap(capability_,other.capability_);
+    std::swap(capacity_,other.capacity_);
     std::swap(deleted_index_,other.deleted_index_);
   }
 
@@ -135,7 +135,7 @@ class unordered_list
   template<class Fn>
   void for_each(Fn& f)
   {
-    for(size_t idx = 0; idx < bound_ && idx < capability_; ++idx)
+    for(size_t idx = 0; idx < bound_ && idx < capacity_; ++idx)
     {
       if(list_[idx] == deleted_) continue;
       if(!f(list_[idx],idx)) break;
@@ -167,15 +167,15 @@ class unordered_list
   }
   inline const T& get(size_t idx) const {return list_[idx]; }
   inline size_t size() const { return size_; }
-  inline size_t capability() const { return capability_; }
+  inline size_t capacity() const { return capacity_; }
   inline bool empty() const { return size_ == 0; }
-  inline bool full() const { return size_ == capability_; }
+  inline bool full() const { return size_ == capacity_; }
   inline bool is_deleted(size_t idx) const {return list_[idx] == deleted_; }
  private:
-  void increase_capability()
+  void increase_capacity()
   {
-    T *t_ = new T[capability_*2]();
-    for(size_t idx = 0; idx < capability_; idx += 4)
+    T *t_ = new T[capacity_*2]();
+    for(size_t idx = 0; idx < capacity_; idx += 4)
     {
       t_[idx+0] = list_[idx+0];
       t_[idx+1] = list_[idx+1];
@@ -184,18 +184,18 @@ class unordered_list
     }
     std::swap(t_,list_);
     delete[] t_;
-    capability_ *= 2;
+    capacity_ *= 2;
   }
   void copy_from(const unordered_list &other)
   {
     clear();
     size_ = other.size_;
     bound_ = other.bound_;
-    capability_ = other.capability_;
+    capacity_ = other.capacity_;
     deleted_ = other.deleted_;
     deleted_index_ = other.deleted_index_;
 
-    for(size_t idx = 0; idx < capability_; idx += 4)
+    for(size_t idx = 0; idx < capacity_; idx += 4)
     {
       list_[idx+0] = other.list_[idx+0];
       list_[idx+1] = other.list_[idx+1];
@@ -209,7 +209,7 @@ class unordered_list
   T         deleted_;
   size_t    size_;
   size_t    bound_;
-  size_t    capability_;
+  size_t    capacity_;
   std::deque<size_t> deleted_index_;
   bool      setted_deleted_;
 };
