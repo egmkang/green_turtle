@@ -105,7 +105,31 @@ void TimerQueue::Update(uint64_t current_time)
     current_slot_ = (current_slot_ + 1) & slot_mark;
     last_update_time_ += interval_;   
 
+#if __has_feature(cxx_lambdas)
+    list_.for_each([&](Timer* timer,size_t iter) -> bool
+    {
+      if(timer)
+      {
+        while(timer && timer->GetNextHandleTime() <= last_update_time_)
+        {
+          timer->HandleTimeOut();
+          timer = list_.get(iter);
+        }
+        if(timer)
+        {
+          int64_t  delay = timer->GetNextHandleTime() - (timer->GetInterval() + this->GetLastUpdateTime());
+          this->ScheduleTimer(timer,timer->GetInterval(),delay);
+        }
+      }
+      else
+      {
+        list_.erase(iter);
+      }
+      return true;
+    });
+#else
     ForEachInList for_each(*this,list_,last_update_time_);
     list_.for_each(for_each);
+#endif
   }
 }

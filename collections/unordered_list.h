@@ -133,7 +133,7 @@ class unordered_list
 
   //bool (T& entry,size_t idx);
   template<class Fn>
-  void for_each(Fn& f)
+  void for_each(Fn f)
   {
     for(size_t idx = 0; idx < bound_ && idx < capacity_; ++idx)
     {
