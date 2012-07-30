@@ -1,5 +1,5 @@
-#include "../collections/unordered_list.h"
-#include "../collections/hash_table.h"
+#include <unordered_list.h>
+#include <hash_table.h>
 #include <stdint.h>
 #include <iostream>
 

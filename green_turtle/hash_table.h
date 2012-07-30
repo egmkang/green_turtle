@@ -35,8 +35,8 @@
 #include <functional>
 #include <cstddef>
 #include <stdlib.h>
-#include "../util/hash_function.h"
-#include "../util/constructor_in_place.h"
+#include "hash_function.h"
+#include "constructor_in_place.h"
 namespace green_turtle{namespace collections{
 using green_turtle::util::constructor;
 using green_turtle::util::constructor_array;

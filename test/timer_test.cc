@@ -1,6 +1,6 @@
-#include "../network/timer.h"
-#include "../network/timer_queue.h"
-#include "../util/systime.h"
+#include <net/timer.h>
+#include <net/timer_queue.h>
+#include <systime.h>
 #include <iostream>
 #include <unistd.h>
 

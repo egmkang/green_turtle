@@ -1,4 +1,4 @@
-#include "../collections/ring_buffer.h"
+#include <ring_buffer.h>
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
