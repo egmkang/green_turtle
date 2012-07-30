@@ -45,12 +45,7 @@ bool Reactor::RegisterEventHandler(EventHandler *h)
   assert(sock != kInvalidFd);
 
   epoll_event ev;
-#ifdef EPOLL_EDGE_TRIGGERED
-  // EPOLLRDHUP since linux 2.6.17
-  ev.events = EPOLLIN | EPOLLOUT | EPOLLRDHUP | EPOLLET;
-#else
   ev.events = EPOLLIN | EPOLLOUT;
-#endif
   ev.data.ptr = h;
   return epoll_ctl(epfd_, EPOLL_CTL_ADD, sock, &ev) == 0;
 }
@@ -69,11 +64,6 @@ void Reactor::RunOnce(int timeout)
 {
   assert(epfd_ != kInvalidFd);
 
-#ifdef EPOLL_EDGE_TRIGGERED
-  // TODO: yyweii
-  // deal the can-read-container and can-write-container first
-#endif
-
   int ready_size = epoll_pwait(epfd_, &events_[0], events_.size(),
       timeout, NULL);
   for(int i = 0; i < ready_size; ++i)
@@ -88,35 +78,17 @@ void Reactor::RunOnce(int timeout)
     {
       h->OnHangUp();
     }
-#ifdef EPOLL_EDGE_TRIGGERED
-    else if(evs & EPOLLRDHUP)
-    {
-      h->OnReadHangUp();
-    }
-#endif
     else
     {
       if(evs & EPOLLIN)
       {
-	const int ret = h->OnReadUntilBlock();
-#ifdef EPOLL_EDGE_TRIGGERED
-	if(ret == kCanRead)
-	{
-	  // TODO: yyweii
-	  // add h to a can-read-container
-	}
-#endif
+          const int ret = h->OnReadUntilBlock();
+          (void)ret;
       }
       if(evs & EPOLLOUT)
       {
-	const int ret = h->OnWriteUntilBlock();
-#ifdef EPOLL_EDGE_TRIGGERED
-	if(ret == kCanWrite)
-	{
-	  // TODO: yyweii
-	  // add h to a can-write-container
-	}
-#endif
+          const int ret = h->OnWriteUntilBlock();
+          (void)ret;
       }
     }
   }

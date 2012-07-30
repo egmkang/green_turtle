@@ -1,8 +1,7 @@
 #include "timer.h"
 #include "timer_queue.h"
 
-using namespace green_turtle::network;
-using namespace green_turtle::collections;
+using namespace green_turtle::net;
 
 Timer::Timer()
   :queue_(NULL)

@@ -36,7 +36,7 @@
 #include <algorithm>
 #include <cstddef>
 
-namespace green_turtle{namespace collections{
+namespace green_turtle{
 
 template<class T>
 class RingBuffer{
@@ -182,6 +182,5 @@ size_t  RingBuffer<T>::GetCapacity() const
   return index_mark_ + 1;
 }
 
-};
-};
+}
 #endif

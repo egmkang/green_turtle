@@ -2,8 +2,8 @@
 #include "timer_queue.h"
 #include <assert.h>
 
-using namespace green_turtle::collections;
-using namespace green_turtle::network;
+using green_turtle::unordered_list;
+using namespace green_turtle::net;
 
 TimerQueue::TimerQueue(size_t slot_size,size_t interval):
     last_update_time_(0)
@@ -51,7 +51,7 @@ void TimerQueue::ScheduleTimer(Timer *timer_ptr,uint64_t timer_interval,int64_t 
   size_t    to_slot = current_slot_
                       + ((time_delay + circle_time_ + timer_interval) >> interval_exponent_);
 
-  to_slot   = to_slot & (queues_.size() - 1);
+  to_slot   = to_slot & slot_mark;
 
   list_type& list_            = queues_[to_slot];
   timer_ptr->iter_pos_        = list_.insert(timer_ptr);

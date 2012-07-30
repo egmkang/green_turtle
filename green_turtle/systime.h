@@ -36,7 +36,7 @@
 #include <cstddef>
 #include <stdint.h>
 
-namespace green_turtle{namespace util{
+namespace green_turtle{
 
 //static functions to get systime time
 //the impl is for single thread application(!!!)
@@ -54,7 +54,6 @@ class SysTime{
   static int        GetSecondsDiffDays(time_t s1,time_t s2);
 };
 
-};
 };
 
 

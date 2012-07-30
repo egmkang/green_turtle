@@ -31,7 +31,7 @@
 
 #ifndef __CONSTRUCTOR_IN_PLACE__
 #define __CONSTRUCTOR_IN_PLACE__
-namespace green_turtle{namespace util{
+namespace green_turtle{
 template<class T>
 void constructor(T* addr)
 {
@@ -122,7 +122,6 @@ void constructor_array(T* addr,int size,P0 p0,P1 p1,P2 p2,P3 p3,P4 p4)
     addr_ += 1;
   }
 }
-};
-};
+}
 
 #endif//__CONSTRUCTOR_IN_PLACE__

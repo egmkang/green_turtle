@@ -35,7 +35,7 @@
 #include <cstddef>
 #include <stdint.h>
 
-namespace green_turtle{namespace network
+namespace green_turtle{namespace net
 {
 
 class TimerQueue;
@@ -66,6 +66,6 @@ class Timer
   size_t      next_handle_time_;
 };
 
-};
-};
+}
+}
 #endif

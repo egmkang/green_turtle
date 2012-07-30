@@ -35,7 +35,7 @@
 #include <vector>
 #include <unordered_list.h>
 
-namespace green_turtle{namespace network{
+namespace green_turtle{namespace net{
 
 class Timer;
 
@@ -53,7 +53,7 @@ class TimerQueue
   void Update(uint64_t current_time);
   inline uint64_t GetLastUpdateTime() const { return last_update_time_; }
  private:
-  typedef green_turtle::collections::unordered_list<Timer*> list_type;
+  typedef green_turtle::unordered_list<Timer*> list_type;
   typedef std::vector<list_type> queue_type;
 
   queue_type    queues_;

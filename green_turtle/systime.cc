@@ -1,7 +1,7 @@
 #include <sys/time.h>
 #include "systime.h"
 
-using namespace green_turtle::util;
+using namespace green_turtle;
 
 static timeval  time_val_;
 static uint64_t time_millisecond_;

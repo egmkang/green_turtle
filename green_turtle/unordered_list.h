@@ -35,7 +35,7 @@
 #include <cstddef>
 #include <assert.h>
 
-namespace green_turtle{ namespace collections{
+namespace green_turtle{
 
 //fast insert/earse/for_each operations
 //when inserted or deleted too many times,
@@ -214,7 +214,6 @@ class unordered_list
   bool      setted_deleted_;
 };
 
-};//end namespace collections 
-};//end namespace green_turtle
+}//end namespace green_turtle
 
 #endif//__UNORDERED_LIST__

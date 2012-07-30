@@ -37,7 +37,7 @@
 #include "common_hash_function.h"
 
 //hash function impl
-namespace green_turtle{namespace util{
+namespace green_turtle{
 
 template<class T>
 struct hash
@@ -104,6 +104,5 @@ struct hash<std::string>
   }
 };
 
-};
-};
+}
 #endif//__HASH_FUCTION__

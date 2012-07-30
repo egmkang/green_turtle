@@ -34,7 +34,7 @@
 #include <cstddef>
 #include <type_traits>
 
-namespace green_turtle{namespace util{
+namespace green_turtle{
 
 //a smart pointer just like std::weak_ptr
 class RefObject;
@@ -163,7 +163,6 @@ class RefPtr
   details::RefCountImpl *impl_ptr_;
 };
 
-};
 };
 
 #endif

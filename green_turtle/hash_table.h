@@ -37,9 +37,9 @@
 #include <stdlib.h>
 #include "hash_function.h"
 #include "constructor_in_place.h"
-namespace green_turtle{namespace collections{
-using green_turtle::util::constructor;
-using green_turtle::util::constructor_array;
+namespace green_turtle{
+using green_turtle::constructor;
+using green_turtle::constructor_array;
 
 //hash_table with linear probing
 template<class Key,
@@ -268,6 +268,5 @@ class hash_map
   equal_fn    equaler_;
 };
 
-};//end namepsace collections
-};//end namespace green_turtle
+}//end namespace green_turtle
 #endif//__MY_HASH_TABLE__
