@@ -5,7 +5,7 @@ TcpSocket::TcpSocket()
 {
 }
 
-TcpSocket::TcpSocket(NativeHandle fd)
+TcpSocket::TcpSocket(int fd)
   : SocketBase(fd)
 {
 }

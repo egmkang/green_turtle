@@ -19,7 +19,7 @@ bool TcpAcceptor::BindAndListen(const char *addr, int16_t port)
 TcpSocket *TcpAcceptor::Accept()
 {
   assert(sockfd_ != kInvalidHandle);
-  NativeHandle h = SocketApi::Accept(sockfd_);
+  int h = SocketApi::Accept(sockfd_);
   TcpSocket *ret = NULL;
   if(h != kInvalidHandle)
   {

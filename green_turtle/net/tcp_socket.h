@@ -8,7 +8,7 @@ class TcpSocket : public SocketBase
 {
   public:
     TcpSocket();
-    TcpSocket(NativeHandle fd);
+    TcpSocket(int fd);
     virtual ~TcpSocket();
   public:
     bool Connect(const char *addr, int16_t port);

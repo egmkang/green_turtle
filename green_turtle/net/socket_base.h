@@ -1,7 +1,6 @@
 #ifndef SOCKET_BASE_
 #define SOCKET_BASE_
 
-#include "socket_api.h"
 #include "event_handler.h"
 
 // SocketBase is the common base class for TcpSocket, TcpAcceptor.
@@ -10,7 +9,7 @@ class SocketBase : public EventHandler
 {
   public:
     SocketBase();
-    SocketBase(NativeHandle fd);
+    SocketBase(int fd);
     virtual ~SocketBase();
     bool CreateFd();
     void DestroyFd();
@@ -18,12 +17,12 @@ class SocketBase : public EventHandler
     SocketBase(const SocketBase &);
     SocketBase &operator=(const SocketBase &);
   public:
-    virtual NativeHandle sockfd() const;
+    virtual int sockfd() const;
   public:
     bool SetNoDelay();
     bool SetNonBlock();
   protected:
-    NativeHandle sockfd_;
+    int sockfd_;
 };
 
 #endif

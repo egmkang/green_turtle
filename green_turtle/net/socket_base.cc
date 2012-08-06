@@ -6,7 +6,7 @@ SocketBase::SocketBase()
 {
 }
 
-SocketBase::SocketBase(NativeHandle fd)
+SocketBase::SocketBase(int fd)
   : sockfd_(fd)
 {
 }
@@ -32,7 +32,7 @@ void SocketBase::DestroyFd()
   }
 }
 
-NativeHandle SocketBase::sockfd() const
+int SocketBase::sockfd() const
 {
   return sockfd_;
 }

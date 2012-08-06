@@ -2,14 +2,12 @@
 #define EPOLL_REACTOR_
 
 #include <vector>
+#include "noncopyable.h"
 
 struct epoll_event;
 class EventHandler;
 
-// TODO: yyweii
-#undef EPOLL_EDGE_TRIGGERED
-
-class Reactor
+class Reactor : Noncopyable
 {
   public:
     Reactor();
