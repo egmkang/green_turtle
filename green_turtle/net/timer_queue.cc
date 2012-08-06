@@ -60,37 +60,7 @@ void TimerQueue::ScheduleTimer(Timer *timer_ptr,uint64_t timer_interval,int64_t 
   timer_ptr->timer_interval_  = timer_interval;
   timer_ptr->next_handle_time_= next_handle_time;
 }
-//TODO:egmkang
-//change it with lambda expression when clang 3.1 release
-struct ForEachInList{
-  ForEachInList(TimerQueue& queue_,unordered_list<Timer*>& list_,uint64_t current_time)
-      :queue_(queue_),list_(list_),current_time(current_time)
-  {}
-  bool operator() (Timer* timer,size_t iter)
-  {
-    if(timer)
-    {
-      while(timer && timer->GetNextHandleTime() <= current_time)
-      {
-        timer->HandleTimeOut();
-        timer = list_.get(iter);
-      }
-      if(timer)
-      {
-        int64_t  delay = timer->GetNextHandleTime() - (timer->GetInterval() + queue_.GetLastUpdateTime());
-        queue_.ScheduleTimer(timer,timer->GetInterval(),delay);
-      }
-    }
-    else
-    {
-      list_.erase(iter);
-    }
-    return true;
-  }
-  TimerQueue&             queue_;
-  unordered_list<Timer*>& list_;
-  uint64_t                current_time;
-};
+
 void TimerQueue::Update(uint64_t current_time)
 {
   if(!last_update_time_)
@@ -105,7 +75,7 @@ void TimerQueue::Update(uint64_t current_time)
     current_slot_ = (current_slot_ + 1) & slot_mark;
     last_update_time_ += interval_;   
 
-#if __has_feature(cxx_lambdas)
+	//lambda expression
     list_.for_each([&](Timer* timer,size_t iter) -> bool
     {
       if(timer)
@@ -127,9 +97,5 @@ void TimerQueue::Update(uint64_t current_time)
       }
       return true;
     });
-#else
-    ForEachInList for_each(*this,list_,last_update_time_);
-    list_.for_each(for_each);
-#endif
   }
 }

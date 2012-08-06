@@ -27,7 +27,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-// auhor: egmkang (egmkang@gmail.com)
+// author: egmkang (egmkang@gmail.com)
 
 #ifndef __TIMER_H__
 #define __TIMER_H__
