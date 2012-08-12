@@ -5,13 +5,24 @@ using namespace green_turtle::net;
 
 void EventHandler::HandleEvent()
 {
+  int ret = kOK;
   if(this->mark_ & this->revents_ & kEventReadable)
   {
-    OnRead();
+    ret = OnRead();
+  }
+  if(ret == kErr)
+  {
+    OnError();
+    return;
   }
   if(this->mark_ & this->revents_ & kEventWriteable)
   {
-    OnWrite();
+    ret = OnWrite();
+  }
+  if(ret == kErr)
+  {
+    OnError();
+    return;
   }
   this->revents_ = kEventNone;
 }

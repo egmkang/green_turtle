@@ -45,12 +45,13 @@ enum {
   kEventReadable    = 0x1,
   kEventWriteable   = 0x2,
 };
+class EventLoop;
 
 class EventHandler
 {
  public:
   virtual ~EventHandler();
-  int  GetSockFd() const { return fd_; }
+  int  fd() const { return fd_; }
   int  GetEvents() const { return events_; }
   void SetEvents(int events) { events_ = events; } 
   int  GetEventMark() const { return mark_;}
@@ -64,6 +65,7 @@ class EventHandler
   int fd_;
   int mark_;
   int events_;
+  EventLoop *event_loop_;
 };
 
 }
