@@ -3,6 +3,9 @@
 
 #include "event_handler.h"
 
+namespace green_turtle{
+namespace net{
+
 // SocketBase is the common base class for TcpSocket, TcpAcceptor.
 // SocketBase is noncopyable and pure virtual class
 class SocketBase : public EventHandler
@@ -25,5 +28,7 @@ class SocketBase : public EventHandler
     int sockfd_;
 };
 
+}
+}
 #endif
 

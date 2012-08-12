@@ -138,7 +138,7 @@ uint64_t burtle_hash(register uint8_t* k,     /* the key */
   case 19: c+=((uint64_t)k[18]<<24);
   case 18: c+=((uint64_t)k[17]<<16);
   case 17: c+=((uint64_t)k[16]<<8);
-    /* the first byte of c is reserved for the length */
+  /* the first byte of c is reserved for the length */
   case 16: b+=((uint64_t)k[15]<<56);
   case 15: b+=((uint64_t)k[14]<<48);
   case 14: b+=((uint64_t)k[13]<<40);
@@ -155,7 +155,7 @@ uint64_t burtle_hash(register uint8_t* k,     /* the key */
   case  3: a+=((uint64_t)k[ 2]<<16);
   case  2: a+=((uint64_t)k[ 1]<<8);
   case  1: a+=((uint64_t)k[ 0]);
-    /* case 0: nothing left to add */
+  /* case 0: nothing left to add */
   }
   mix64(a,b,c);
   /*-------------------------------------------- report the result */

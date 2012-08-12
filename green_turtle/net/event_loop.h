@@ -5,6 +5,7 @@
 #include <noncopyable.h>
 
 namespace green_turtle{
+namespace net{
 
 class Poller;
 
@@ -23,5 +24,6 @@ class EventLoop : NonCopyable
   std::vector<EventHandler*>  fired_handler_;
 };
 
+}
 }
 #endif

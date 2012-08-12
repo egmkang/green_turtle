@@ -1,8 +1,12 @@
 #include <assert.h>
 #include "event_loop.h"
 #include "event_handler.h"
+#include "poller.h"
 
-EventLoop::EventLoop(int expected_size) : poller_(NULL)
+using namespace green_turtle;
+using namespace green_turtle::net;
+
+EventLoop::EventLoop(int expected_size) : poller_(nullptr)
 {
   poller_ = Poller::CreatePoller(expected_size);
   assert(poller_);

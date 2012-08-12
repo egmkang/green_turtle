@@ -35,7 +35,8 @@
 #include <vector>
 #include <unordered_list.h>
 
-namespace green_turtle{namespace net{
+namespace green_turtle{
+namespace net{
 
 class Timer;
 

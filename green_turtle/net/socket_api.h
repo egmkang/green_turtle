@@ -4,7 +4,6 @@
 #include <stdint.h>
 #include <stddef.h> // for size_t
 
-typedef int int;
 static const int kInvalidHandle = -1;
 
 class SocketApi

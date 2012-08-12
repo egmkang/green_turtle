@@ -35,8 +35,8 @@
 #include <cstddef>
 #include <stdint.h>
 
-namespace green_turtle{namespace net
-{
+namespace green_turtle{
+namespace net{
 
 class TimerQueue;
 

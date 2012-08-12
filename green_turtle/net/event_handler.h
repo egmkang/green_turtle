@@ -33,18 +33,40 @@
 #ifndef __EVENT_HANDLER__
 #define __EVENT_HANDLER__
 
-class EventHandler
-{
-  public:
-    virtual int sockfd() const      = 0;
-    virtual int OnReadUntilBlock()  = 0;
-    virtual int OnWriteUntilBlock() = 0;
-    virtual int OnRead()            = 0;
-    virtual int OnWrite()           = 0;
-    virtual int OnError()           = 0;
-    virtual int OnHangUp()          = 0;
-    virtual int OnReadHangUp()      = 0;
+namespace green_turtle{
+namespace net{
+
+enum {
+  kOK   = 0,
+  kErr  = -1,
+};
+enum {
+  kEventNone        = 0x0,
+  kEventReadable    = 0x1,
+  kEventWriteable   = 0x2,
 };
 
+class EventHandler
+{
+ public:
+  virtual ~EventHandler();
+  int  GetSockFd() const { return fd_; }
+  int  GetEvents() const { return events_; }
+  void SetEvents(int events) { events_ = events; } 
+  int  GetEventMark() const { return mark_;}
+  void SetEventMark(int mark) { mark_ = mark; }
+  void HandleEvent();
+ protected:
+  virtual int OnRead()            = 0;
+  virtual int OnWrite()           = 0;
+  virtual int OnError()           = 0;
+ private:
+  int fd_;
+  int mark_;
+  int events_;
+};
+
+}
+}
 #endif
 

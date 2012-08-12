@@ -1,6 +1,9 @@
 #include <assert.h>
 #include "socket_base.h"
 
+using namespace green_turtle;
+using namespace green_turtle::net;
+
 SocketBase::SocketBase()
   : sockfd_(kInvalidHandle)
 {
