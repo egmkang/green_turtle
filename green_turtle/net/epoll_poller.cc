@@ -67,7 +67,7 @@ void EpollPoller::PollOnce(int timeout,std::vector<EventHandler*>& fired_handler
 
 int Epoll_Ctl(int epollfd, int operation, int fd, int events)
 {
-  struct epoll_event event = {9};
+  struct epoll_event event = {0};
   event.events = events;
   return ::epoll_ctl(epollfd, operation, fd, &event);
 }
