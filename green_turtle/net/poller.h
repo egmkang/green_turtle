@@ -22,7 +22,7 @@ class Poller : green_turtle::NonCopyable
   void SetEventHandler(int fd,EventHandler *handler);
   inline EventHandler* GetEventHandler(int fd)
   {
-    assert(fd >= (int)event_handlers_.size());
+    assert(fd <= (int)event_handlers_.size());
     return event_handlers_[fd];
   }
  public:

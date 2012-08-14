@@ -5,11 +5,10 @@
 using namespace green_turtle;
 using namespace green_turtle::net;
 
-static const int kInitEventSize = 16;
 
 PollPoller::PollPoller():
     Poller(kInitEventSize)
-    ,pollfds_(kInitEventSize)
+    ,pollfds_()
     ,polling_(false)
 {
 }
@@ -23,6 +22,8 @@ void PollPoller::AddEventHandler(EventHandler *event_handler)
   assert(!polling_);
   this->SetEventHandler(event_handler->fd(), event_handler);
 
+  //TODO:egmkang
+  //check multi add problem
   struct pollfd pfd = {0};
   pfd.events = event_handler->events();
   pfd.fd = event_handler->fd();
@@ -36,7 +37,7 @@ void PollPoller::RemoveEventHandler(EventHandler *event_handler)
   assert(!polling_);
   this->SetEventHandler(event_handler->fd(), nullptr);
   int idx = event_handler->index();
-  assert(idx > 0);
+  if(idx < 0) return;
   if(idx != pollfds_.size() - 1)
   {
     std::iter_swap(pollfds_.begin() + idx, --pollfds_.end());
