@@ -5,6 +5,7 @@
 using namespace green_turtle;
 using namespace green_turtle::net;
 
+static const int kInitEventSize = 16;
 
 PollPoller::PollPoller():
     Poller(kInitEventSize)
