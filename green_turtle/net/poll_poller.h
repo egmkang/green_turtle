@@ -20,6 +20,7 @@ class PollPoller : public Poller
    virtual void PollOnce(int timeout,std::vector<EventHandler*>& fired_handler);
  private:
    std::vector<struct pollfd> pollfds_;
+   bool polling_;
 };
 
 }

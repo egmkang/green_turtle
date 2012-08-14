@@ -50,12 +50,15 @@ class EventLoop;
 class EventHandler
 {
  public:
+  EventHandler(int fd);
   virtual ~EventHandler();
   int  fd() const { return fd_; }
-  int  GetEvents() const { return events_; }
-  void SetEvents(int events) { events_ = events; } 
-  int  GetEventMark() const { return mark_;}
-  void SetEventMark(int mark) { mark_ = mark; }
+  int  revents() const { return revents_; }
+  void set_revents(int revents) { revents_ = revents; } 
+  int  events() const { return events_;}
+  void set_events(int events) { events_ = events; }
+  int  index() const { return poll_idx_; } 
+  void set_index(int idx) { poll_idx_ = idx; }
   void HandleEvent();
  protected:
   virtual int OnRead()            = 0;
@@ -63,8 +66,9 @@ class EventHandler
   virtual int OnError()           = 0;
  private:
   int fd_;
-  int mark_;
-  int events_;
+  int events_;    //request events
+  int revents_;   //returned events
+  int poll_idx_;  //poll index,for fast remove
   EventLoop *event_loop_;
 };
 

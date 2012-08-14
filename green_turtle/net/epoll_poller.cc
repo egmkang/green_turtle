@@ -29,7 +29,7 @@ void EpollPoller::AddEventHandler(EventHandler *event_handler)
   {
     events_.resize(events_.size() * 2);
   }
-  if(Epoll_Ctl(epollfd_, EPOLL_CTL_ADD, event_handler->fd(), event_handler->GetEventMark()) < 0)
+  if(Epoll_Ctl(epollfd_, EPOLL_CTL_ADD, event_handler->fd(), event_handler->events()) < 0)
   {
     //TODO:egmkang
     this->SetEventHandler(event_handler->fd(), nullptr);
@@ -39,7 +39,7 @@ void EpollPoller::AddEventHandler(EventHandler *event_handler)
 void EpollPoller::RemoveEventHandler(EventHandler *event_handler)
 {
   this->SetEventHandler(event_handler->fd(), nullptr);
-  if(Epoll_Ctl(epollfd_, EPOLL_CTL_DEL, event_handler->fd(), event_handler->GetEventMark()) < 0)
+  if(Epoll_Ctl(epollfd_, EPOLL_CTL_DEL, event_handler->fd(), event_handler->events()) < 0)
   {
       //TODO:egmkang
   }
@@ -59,7 +59,7 @@ void EpollPoller::PollOnce(int timeout,std::vector<EventHandler*>& fired_handler
     if(e.events & EPOLLOUT) mark |= kEventWriteable;
     if(e.events & EPOLLERR) mark |= kEventWriteable;
     if(e.events & EPOLLHUP) mark |= kEventWriteable;
-    handle->SetEvents(mark);
+    handle->set_revents(mark);
 
     fired_handler.push_back(handle);
   }
