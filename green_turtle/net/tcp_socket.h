@@ -4,6 +4,9 @@
 #include "socket_api.h"
 #include "socket_base.h"
 
+namespace green_turtle{
+namespace net{
+
 class TcpSocket : public SocketBase
 {
   public:
@@ -23,6 +26,9 @@ class TcpSocket : public SocketBase
     // virtual int OnHangUp() {}
     // virtual int OnReadHangUp() {}
 };
+
+}
+}
 
 #endif
 

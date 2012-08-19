@@ -1,5 +1,7 @@
 #include <assert.h>
 #include "tcp_socket.h"
+using namespace green_turtle;
+using namespace green_turtle::net;
 
 TcpSocket::TcpSocket()
 {

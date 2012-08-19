@@ -32,6 +32,7 @@
 
 #ifndef __EVENT_HANDLER__
 #define __EVENT_HANDLER__
+#include <noncopyable.h>
 
 namespace green_turtle{
 namespace net{
@@ -47,7 +48,7 @@ enum {
 };
 class EventLoop;
 
-class EventHandler
+class EventHandler : green_turtle::NonCopyable
 {
  public:
   EventHandler(int fd);
