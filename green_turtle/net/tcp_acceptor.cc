@@ -1,30 +1,59 @@
 #include <assert.h>
-#include "tcp_socket.h"
+#include "socket_option.h"
 #include "tcp_acceptor.h"
 
-TcpAcceptor::TcpAcceptor()
+using namespace green_turtle;
+using namespace green_turtle::net;
+
+TcpAcceptor::TcpAcceptor(const AddrInfo& addr, int rev_buf, int snd_buf)
+  :EventHandler(SocketOption::NewFD())
+    ,addr_(addr)
 {
+  SocketOption::SetNoBlock(this->fd());
+  SocketOption::SetNoDelay(this->fd());
+  SocketOption::SetRecvBuffer(this->fd(), rev_buf);
+  SocketOption::SetSendBuffer(this->fd(), snd_buf);
 }
 
 TcpAcceptor::~TcpAcceptor()
 {
+  SocketOption::DestoryFD(this->fd());
 }
 
-bool TcpAcceptor::BindAndListen(const char *addr, int16_t port)
+bool TcpAcceptor::Listen()
 {
-  assert(sockfd_ != kInvalidHandle);
-  return SocketApi::BindAndListen(sockfd_, addr, port);
+  int ret = SocketOption::Listen(this->fd()
+                                 , addr_.sockaddr()
+                                 , addr_.sockaddr_len());
+  return ret != -1;
 }
 
-TcpSocket *TcpAcceptor::Accept()
+int TcpAcceptor::Accept()
 {
-  assert(sockfd_ != kInvalidHandle);
-  int h = SocketApi::Accept(sockfd_);
-  TcpSocket *ret = NULL;
-  if(h != kInvalidHandle)
-  {
-    ret = new TcpSocket(h);
-  }
-  return ret;
+  AddrInfo info;
+  int new_fd = SocketOption::Accept(this->fd(), info);
+  return new_fd;
 }
 
+int TcpAcceptor::OnRead()
+{
+  int new_fd = Accept();
+  if(new_fd == -1)
+    return new_fd;
+  //TODO:egmkang
+  //Add new task to poller
+
+  return kOK;
+}
+
+int TcpAcceptor::OnWrite()
+{
+  return kOK;
+}
+
+int TcpAcceptor::OnError()
+{
+  //TODO:egmkang
+  //error processer
+  return kOK;
+}

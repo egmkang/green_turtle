@@ -1,27 +1,35 @@
-#ifndef TCP_ACCEPTOR_
-#define TCP_ACCEPTOR_
+#ifndef __TCP_ACCEPTOR__
+#define __TCP_ACCEPTOR__
+#include "addr_info.h"
+#include "event_handler.h"
 
-#include "socket_base.h"
-class TcpSocket;
+namespace green_turtle{
+namespace net{
 
-class TcpAcceptor : public SocketBase
+enum
+{
+  kWindowRecv   = 128*1024,
+  kWindowSend   = 128*1024,
+};
+
+class TcpAcceptor : public EventHandler
 {
   public:
-    TcpAcceptor();
+    TcpAcceptor(const AddrInfo& addr, int rev_buf = kWindowRecv, int snd_buf = kWindowSend);
     virtual ~TcpAcceptor();
   public:
-    // if addr is NULL, port on all interfaces will be listened 
-    bool BindAndListen(const char *addr, int16_t port);
-    TcpSocket *Accept();
+    virtual int OnRead();
+    virtual int OnWrite();
+    virtual int OnError();
   public:
-    // virtual int OnReadUntilBlock() {}
-    // virtual int OnWriteUntilBlock() {}
-    // virtual int OnRead() {}
-    // virtual int OnWrite() {}
-    // virtual int OnError() {}
-    // virtual int OnHangUp() {}
-    // virtual int OnReadHangUp() {}
+    bool Listen();
+    int Accept();
+  private:
+    AddrInfo addr_;
 };
+
+}
+}
 
 #endif
 

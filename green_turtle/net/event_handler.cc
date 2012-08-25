@@ -14,7 +14,7 @@ EventHandler::EventHandler(int fd) :
 void EventHandler::HandleEvent()
 {
   int ret = kOK;
-  if(this->mark_ & this->revents_ & kEventReadable)
+  if(this->events_ & this->revents_ & kEventReadable)
   {
     ret = OnRead();
   }
@@ -23,7 +23,7 @@ void EventHandler::HandleEvent()
     OnError();
     return;
   }
-  if(this->mark_ & this->revents_ & kEventWriteable)
+  if(this->events_ & this->revents_ & kEventWriteable)
   {
     ret = OnWrite();
   }
