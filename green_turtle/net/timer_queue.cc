@@ -71,11 +71,11 @@ void TimerQueue::Update(uint64_t current_time)
   while(last_update_time_ < delta_time)
   {
     list_type& list_ = queues_[current_slot_];
-    
-    current_slot_ = (current_slot_ + 1) & slot_mark;
-    last_update_time_ += interval_;   
 
-	//lambda expression
+    current_slot_ = (current_slot_ + 1) & slot_mark;
+    last_update_time_ += interval_;
+
+    //lambda expression
     list_.for_each([&](Timer* timer,size_t iter) -> bool
     {
       if(timer)

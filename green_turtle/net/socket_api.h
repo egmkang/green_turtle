@@ -12,7 +12,7 @@ class SocketApi
     static int CreateNonBlockingStreamSocket();
   public:
     static bool BindAndListen(int h, const char *addr,
-	int16_t port);
+                              int16_t port);
     static int Accept(int h);
     static bool Connect(int h, const char *addr, int16_t port);
   public:
