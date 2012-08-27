@@ -1,6 +1,5 @@
 #ifndef __TCP_ACCEPTOR__
 #define __TCP_ACCEPTOR__
-#include "addr_info.h"
 #include "event_handler.h"
 
 namespace green_turtle{
@@ -8,14 +7,16 @@ namespace net{
 
 enum
 {
-  kWindowRecv   = 128*1024,
-  kWindowSend   = 128*1024,
+  kAcceptorWindowRecvSize   = 128*1024,
+  kAcceptorWindowSendSize   = 128*1024,
 };
+
+struct AddrInfo;
 
 class TcpAcceptor : public EventHandler
 {
   public:
-    TcpAcceptor(const AddrInfo& addr, int rev_buf = kWindowRecv, int snd_buf = kWindowSend);
+    TcpAcceptor(const AddrInfo& addr, int rev_buf = kAcceptorWindowRecvSize, int snd_buf = kAcceptorWindowSendSize);
     virtual ~TcpAcceptor();
   public:
     virtual int OnRead();
@@ -25,7 +26,7 @@ class TcpAcceptor : public EventHandler
     bool Listen();
     int Accept();
   private:
-    AddrInfo addr_;
+    AddrInfo *addr_;
 };
 
 }
