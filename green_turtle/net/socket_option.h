@@ -5,8 +5,6 @@ struct sockaddr;
 namespace green_turtle{
 namespace net{
 
-struct AddrInfo;
-
 class SocketOption{
   public:
    static int   NewFD();
@@ -16,7 +14,7 @@ class SocketOption{
    static int   SetSendBuffer(int fd, int size);
    static int   SetRecvBuffer(int fd, int size);
    static int   Listen(int fd, struct sockaddr* addr, int len);
-   static int   Accept(int fd, AddrInfo& info);
+   static int   Accept(int fd, struct sockaddr_in* info);
 };
 }
 }

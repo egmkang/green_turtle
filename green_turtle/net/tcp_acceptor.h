@@ -24,8 +24,8 @@ class TcpAcceptor : public EventHandler
     virtual int OnError();
   public:
     bool Listen();
-    int Accept();
   private:
+    int Accept();
     AddrInfo *addr_;
 };
 

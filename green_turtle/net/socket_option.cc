@@ -1,7 +1,6 @@
 #include <netinet/in.h>
 #include <sys/socket.h>
 #include <netinet/tcp.h>
-#include <netinet/in.h>
 #include <unistd.h>
 #include <assert.h>
 #include <fcntl.h>
@@ -75,10 +74,10 @@ int SocketOption::Listen(int fd, struct sockaddr* addr, int len)
   }
   return ret;
 }
-int SocketOption::Accept(int fd, AddrInfo& info)
+int SocketOption::Accept(int fd, struct sockaddr_in* addr)
 {
-  socklen_t salen = sizeof(info.addr_);
-  int accept_fd = ::accept(fd, info.sockaddr(), &salen);
+  socklen_t salen = sizeof(*addr);
+  int accept_fd = ::accept(fd, static_cast<struct sockaddr*>(static_cast<void*>(addr)), &salen);
   //TODO:egmkang
   //process -1
   return accept_fd;

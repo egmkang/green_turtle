@@ -26,10 +26,13 @@ void EventLoop::RemoveEventHandler(EventHandler *pEventHandler)
 void EventLoop::Loop()
 {
   assert(poller_);
-  fired_handler_.clear();
-  poller_->PollOnce(0,fired_handler_);
-  for(auto handler : fired_handler_)
+  while(!this->terminal_)
   {
-    handler->HandleEvent();
+    fired_handler_.clear();
+    poller_->PollOnce(0,fired_handler_);
+    for(auto handler : fired_handler_)
+    {
+      handler->HandleEvent();
+    }
   }
 }

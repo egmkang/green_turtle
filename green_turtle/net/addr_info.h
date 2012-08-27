@@ -55,8 +55,8 @@ struct AddrInfo
   }
   AddrInfo(const sockaddr_in& addr_) : addr_(addr_)
   {
-    //TODO:egmkang
-    //fill accept socket info
+    addr_port_ = ::ntohs(addr_.sin_port);
+    addr_str_ = ::inet_ntoa(addr_.sin_addr);
   }
   std::string     addr_str_;
   unsigned short  addr_port_;

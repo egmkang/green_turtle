@@ -61,10 +61,17 @@ class EventHandler : green_turtle::NonCopyable
   int  index() const { return poll_idx_; } 
   void set_index(int idx) { poll_idx_ = idx; }
   void HandleEvent();
+  EventLoop* event_loop() const { return event_loop_; }
+  void set_event_loop(EventLoop *loop)
+  {
+    event_loop_ = loop;
+    OnAddedIntoEventLoop(loop);
+  }
  protected:
   virtual int OnRead()            = 0;
   virtual int OnWrite()           = 0;
   virtual int OnError()           = 0;
+  virtual void OnAddedIntoEventLoop(EventLoop *loop) {}
  private:
   int fd_;
   int events_;    //request events
