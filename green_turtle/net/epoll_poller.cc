@@ -25,7 +25,7 @@ EpollPoller::~EpollPoller()
 void EpollPoller::AddEventHandler(EventHandler *event_handler)
 {
   this->SetEventHandler(event_handler->fd(), event_handler);
-  if(event_handler->fd() >= this->events_.size())
+  if(event_handler->fd() >= (int)this->events_.size())
   {
     events_.resize(events_.size() * 2);
   }

@@ -95,7 +95,7 @@ class unordered_list
       else
         index = INVALID_POS;
     }
-    if(index == INVALID_POS)
+    if((size_t)index == INVALID_POS)
     {
       index = bound_;
     }

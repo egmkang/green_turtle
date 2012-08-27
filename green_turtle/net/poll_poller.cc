@@ -39,7 +39,7 @@ void PollPoller::RemoveEventHandler(EventHandler *event_handler)
   this->SetEventHandler(event_handler->fd(), nullptr);
   int idx = event_handler->index();
   if(idx < 0) return;
-  if(idx != pollfds_.size() - 1)
+  if(idx != (int)(pollfds_.size() - 1))
   {
     std::iter_swap(pollfds_.begin() + idx, --pollfds_.end());
     GetEventHandler(pollfds_[idx].fd)->set_index(idx);
