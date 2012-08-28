@@ -4,6 +4,7 @@
 #include <unistd.h>
 #include <assert.h>
 #include <fcntl.h>
+#include <errno.h>
 #include "socket_option.h"
 #include "addr_info.h"
 
@@ -105,11 +106,13 @@ int SocketOption::Accept(int fd, struct sockaddr_in* addr)
 int SocketOption::Write(int fd, const void *data, size_t len)
 {
   int nwrite = ::write(fd, data, len);
+  if(nwrite == -1 && errno == EAGAIN) nwrite = 0;
   return nwrite;
 }
 
 int SocketOption::Read(int fd, void *data, const size_t len)
 {
   int nread = ::read(fd, data, len);
+  if(nread == -1 && errno == EAGAIN) nread = 0;
   return nread;
 }
