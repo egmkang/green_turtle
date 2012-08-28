@@ -58,9 +58,6 @@ struct AddrInfo
     addr_port_ = ::ntohs(addr_.sin_port);
     addr_str_ = ::inet_ntoa(addr_.sin_addr);
   }
-  std::string     addr_str_;
-  unsigned short  addr_port_;
-  sockaddr_in     addr_;
   struct sockaddr* sockaddr()
   {
     return static_cast<struct sockaddr*>(static_cast<void*>(&addr_));
@@ -69,6 +66,10 @@ struct AddrInfo
   {
     return sizeof(addr_);
   }
+
+  std::string     addr_str_;
+  unsigned short  addr_port_;
+  sockaddr_in     addr_;
 };
 
 }

@@ -12,8 +12,8 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 
 set(CMAKE_CXX_COMPILER "clang++")
-set(CMAKE_CXX_FLAGS_DEBUG   "-g -Wall -Werror -std=c++11 -DDEBUG -D_DEBUG -O0 -fomit-frame-pointer -fstack-protector-all")
-set(CMAKE_CXX_FLAGS_RELEASE "-g -Wall -Werror -std=c++11 -DNDEBUG -O2 -fomit-frame-pointer -fstack-protector-all")
+set(CMAKE_CXX_FLAGS_DEBUG   "-g -Wall -Werror -std=c++11 -stdlib=libc++ -DDEBUG -D_DEBUG -O0 -fomit-frame-pointer -fstack-protector-all")
+set(CMAKE_CXX_FLAGS_RELEASE "-g -Wall -Werror -std=c++11 -stdlib=libc++ -DNDEBUG -O2 -fomit-frame-pointer -fstack-protector-all")
 
 ADD_SUBDIRECTORY(green_turtle)
 ADD_SUBDIRECTORY(test)

@@ -35,11 +35,12 @@
 #include <cstring>
 #include <algorithm>
 #include <cstddef>
+#include <noncopyable.h>
 
 namespace green_turtle{
 
 template<class T>
-class RingBuffer{
+class RingBuffer : NonCopyable{
  public:
   RingBuffer(size_t buffer_size_);
   ~RingBuffer();
