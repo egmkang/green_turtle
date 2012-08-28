@@ -48,8 +48,8 @@ class RingBuffer : NonCopyable{
   size_t  Read(T* dest,size_t count);
   size_t  Write(const T* src,size_t count);
   void    Reset();
-  void    MoveReadPos(int offset);
-  void    MoveWritePos(int offset);
+  void    SkipRead(int offset);
+  void    SkipWrite(int offset);
   T*      GetBegin() const;
   T*      GetEnd() const;
   size_t  GetSize() const;
@@ -145,13 +145,13 @@ void    RingBuffer<T>::Reset()
   read_ = 0;
 }
 template<class T>
-void    RingBuffer<T>::MoveReadPos(int offset)
+void    RingBuffer<T>::SkipRead(int offset)
 {
   assert( read_ + offset > 0 && read_ + offset <= write_);
   read_ += offset;
 }
 template<class T>
-void    RingBuffer<T>::MoveWritePos(int offset)
+void    RingBuffer<T>::SkipWrite(int offset)
 {
   assert(write_ + offset > 0 && write_ + offset >= read_);
   write_ += offset;

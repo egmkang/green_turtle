@@ -43,6 +43,26 @@ int SocketOption::SetNoBlock(int fd)
 #endif
   return ret;
 }
+int SocketOption::GetSendBuffer(int fd)
+{
+  socklen_t buff_szie = 0;
+  int optname = 0;
+  int ret = getsockopt(fd, SOL_SOCKET, SO_SNDBUF, &optname , &buff_szie);
+  assert(ret != -1);
+  assert(!buff_szie);
+  return buff_szie > 0 ? buff_szie : 0;
+}
+
+int SocketOption::GetRecvBuffer(int fd)
+{
+  socklen_t buff_szie = 0;
+  int optname = 0;
+  int ret = getsockopt(fd, SOL_SOCKET, SO_RCVBUF, &optname, &buff_szie);
+  assert(ret != -1);
+  assert(!buff_szie);
+  return buff_szie > 0 ? buff_szie : 0;
+}
+
 int SocketOption::SetSendBuffer(int fd, int size)
 {
   int ret = setsockopt(fd, SOL_SOCKET, SO_SNDBUF, &size, sizeof(size));
@@ -77,8 +97,19 @@ int SocketOption::Listen(int fd, struct sockaddr* addr, int len)
 int SocketOption::Accept(int fd, struct sockaddr_in* addr)
 {
   socklen_t salen = sizeof(*addr);
-  int accept_fd = ::accept(fd, static_cast<struct sockaddr*>(static_cast<void*>(addr)), &salen);
+  int accept_fd = ::accept(fd, reinterpret_cast<struct sockaddr*>(addr), &salen);
   //TODO:egmkang
   //process -1
   return accept_fd;
+}
+int SocketOption::Write(int fd, const void *data, size_t len)
+{
+  int nwrite = ::write(fd, data, len);
+  return nwrite;
+}
+
+int SocketOption::Read(int fd, void *data, const size_t len)
+{
+  int nread = ::read(fd, data, len);
+  return nread;
 }
