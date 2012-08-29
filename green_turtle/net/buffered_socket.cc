@@ -1,5 +1,4 @@
 #include "buffered_socket.h"
-#include <lock.h>
 #include <ring_buffer.h>
 #include "addr_info.h"
 #include "socket_option.h"
@@ -12,9 +11,8 @@ BufferedSocket::BufferedSocket(int fd,const AddrInfo& addr)
     , addr_(new AddrInfo(addr))
     , cache_line_size_(SocketOption::GetRecvBuffer(fd)/4)
     , rcv_buffer_(new CacheLine(SocketOption::GetSendBuffer(fd)))
-    , write_lock_(new Mutex())
+    , write_lock_()
 {
-
 }
 
 BufferedSocket::~BufferedSocket()
@@ -25,7 +23,6 @@ BufferedSocket::~BufferedSocket()
     delete p;
   }
   snd_queue_.clear();
-  delete write_lock_;
 }
 
 int BufferedSocket::OnRead()
@@ -42,7 +39,7 @@ int BufferedSocket::OnRead()
 
 int BufferedSocket::OnWrite()
 {
-  LockGuard<Mutex> lock(*this->write_lock_);
+  std::lock_guard<std::mutex> lock(this->write_lock_);
   int ret = 0;
   while(ret > 0)
   {
@@ -75,7 +72,7 @@ int BufferedSocket::OnError()
 
 void BufferedSocket::SendMessage(const void *data, size_t len)
 {
-  LockGuard<Mutex> lock(*this->write_lock_);
+  std::lock_guard<std::mutex> lock(this->write_lock_);
   size_t sent = 0;
   while(len)
   {

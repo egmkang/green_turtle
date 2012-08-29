@@ -2,8 +2,8 @@
 #define __BUFFERED_SOCKET__
 #include <cstddef>
 #include <deque>
+#include <mutex>
 #include "event_handler.h"
-
 
 namespace green_turtle{
 
@@ -33,7 +33,7 @@ class BufferedSocket : public EventHandler
   const size_t            cache_line_size_;
   std::deque<CacheLine*>  snd_queue_;
   CacheLine               *rcv_buffer_;
-  green_turtle::Mutex     *write_lock_;
+  std::mutex              write_lock_;
 };
 
 }
