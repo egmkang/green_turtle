@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <assert.h>
 #include "addr_info.h"
 #include "socket_option.h"
@@ -70,8 +71,17 @@ int TcpAcceptor::OnWrite()
 
 int TcpAcceptor::OnError()
 {
-  this->event_loop()->Ternimal();
-  //TODO:egmkang
-  //error processer
+  for(auto loop : loops_)
+  {
+    loop->Ternimal();
+  }
   return kOK;
 }
+
+void TcpAcceptor::OnAddedIntoEventLoop(EventLoop *loop)
+{
+  auto iter = std::find(loops_.begin(), loops_.end(), loop);
+  if(iter == loops_.end())
+    loops_.push_back(loop);
+}
+

@@ -1,5 +1,6 @@
 #ifndef __TCP_ACCEPTOR__
 #define __TCP_ACCEPTOR__
+#include <vector>
 #include "event_handler.h"
 
 namespace green_turtle{
@@ -22,11 +23,13 @@ class TcpAcceptor : public EventHandler
     virtual int OnRead();
     virtual int OnWrite();
     virtual int OnError();
+    virtual void OnAddedIntoEventLoop(EventLoop *loop);
   public:
     bool Listen();
   private:
     int Accept();
     AddrInfo *addr_;
+    std::vector<EventLoop*> loops_;
 };
 
 }

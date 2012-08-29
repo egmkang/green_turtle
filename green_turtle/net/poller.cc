@@ -10,6 +10,10 @@ Poller::Poller(int init_size):
 }
 Poller::~Poller()
 {
+  for(auto handler : this->event_handlers_)
+  {
+    delete handler;
+  }
 }
 void Poller::SetEventHandler(int fd, EventHandler *handler)
 {

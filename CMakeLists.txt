@@ -16,4 +16,4 @@ set(CMAKE_CXX_FLAGS_DEBUG   "-g -Wall -Werror -std=c++11 -stdlib=libc++ -DDEBUG 
 set(CMAKE_CXX_FLAGS_RELEASE "-g -Wall -Werror -std=c++11 -stdlib=libc++ -DNDEBUG -O2 -fomit-frame-pointer -fstack-protector-all")
 
 ADD_SUBDIRECTORY(green_turtle)
-ADD_SUBDIRECTORY(test)
+#ADD_SUBDIRECTORY(test)

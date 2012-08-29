@@ -1,9 +1,10 @@
 #include "event_handler.h"
+#include "socket_option.h"
 
 using namespace green_turtle;
 using namespace green_turtle::net;
 
-EventHandler::EventHandler(int fd) : 
+EventHandler::EventHandler(int fd) :
     fd_(fd)
     ,events_(kEventNone)
     ,revents_(kEventNone)
@@ -11,6 +12,12 @@ EventHandler::EventHandler(int fd) :
     ,event_loop_(nullptr)
 {
 }
+
+EventHandler::~EventHandler()
+{
+  SocketOption::DestoryFD(fd());
+}
+
 void EventHandler::HandleEvent()
 {
   int ret = kOK;
