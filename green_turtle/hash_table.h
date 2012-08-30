@@ -44,7 +44,7 @@ using green_turtle::constructor_array;
 //hash_table with linear probing
 template<class Key,
         class T,
-        class Hash = util::hash<Key>,
+        class Hash = hash<Key>,
         class KeyEqual = std::equal_to<Key> >
 class hash_map
 {
