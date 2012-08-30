@@ -24,6 +24,10 @@ BufferedSocket::~BufferedSocket()
   }
   snd_queue_.clear();
 }
+const AddrInfo& BufferedSocket::addr() const
+{
+  return *this->addr_;
+}
 
 int BufferedSocket::OnRead()
 {
@@ -32,8 +36,7 @@ int BufferedSocket::OnRead()
   if(nread < 0)
     return kErr;
   rcv_buffer_->SkipWrite(nread);
-  //TODO:egmkang
-  //process data
+  ProcessData(*rcv_buffer_);
   return kOK;
 }
 

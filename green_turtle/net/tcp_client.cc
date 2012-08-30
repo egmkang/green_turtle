@@ -6,16 +6,6 @@
 using namespace green_turtle;
 using namespace green_turtle::net;
 
-//class TcpClient : public BufferedSocket
-//{
-// public:
-//  TcpClient(const std::string& ip,unsigned short port);
-//  ~TcpClient();
-// protected:
-//  int OnError();
-// private:
-//};
-
 TcpClient::TcpClient(const std::string& ip, unsigned short port)
   : BufferedSocket(SocketOption::NewFD(), AddrInfo(ip.c_str(), port))
 {
@@ -23,6 +13,16 @@ TcpClient::TcpClient(const std::string& ip, unsigned short port)
 
 TcpClient::~TcpClient()
 {
+}
+
+int TcpClient::Connect()
+{
+  int ret = SocketOption::Connect(this->fd(), this->addr().sockaddr(), this->addr().sockaddr_len());
+  if(!ret)
+  {
+    SocketOption::SetNoBlock(this->fd());
+  }
+  return ret;
 }
 
 int TcpClient::OnError()

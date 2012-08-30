@@ -58,11 +58,11 @@ struct AddrInfo
     addr_port_ = ::ntohs(addr_.sin_port);
     addr_str_ = ::inet_ntoa(addr_.sin_addr);
   }
-  struct sockaddr* sockaddr()
+  const struct sockaddr* sockaddr() const
   {
-    return static_cast<struct sockaddr*>(static_cast<void*>(&addr_));
+    return static_cast<const struct sockaddr*>(static_cast<const void*>(&addr_));
   }
-  int sockaddr_len()
+  int sockaddr_len() const
   {
     return sizeof(addr_);
   }

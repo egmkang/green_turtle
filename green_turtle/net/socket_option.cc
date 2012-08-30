@@ -80,7 +80,7 @@ int SocketOption::SetRecvBuffer(int fd, int size)
 #endif
   return ret;
 }
-int SocketOption::Listen(int fd, struct sockaddr* addr, int len)
+int SocketOption::Listen(int fd, const struct sockaddr* addr, int len)
 {
   int ret = ::bind(fd, addr, len);
   if(ret == -1)
@@ -115,4 +115,11 @@ int SocketOption::Read(int fd, void *data, const size_t len)
   int nread = ::read(fd, data, len);
   if(nread == -1 && errno == EAGAIN) nread = 0;
   return nread;
+}
+
+int SocketOption::Connect(int fd, const sockaddr *addr, int len)
+{
+  int ret = ::connect(fd, addr, len);
+  if(ret == EINPROGRESS) ret = 0;
+  return ret;
 }

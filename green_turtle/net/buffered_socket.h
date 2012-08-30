@@ -24,10 +24,12 @@ class BufferedSocket : public EventHandler
   BufferedSocket(int fd,const AddrInfo& addr);
   ~BufferedSocket();
   void SendMessage(const void *data, size_t len);
+  const AddrInfo& addr() const;
  protected:
-  int OnRead();
-  int OnWrite();
-  int OnError();
+  virtual int OnRead();
+  virtual int OnWrite();
+  virtual int OnError();
+  virtual void ProcessData(CacheLine& data) = 0;;
  private:
   AddrInfo                *addr_;
   const size_t            cache_line_size_;

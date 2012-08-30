@@ -11,6 +11,7 @@ class TcpClient : public BufferedSocket
  public:
   TcpClient(const std::string& ip,unsigned short port);
   ~TcpClient();
+  int Connect();
  protected:
   int OnError();
 };

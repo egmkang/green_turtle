@@ -16,10 +16,11 @@ class SocketOption{
    static int   GetRecvBuffer(int fd);
    static int   SetSendBuffer(int fd, int size);
    static int   SetRecvBuffer(int fd, int size);
-   static int   Listen(int fd, struct sockaddr* addr, int len);
+   static int   Listen(int fd, const struct sockaddr* addr, int len);
    static int   Accept(int fd, struct sockaddr_in* info);
    static int   Write(int fd, const void *data, size_t len);
    static int   Read(int fd, void *data, const size_t len);
+   static int   Connect(int fd, const struct sockaddr* addr, int len);
 };
 }
 }
