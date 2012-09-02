@@ -23,7 +23,7 @@ void PollPoller::AddEventHandler(EventHandler *event_handler)
   assert(!polling_);
   this->SetEventHandler(event_handler->fd(), event_handler);
 
-  struct pollfd pfd = {0};
+  struct pollfd pfd = {0,0,0};
   pfd.events = event_handler->events();
   pfd.fd = event_handler->fd();
   pollfds_.push_back(pfd);
@@ -49,7 +49,7 @@ void PollPoller::RemoveEventHandler(EventHandler *event_handler)
 void PollPoller::PollOnce(int timeout,std::vector<EventHandler*>& fired_handler)
 {
   polling_ = true;
-  int num = ::poll(&*pollfds_.begin(), pollfds_.size(), 0);
+  int num = ::poll(&*pollfds_.begin(), pollfds_.size(), timeout);
   for(int i = 0; i < num; ++i)
   {
     const struct pollfd& e = pollfds_[i];

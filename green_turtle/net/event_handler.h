@@ -71,7 +71,10 @@ class EventHandler : green_turtle::NonCopyable
   virtual int OnRead()            = 0;
   virtual int OnWrite()           = 0;
   virtual int OnError()           = 0;
-  virtual void OnAddedIntoEventLoop(EventLoop *loop) {}
+  virtual void OnAddedIntoEventLoop(EventLoop *loop)
+  {
+    (void)loop;
+  }
  private:
   int fd_;
   int events_;    //request events

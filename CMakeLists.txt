@@ -14,6 +14,7 @@ ENDIF()
 SET(CXX_FLAGS
     -g
     -Wall
+    -Wextra
     -Werror
     -std=c++11
     -stdlib=libc++

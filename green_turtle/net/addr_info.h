@@ -33,6 +33,7 @@
 #define __ADDR_INFO__
 #include <assert.h>
 #include <string>
+#include <string.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
@@ -43,7 +44,7 @@ struct AddrInfo
 {
   AddrInfo()
   {
-    addr_ = {0};
+    memset(&addr_, 0, sizeof(addr_));
     addr_port_ = 0;
   }
   AddrInfo(const char *ip, const unsigned short port) : addr_str_(ip), addr_port_(port)
