@@ -7,13 +7,27 @@ INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/green_turtle)
 
 #LINK_DIRECTORIES(${CMAKE_SOURCE_DIR}/lib)
 
-if(NOT CMAKE_BUILD_TYPE)
-    set(CMAKE_BUILD_TYPE "Debug")
-endif()
+IF(NOT CMAKE_BUILD_TYPE)
+    SET(CMAKE_BUILD_TYPE "Debug")
+ENDIF()
 
-set(CMAKE_CXX_COMPILER "clang++")
-set(CMAKE_CXX_FLAGS_DEBUG   "-g -Wall -Werror -std=c++11 -stdlib=libc++ -DDEBUG -D_DEBUG -O0 -fomit-frame-pointer -fstack-protector-all")
-set(CMAKE_CXX_FLAGS_RELEASE "-g -Wall -Werror -std=c++11 -stdlib=libc++ -DNDEBUG -O2 -fomit-frame-pointer -fstack-protector-all")
+SET(CXX_FLAGS
+    -g
+    -Wall
+    -Werror
+    -std=c++11
+    -stdlib=libc++
+    -fomit-frame-pointer
+    -fstack-protector-all
+    -fno-rtti
+    -fno-exceptions
+    )
+STRING(REPLACE ";" " " CMAKE_CXX_FLAGS "${CXX_FLAGS}")
+MESSAGE(STATUS "cxx flags : " "${CMAKE_CXX_FLAGS}")
+
+SET(CMAKE_CXX_COMPILER "clang++")
+SET(CMAKE_CXX_FLAGS_DEBUG   "-DDEBUG -D_DEBUG -O0")
+SET(CMAKE_CXX_FLAGS_RELEASE "-DNDEBUG -O2")
 
 ADD_SUBDIRECTORY(green_turtle)
 #ADD_SUBDIRECTORY(test)
