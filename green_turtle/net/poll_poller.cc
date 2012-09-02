@@ -23,8 +23,6 @@ void PollPoller::AddEventHandler(EventHandler *event_handler)
   assert(!polling_);
   this->SetEventHandler(event_handler->fd(), event_handler);
 
-  //TODO:egmkang
-  //check multi add problem
   struct pollfd pfd = {0};
   pfd.events = event_handler->events();
   pfd.fd = event_handler->fd();

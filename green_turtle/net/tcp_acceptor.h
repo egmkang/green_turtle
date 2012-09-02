@@ -20,16 +20,18 @@ class TcpAcceptor : public EventHandler
     TcpAcceptor(const AddrInfo& addr, int rev_buf = kAcceptorWindowRecvSize, int snd_buf = kAcceptorWindowSendSize);
     virtual ~TcpAcceptor();
   public:
+    bool Listen();
+  protected:
     virtual int OnRead();
     virtual int OnWrite();
     virtual int OnError();
     virtual void OnAddedIntoEventLoop(EventLoop *loop);
-  public:
-    bool Listen();
+    virtual EventHandler* CreateNewHandler(const AddrInfo& info, int fd) = 0; //EventHandler factory
   private:
-    int Accept();
-    AddrInfo *addr_;
+    int Accept(AddrInfo& info);
+    AddrInfo                *addr_;
     std::vector<EventLoop*> loops_;
+    int                     idx_; //load balance,not thread safe,so what!
 };
 
 }

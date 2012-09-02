@@ -99,8 +99,8 @@ int SocketOption::Accept(int fd, struct sockaddr_in* addr)
 {
   socklen_t salen = sizeof(*addr);
   int accept_fd = ::accept(fd, reinterpret_cast<struct sockaddr*>(addr), &salen);
-  //TODO:egmkang
-  //process -1
+  if(accept_fd == -1 && errno == EAGAIN)
+    accept_fd = 0;
   return accept_fd;
 }
 int SocketOption::Write(int fd, const void *data, size_t len)

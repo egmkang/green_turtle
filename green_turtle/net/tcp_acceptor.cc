@@ -4,6 +4,7 @@
 #include "socket_option.h"
 #include "tcp_acceptor.h"
 #include "event_loop.h"
+#include "buffered_socket.h"
 
 using namespace green_turtle;
 using namespace green_turtle::net;
@@ -36,31 +37,30 @@ bool TcpAcceptor::Listen()
   return ret != -1;
 }
 
-int TcpAcceptor::Accept()
+int TcpAcceptor::Accept(AddrInfo& info)
 {
   struct sockaddr_in addr;
   int new_fd = SocketOption::Accept(this->fd(), &addr);
-  if(new_fd >= 0)
+  if(new_fd > 0)
   {
     SocketOption::SetNoBlock(new_fd);
   }
 
-  AddrInfo info(addr);
-  (void)info.sockaddr();
+  AddrInfo fd_info(addr);
+  info = fd_info;
 
-  //TODO:egmkang
-  //TcpTask
   return new_fd;
 }
 
 int TcpAcceptor::OnRead()
 {
-  int new_fd = Accept();
-  if(new_fd == -1)
+  AddrInfo info;
+  int new_fd = Accept(info);
+  if(new_fd <= 0)
     return new_fd;
-  //TODO:egmkang
-  //Add new task to poller
-  //this->event_loop()->AddEventHandler(<#green_turtle::net::EventHandler *pEventHandler#>);
+  EventHandler *new_handler = CreateNewHandler(info, new_fd);
+  new_handler->set_events(kEventReadable | kEventWriteable);
+  this->loops_[idx_++]->AddEventHandler(new_handler);
   return kOK;
 }
 

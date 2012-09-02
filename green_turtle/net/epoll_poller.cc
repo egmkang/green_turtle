@@ -31,7 +31,6 @@ void EpollPoller::AddEventHandler(EventHandler *event_handler)
   }
   if(Epoll_Ctl(epollfd_, EPOLL_CTL_ADD, event_handler->fd(), event_handler->events()) < 0)
   {
-    //TODO:egmkang
     this->SetEventHandler(event_handler->fd(), nullptr);
   }
 }
@@ -41,7 +40,6 @@ void EpollPoller::RemoveEventHandler(EventHandler *event_handler)
   this->SetEventHandler(event_handler->fd(), nullptr);
   if(Epoll_Ctl(epollfd_, EPOLL_CTL_DEL, event_handler->fd(), event_handler->events()) < 0)
   {
-      //TODO:egmkang
   }
 }
 
