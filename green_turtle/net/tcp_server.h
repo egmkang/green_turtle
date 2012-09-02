@@ -30,6 +30,9 @@ class TcpServer : green_turtle::NonCopyable {
   //unregister a timer
   void CancelTimer(Timer *timer_ptr);
  private:
+  void InitEventLoop();
+  void InitThreads();
+ private:
   std::vector<EventLoop*>   loops_;
   std::vector<std::thread*> threads_;
   std::vector<std::pair<EventHandler*, int>>  handler_mark_;

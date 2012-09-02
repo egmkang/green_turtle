@@ -69,7 +69,7 @@ void TcpServer::CancelTimer(Timer *timer_ptr)
   this->timer_queue_->CancelTimer(timer_ptr);
 }
 
-void TcpServer::Run()
+void TcpServer::InitEventLoop()
 {
   int event_handler_size_per_thread = (expected_size_ + thread_count_ - 1)   / thread_count_;
   for(int idx = 0; idx < thread_count_; ++idx)
@@ -88,11 +88,21 @@ void TcpServer::Run()
       }
     }
   }
+}
+
+void TcpServer::InitThreads()
+{
   for(int i = 0; i < thread_count_; ++i)
   {
     std::thread *thrd = new std::thread(std::bind(&EventLoop::Loop,this->loops_[i]));
     this->threads_.push_back(thrd);
   }
+}
+
+void TcpServer::Run()
+{
+  InitEventLoop();
+  InitThreads();
   while(!is_terminal_)
   {
     SysTime::Update();
