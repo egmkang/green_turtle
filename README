@@ -8,8 +8,8 @@ TODO:
 2) socket send/recv buffer queue(not test)
 3) acceptor(not test)
 4) message queue
-4.1) 1:1 message queue(try lock free)
-4.2) n:1 message queue(try lock free)
+4.1) 1:1 message queue(done)
+4.2) n:1 message queue(use 1:1 message queue)
 4) timer(done)
 3) writing some samples
 3. util
