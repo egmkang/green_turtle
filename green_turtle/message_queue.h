@@ -21,7 +21,6 @@ class MessageQueue : NonCopyable
     , array_(new T[size]())
     , read_idx_(0)
     , write_idx_(0)
-    , index_mark_(size - 1)
   {
     assert(size >= 2);
     assert(!(size & (size - 1)) && " size must be 2^n");
@@ -37,10 +36,14 @@ class MessageQueue : NonCopyable
   {
     size_t const current = write_idx_.load(std::memory_order_relaxed);
     size_t next = current + 1;
+    if(next == size_)
+    {
+      next = 0;
+    }
 
     if (next != read_idx_.load(std::memory_order_acquire))
     {
-      array_[current & index_mark_] = v;
+      array_[current] = v;
       write_idx_.store(next, std::memory_order_release);
       return true;
     }
@@ -59,7 +62,11 @@ class MessageQueue : NonCopyable
     }
 
     auto next = current + 1;
-    v = array_[current & index_mark_];
+    if(next == size_)
+    {
+      next = 0;
+    }
+    v = array_[current];
     read_idx_.store(next, std::memory_order_release);
     return true;
   }
@@ -92,7 +99,6 @@ private:
   std::atomic<size_t> read_idx_;
   std::atomic<size_t> write_idx_;
   const size_t        size_;
-  const size_t        index_mark_;
   value_type          *array_;
 };
 
