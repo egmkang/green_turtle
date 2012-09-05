@@ -173,7 +173,7 @@ class hash_map
   }
   //bool (const value_type&);
   template<class Fn>
-  void for_each(Fn& f) const
+  void for_each(Fn f) const
   {
     if(empty()) return;
     for(size_t idx = 0; idx < capacity_; ++idx)

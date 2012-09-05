@@ -23,7 +23,6 @@ class MessageQueue : NonCopyable
     , array_(new T[size]())
   {
     assert(size >= 2);
-    assert(!(size & (size - 1)) && " size must be 2^n");
     assert(array_);
   }
 
@@ -48,20 +47,18 @@ class MessageQueue : NonCopyable
       return true;
     }
 
-    // queue is full
     return false;
   }
 
   bool Pop(value_type& v)
   {
-    auto const current = read_idx_.load(std::memory_order_relaxed);
+    size_t const current = read_idx_.load(std::memory_order_relaxed);
     if (current == write_idx_.load(std::memory_order_acquire))
     {
-      // queue is empty
       return false;
     }
 
-    auto next = current + 1;
+    size_t next = current + 1;
     if(next == size_)
     {
       next = 0;
