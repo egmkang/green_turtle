@@ -7,8 +7,6 @@
 
 namespace green_turtle{
 
-struct Mutex;
-
 template<class T>
 class RingBuffer;
 

@@ -23,9 +23,7 @@ int SocketOption::SetNoDelay(int fd)
 {
   int yes = 1, ret = 0;
   ret = setsockopt(fd, IPPROTO_TCP, TCP_NODELAY, &yes, sizeof(yes));
-#ifdef DEBUG
   assert(ret != -1);
-#endif
   return ret;
 }
 int SocketOption::SetNoBlock(int fd)
@@ -33,15 +31,11 @@ int SocketOption::SetNoBlock(int fd)
   int flags = 0;
   int ret = 0;
   flags = fcntl(fd, F_GETFL);
-#ifdef DEBUG
   assert(flags != -1);
-#endif
   if(flags == -1)
     return flags;
   ret = fcntl(fd, F_SETFL, flags | O_NONBLOCK);
-#ifdef DEBUG
   assert(ret != -1);
-#endif
   return ret;
 }
 int SocketOption::GetSendBuffer(int fd)
@@ -49,6 +43,7 @@ int SocketOption::GetSendBuffer(int fd)
   socklen_t buff_szie = 0;
   int optname = 0;
   int ret = getsockopt(fd, SOL_SOCKET, SO_SNDBUF, &optname , &buff_szie);
+  (void)ret;
   assert(ret != -1);
   assert(!buff_szie);
   return buff_szie > 0 ? buff_szie : 0;
@@ -59,6 +54,7 @@ int SocketOption::GetRecvBuffer(int fd)
   socklen_t buff_szie = 0;
   int optname = 0;
   int ret = getsockopt(fd, SOL_SOCKET, SO_RCVBUF, &optname, &buff_szie);
+  (void)ret;
   assert(ret != -1);
   assert(!buff_szie);
   return buff_szie > 0 ? buff_szie : 0;
@@ -67,17 +63,14 @@ int SocketOption::GetRecvBuffer(int fd)
 int SocketOption::SetSendBuffer(int fd, int size)
 {
   int ret = setsockopt(fd, SOL_SOCKET, SO_SNDBUF, &size, sizeof(size));
-#ifdef DEBUG
+  (void)ret;
   assert(ret != -1);
-#endif
   return ret;
 }
 int SocketOption::SetRecvBuffer(int fd, int size)
 {
   int ret = setsockopt(fd, SOL_SOCKET, SO_RCVBUF, &size, sizeof(size));
-#ifdef DEBUG
   assert(ret != -1);
-#endif
   return ret;
 }
 int SocketOption::Listen(int fd, const struct sockaddr* addr, int len)

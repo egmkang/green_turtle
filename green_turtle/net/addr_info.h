@@ -56,8 +56,8 @@ struct AddrInfo
   }
   AddrInfo(const sockaddr_in& addr_) : addr_(addr_)
   {
-    addr_port_ = ::ntohs(addr_.sin_port);
-    addr_str_ = ::inet_ntoa(addr_.sin_addr);
+    addr_port_ = ntohs(addr_.sin_port);
+    addr_str_ = inet_ntoa(addr_.sin_addr);
   }
   const struct sockaddr* sockaddr() const
   {
