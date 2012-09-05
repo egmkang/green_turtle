@@ -17,10 +17,10 @@ class MessageQueue : NonCopyable
   typedef T value_type;
  public:
   MessageQueue(size_t size = 128*1024)
-    : size_(size)
-    , array_(new T[size]())
-    , read_idx_(0)
+    : read_idx_(0)
     , write_idx_(0)
+    , size_(size)
+    , array_(new T[size]())
   {
     assert(size >= 2);
     assert(!(size & (size - 1)) && " size must be 2^n");
@@ -70,31 +70,6 @@ class MessageQueue : NonCopyable
     read_idx_.store(next, std::memory_order_release);
     return true;
   }
-
-  //not thread safe
-  bool Empty() const
-  {
-    size_t write = write_idx_.load(std::memory_order_relaxed);
-    size_t read = read_idx_.load(std::memory_order_relaxed);
-    return write == read;
-  }
-
-  //not thread safe
-  bool Full() const
-  {
-    size_t write = write_idx_.load(std::memory_order_relaxed);
-    size_t read = read_idx_.load(std::memory_order_relaxed);
-    return (write - read) == size_;
-  }
-
-  //not thread safe
-  size_t Size() const
-  {
-    size_t write = write_idx_.load(std::memory_order_relaxed);
-    size_t read = read_idx_.load(std::memory_order_relaxed);
-    return write - read;
-  }
-
 private:
   std::atomic<size_t> read_idx_;
   std::atomic<size_t> write_idx_;
