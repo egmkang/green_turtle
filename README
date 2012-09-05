@@ -6,6 +6,7 @@ TODO:
 2. network
 1) reactor(almost done)
 2) socket send/recv buffer queue(not test)
+   send message abstraction
 3) acceptor(not test)
 4) message queue
 4.1) 1:1 message queue(done)
@@ -14,3 +15,5 @@ TODO:
 3) writing some samples
 3. util
 1) RefObject and RefPtr<T>(Done)
+2) pthread_setaffinity_np
+3) get cpu count
