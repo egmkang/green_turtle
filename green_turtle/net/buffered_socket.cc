@@ -17,7 +17,6 @@ BufferedSocket::BufferedSocket(int fd,const AddrInfo& addr)
 
 BufferedSocket::~BufferedSocket()
 {
-  delete addr_;
   for(auto p : snd_queue_)
   {
     delete p;
