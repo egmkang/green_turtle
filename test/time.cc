@@ -2,7 +2,7 @@
 #include <stdint.h>
 #include <iostream>
 
-using namespace green_turtle::util;
+using namespace green_turtle;
 
 int main()
 {

@@ -1,7 +1,7 @@
 #include <ref_object.h>
 #include <stdio.h>
 
-using namespace green_turtle::util;
+using namespace green_turtle;
 
 class ObjA : public RefObject
 {

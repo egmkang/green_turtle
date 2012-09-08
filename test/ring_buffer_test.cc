@@ -4,7 +4,7 @@
 #include <stdio.h>
 
 
-using namespace green_turtle::collections;
+using namespace green_turtle;
 
 int main()
 {
@@ -17,21 +17,18 @@ int main()
     buffer.Write(message_in,strlen(message_in));
     memset(message_out,0,sizeof(message_out));
     buffer.Read(&message_out[0], sizeof(message_out));
-    printf(message_out);
-    printf("\n");
+    printf("%s\n",message_out);
   }
   buffer.Write(message_in,strlen(message_in));
   memset(message_out,0,sizeof(message_out));
   buffer.Reset();
   buffer.Read(&message_out[0], sizeof(message_out));
-  printf(message_out);
-  printf("\n");
+  printf("%s\n",message_out);
   buffer.Write(message_in,strlen(message_in));
   memset(message_out,0,sizeof(message_out));
   buffer.Reset();
   buffer.Read(&message_out[0], sizeof(message_out));
-  printf(message_out);
-  printf("\n");
+  printf("%s\n",message_out);
 
   return 0;
 }

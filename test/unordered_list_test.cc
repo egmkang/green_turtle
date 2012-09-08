@@ -3,13 +3,13 @@
 #include <stdint.h>
 #include <iostream>
 
-using namespace green_turtle::collections;
+using namespace green_turtle;
 
 struct for_each_list
 {
   bool operator ()(uint32_t &v,size_t idx)
   {
-    std::cout << v << std::endl;
+    std::cout << v << ", " << idx << std::endl;
     return true;
   }
 };

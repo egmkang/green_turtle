@@ -4,8 +4,8 @@
 #include <iostream>
 #include <unistd.h>
 
-using namespace green_turtle::util;
-using namespace green_turtle::network;
+using namespace green_turtle;
+using namespace green_turtle::net;
 
 class TestTimer:public Timer
 {
@@ -16,6 +16,7 @@ class TestTimer:public Timer
  protected:
   void OnTimeOut(uint64_t current_time)
   {
+    (void)current_time;
     count_++;
     std::cout << this->GetInterval() 
         << "ms , count " << count_
