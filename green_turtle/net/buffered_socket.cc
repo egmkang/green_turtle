@@ -2,6 +2,7 @@
 #include <ring_buffer.h>
 #include "addr_info.h"
 #include "socket_option.h"
+#include "event_loop.h"
 
 using namespace green_turtle;
 using namespace green_turtle::net;
@@ -35,13 +36,42 @@ int BufferedSocket::OnRead()
   if(nread < 0)
     return kErr;
   rcv_buffer_->SkipWrite(nread);
-  ProcessData(*rcv_buffer_);
+  ProcessInputData(*rcv_buffer_);
   return kOK;
+}
+
+BufferedSocket::CacheLine* BufferedSocket::GetNewCacheLine()
+{
+  CacheLine *cache = snd_queue_.back();
+  if(!cache || !cache->GetTailSpace())
+  {
+    cache = new CacheLine(cache_line_size_);
+    snd_queue_.push_back(cache);
+  }
+  return cache;
 }
 
 int BufferedSocket::OnWrite()
 {
-  std::lock_guard<std::mutex> lock(this->write_lock_);
+  std::deque<RawData> send_raw_message_queue;
+  {
+    std::lock_guard<std::mutex> lock(this->write_lock_);
+    send_raw_message_queue.swap(this->snd_raw_data_queue);
+  }
+  //use process here
+  for(auto pair : send_raw_message_queue)
+  {
+    const void    *data = pair.first;
+    unsigned int  len = pair.second;
+    this->ProcessOutputMessage(data, len);
+    //size_t sent = 0;
+    //while(len)
+    //{
+    //  CacheLine *cache = GetNewCacheLine();
+    //  sent += cache->Write(reinterpret_cast<const unsigned char*>(data) + sent, len - sent);
+    //}
+  }
+
   int ret = 0;
   while(ret > 0)
   {
@@ -49,10 +79,8 @@ int BufferedSocket::OnWrite()
     {
       CacheLine *cache = snd_queue_.front();
       int send_size = SocketOption::Write(fd(), cache->GetBegin(), cache->GetSize());
-      if(send_size < 0)
-        return kErr;
-      if(!send_size)
-        return kOK;
+      if(send_size < 0)   return kErr;
+      else if(!send_size) return kOK;
       cache->SkipRead(send_size);
       if(!cache->GetSize())
       {
@@ -66,24 +94,13 @@ int BufferedSocket::OnWrite()
 
 int BufferedSocket::OnError()
 {
-  //TODO:egmkang
-  //remove this from event loop
-  //and tell someone to dispose this
+  this->event_loop()->RemoveEventHandler(this); 
+  this->ProcessDeleteSelf();
   return -1;
 }
 
 void BufferedSocket::SendMessage(const void *data, size_t len)
 {
   std::lock_guard<std::mutex> lock(this->write_lock_);
-  size_t sent = 0;
-  while(len)
-  {
-    CacheLine *cache = snd_queue_.back();
-    if(!cache || !cache->GetTailSpace())
-    {
-      cache = new CacheLine(cache_line_size_);
-      snd_queue_.push_back(cache);
-    }
-    sent += cache->Write(reinterpret_cast<const unsigned char*>(data) + sent, len - sent);
-  }
+  this->snd_raw_data_queue.push_back({data,len});
 }
