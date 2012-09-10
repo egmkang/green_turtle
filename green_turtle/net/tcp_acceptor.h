@@ -26,7 +26,7 @@ class TcpAcceptor : public EventHandler
     virtual int OnWrite();
     virtual int OnError();
     virtual void OnAddedIntoEventLoop(EventLoop *loop);
-    virtual EventHandler* CreateNewHandler(const AddrInfo& info, int fd) = 0; //EventHandler factory
+    EventHandler* CreateNewHandler(const AddrInfo& info, int fd);
   private:
     int Accept(AddrInfo& info);
     AddrInfo                *addr_;

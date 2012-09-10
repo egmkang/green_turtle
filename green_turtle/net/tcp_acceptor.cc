@@ -5,6 +5,7 @@
 #include "tcp_acceptor.h"
 #include "event_loop.h"
 #include "buffered_socket.h"
+#include "event_handler_factory.h"
 
 using namespace green_turtle;
 using namespace green_turtle::net;
@@ -85,3 +86,7 @@ void TcpAcceptor::OnAddedIntoEventLoop(EventLoop *loop)
     loops_.push_back(loop);
 }
 
+EventHandler* TcpAcceptor::CreateNewHandler(const AddrInfo& info, int fd)
+{
+  return EventHandlerFactory::Instance().NewEventHandler(this, info, fd);
+}
