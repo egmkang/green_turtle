@@ -1,3 +1,4 @@
+#include <assert.h>
 #include "event_handler_factory.h"
 
 using namespace green_turtle;

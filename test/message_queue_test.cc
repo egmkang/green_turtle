@@ -19,7 +19,7 @@ void producer()
 {
   for(int i = 0; i < MAX_TIMES; ++i)
   {
-    int *ptr = new int[rand()%200 + 10];
+    int *ptr = (int*)malloc(sizeof(int) * (rand()%200 + 10));
     int value = write_++;
     ptr[0] = value;
     while(!queue.Push(ptr))
@@ -49,7 +49,7 @@ int main()
     int value = read_++;
     if(ptr[0] != value)
       assert(false);
-    delete[] ptr;
+    free(ptr);
     ++i;
   }
   thrd.join();

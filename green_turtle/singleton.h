@@ -56,7 +56,7 @@ class Singleton : NonCopyable
 
 };
 template<class T>
-T* Singleton<T>::value_ = NULL;
+T* Singleton<T>::value_ = nullptr;
 
 }
 

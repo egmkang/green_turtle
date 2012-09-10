@@ -26,4 +26,6 @@ SOURCE_GROUP("net"      FILES ${GREEN_TURTLE_NET})
 
 ADD_LIBRARY(green_turtle STATIC
     ${GREEN_TURTLE}
-    ${GREEN_TURTLE_NET})
+    ${GREEN_TURTLE_NET}
+    )
+TARGET_LINK_LIBRARIES(green_turtle jemalloc)

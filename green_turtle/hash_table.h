@@ -219,7 +219,7 @@ class hash_map
       else if(equaler_(key,buckets_[begin_].first))
         return &buckets_[begin_];
 
-      begin_ = (++begin_) &  mark_;
+      begin_ = (begin_ + 1) &  mark_;
       assert(times_++ <= capacity_);
     }
     return NULL;
