@@ -1,4 +1,4 @@
-#include <systime.h>
+#include <system.h>
 #include <stdint.h>
 #include <iostream>
 
@@ -6,8 +6,8 @@ using namespace green_turtle;
 
 int main()
 {
-  SysTime::Update();
-  std::cout << SysTime::GetSeconds() << std::endl;
-  std::cout << SysTime::GetMilliSeconds() << std::endl;
+  System::UpdateTime();
+  std::cout << System::GetSeconds() << std::endl;
+  std::cout << System::GetMilliSeconds() << std::endl;
   return 0;
 }

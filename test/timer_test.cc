@@ -1,6 +1,6 @@
 #include <net/timer.h>
 #include <net/timer_queue.h>
-#include <systime.h>
+#include <system.h>
 #include <iostream>
 #include <unistd.h>
 
@@ -20,10 +20,10 @@ class TestTimer:public Timer
     count_++;
     std::cout << this->GetInterval() 
         << "ms , count " << count_
-        << " , Diff Time :  " << SysTime::GetMilliSeconds()-begin_time_ 
+        << " , Diff Time :  " << System::GetMilliSeconds()-begin_time_ 
         << std::endl;
 
-    begin_time_ = SysTime::GetMilliSeconds();
+    begin_time_ = System::GetMilliSeconds();
   }
  public:
   uint64_t begin_time_;
@@ -32,8 +32,8 @@ class TestTimer:public Timer
 
 int main()
 {
-  SysTime::Update();
-  uint64_t current_time = SysTime::GetMilliSeconds();
+  System::UpdateTime();
+  uint64_t current_time = System::GetMilliSeconds();
 
   TimerQueue queue(16,8);
   queue.Update(current_time);
@@ -48,12 +48,12 @@ int main()
 
   for(size_t idx = 0; idx < 100; ++idx)
   {
-    SysTime::Update();
-    uint64_t current_time = SysTime::GetMilliSeconds();
+    System::UpdateTime();
+    uint64_t current_time = System::GetMilliSeconds();
     queue.Update(current_time);
     ::usleep(4000);
   }
-  uint64_t diff_time = SysTime::GetMilliSeconds() - current_time;
+  uint64_t diff_time = System::GetMilliSeconds() - current_time;
 
   std::cout << diff_time << std::endl;
 

@@ -18,6 +18,7 @@ class EventLoop : NonCopyable
   void AddEventHandler(EventHandler *pEventHandler);
   void RemoveEventHandler(EventHandler *pEventHandler);
   void Loop();
+  static void SetFrameTime(int milliSeconds);
  private:
   Poller  *poller_;
   bool    terminal_;

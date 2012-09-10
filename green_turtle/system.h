@@ -38,20 +38,24 @@
 
 namespace green_turtle{
 
-//static functions to get systime time
-//the impl is for single thread application(!!!)
-class SysTime{
+//not thread safe, for inexact usage
+class System{
  public:
   //update the static data
-  static void       Update();
+  static void       UpdateTime();
   static time_t     GetSeconds();
   static uint64_t   GetMilliSeconds();
+
   //local time
   static const tm&  GetTime();
+
   //if s1 and s2 is the same day,than return 0
   //else return s2.days - s1.days
   //days are defined in local time
   static int        GetSecondsDiffDays(time_t s1,time_t s2);
+
+  //sleep for a while
+  static void     Yield(uint64_t milliSeconds);
 };
 
 };

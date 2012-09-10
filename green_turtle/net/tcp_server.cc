@@ -6,7 +6,7 @@
 #include "tcp_client.h"
 #include "timer.h"
 #include "timer_queue.h"
-#include <systime.h>
+#include <system.h>
 
 using namespace green_turtle;
 using namespace green_turtle::net;
@@ -105,18 +105,18 @@ void TcpServer::Run()
   InitThreads();
   while(!is_terminal_)
   {
-    SysTime::Update();
-    size_t message_begin = SysTime::GetMilliSeconds();
+    System::UpdateTime();
+    size_t message_begin = System::GetMilliSeconds();
 
     //process message
     //or something
 
-    SysTime::Update();
-    size_t timer_begin = SysTime::GetMilliSeconds();
+    System::UpdateTime();
+    size_t timer_begin = System::GetMilliSeconds();
     this->timer_queue_->Update(timer_begin);
 
-    SysTime::Update();
-    size_t process_end = SysTime::GetMilliSeconds();
+    System::UpdateTime();
+    size_t process_end = System::GetMilliSeconds();
     //time cost
     size_t cost = process_end - message_begin;
     if(cost)
