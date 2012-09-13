@@ -37,10 +37,16 @@
 namespace green_turtle{
 namespace net{
 
+enum
+{
+  kTcpClientRecvWindowSize  = 128*1024,
+  kTcpClientSendWindowSize  = 128*1024,
+};
+
 class TcpClient : public BufferedSocket
 {
  public:
-  TcpClient(const std::string& ip,unsigned short port);
+  TcpClient(const std::string& ip, unsigned short port, int recvWindowSize = kTcpClientRecvWindowSize, int sendWindowSize = kTcpClientSendWindowSize);
   ~TcpClient();
   int Connect();
  protected:

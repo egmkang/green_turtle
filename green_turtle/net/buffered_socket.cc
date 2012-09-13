@@ -1,5 +1,5 @@
+#include <constructor_in_place.h>
 #include "buffered_socket.h"
-#include <ring_buffer.h>
 #include "addr_info.h"
 #include "socket_option.h"
 #include "event_loop.h"
@@ -7,13 +7,23 @@
 using namespace green_turtle;
 using namespace green_turtle::net;
 
-BufferedSocket::BufferedSocket(int fd,const AddrInfo& addr)
+BufferedSocket::BufferedSocket(int fd,const AddrInfo& addr, int recv_buff, int send_buff)
   : EventHandler(fd)
     , addr_(addr)
-    , cache_line_size_(SocketOption::GetRecvBuffer(fd)/4)
-    , rcv_buffer_(SocketOption::GetSendBuffer(fd))
+    , cache_line_size_(SocketOption::GetSendBuffer(fd)/4)
+    , rcv_buffer_(nullptr)
     , write_lock_()
 {
+  if(recv_buff)
+  {
+    SocketOption::SetRecvBuffer(fd, recv_buff);
+  }
+  rcv_buffer_ = new CacheLine(SocketOption::GetRecvBuffer(fd));
+  if(send_buff)
+  {
+    SocketOption::SetSendBuffer(fd, send_buff);
+    constructor(const_cast<size_t*>(&cache_line_size_), send_buff/4);
+  }
 }
 
 BufferedSocket::~BufferedSocket()
@@ -23,6 +33,7 @@ BufferedSocket::~BufferedSocket()
     delete p;
   }
   snd_queue_.clear();
+  delete rcv_buffer_;
 }
 const AddrInfo& BufferedSocket::addr() const
 {
@@ -31,13 +42,13 @@ const AddrInfo& BufferedSocket::addr() const
 
 int BufferedSocket::OnRead()
 {
-  rcv_buffer_.Reset();
-  int nread = SocketOption::Read(fd(), rcv_buffer_.GetEnd(), rcv_buffer_.GetTailSpace());
+  rcv_buffer_->Reset();
+  int nread = SocketOption::Read(fd(), rcv_buffer_->GetEnd(), rcv_buffer_->GetTailSpace());
   if(nread < 0)
     return kErr;
   if(nread)
-    rcv_buffer_.SkipWrite(nread);
-  ProcessInputData(rcv_buffer_);
+    rcv_buffer_->SkipWrite(nread);
+  ProcessInputData(*rcv_buffer_);
   return kOK;
 }
 

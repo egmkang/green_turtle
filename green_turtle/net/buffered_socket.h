@@ -47,7 +47,7 @@ class BufferedSocket : public EventHandler
  public:
   typedef green_turtle::RingBuffer<unsigned char> CacheLine;
  public:
-  BufferedSocket(int fd,const AddrInfo& addr);
+  BufferedSocket(int fd,const AddrInfo& addr, int recv_buff = 0, int send_buff = 0);
   ~BufferedSocket();
   //data must in heap,cannot be an object on stack
   void SendMessage(const void *data, size_t len);
@@ -66,7 +66,7 @@ class BufferedSocket : public EventHandler
   const size_t                cache_line_size_;
   std::deque<CacheLine*>      snd_queue_;
   std::deque<RawData>         snd_raw_data_queue;
-  CacheLine                   rcv_buffer_;
+  CacheLine                   *rcv_buffer_;
   std::mutex                  write_lock_;
 };
 

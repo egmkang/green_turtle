@@ -16,19 +16,17 @@ SET(CXX_FLAGS
     -Wall
     -Wextra
     -Werror
-    -std=c++0x
-    #-std=c++11
-    #-stdlib=libc++
+    -std=c++11
+    -stdlib=libc++
     -fomit-frame-pointer
     -fstack-protector-all
     -fno-rtti
     -fno-exceptions
-    -rdynamic
     )
 STRING(REPLACE ";" " " CMAKE_CXX_FLAGS "${CXX_FLAGS}")
 MESSAGE(STATUS "cxx flags : " "${CMAKE_CXX_FLAGS}")
 
-#SET(CMAKE_CXX_COMPILER "clang++")
+SET(CMAKE_CXX_COMPILER "clang++")
 SET(CMAKE_CXX_FLAGS_DEBUG   "-DDEBUG -D_DEBUG -O0")
 SET(CMAKE_CXX_FLAGS_RELEASE "-DNDEBUG -O2")
 

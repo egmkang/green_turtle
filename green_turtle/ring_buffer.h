@@ -39,6 +39,19 @@
 
 namespace green_turtle{
 
+namespace details{
+inline unsigned int nextpow2(unsigned int x)
+{
+  --x;
+  x |= x >> 1;
+  x |= x >> 2;
+  x |= x >> 4;
+  x |= x >> 8;
+  x |= x >> 16;
+  return x+1;
+}
+}
+
 template<class T>
 class RingBuffer : NonCopyable{
  public:
@@ -68,7 +81,7 @@ RingBuffer<T>::RingBuffer(size_t buffer_size_):
   ,index_mark_(0)
 {
   assert(buffer_size_);
-  assert(!(buffer_size_ & (buffer_size_-1)));
+  buffer_size_ = details::nextpow2(buffer_size_);
   index_mark_ = buffer_size_ - 1;
   array_ = new  T[buffer_size_];
 }

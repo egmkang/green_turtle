@@ -26,11 +26,13 @@ class EchoTcpClient : public TcpClient
   virtual void ProcessInputData(CacheLine& data)
   {
     size_t size = data.GetSize();
-    std::cout << std::string((char*)data.GetBegin(),(char*)data.GetEnd());
-    data.SkipRead(size);
-    char *str = NewEchoString();
-    this->SendMessage(str, strlen(str));
-
+    std::cout << std::string((char*)data.GetBegin(),(char*)data.GetEnd()) << std::endl;
+    if(size)
+    {
+      data.SkipRead(size);
+      char *str = NewEchoString();
+      this->SendMessage(str, strlen(str));
+    }
   }
 
   virtual void ProcessOutputMessage(const void *data, unsigned int len)
