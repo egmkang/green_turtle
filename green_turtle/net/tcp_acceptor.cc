@@ -13,6 +13,7 @@ using namespace green_turtle::net;
 TcpAcceptor::TcpAcceptor(const char *ip, unsigned short port, int rev_buf, int snd_buf)
   :EventHandler(SocketOption::NewFD())
     ,addr_( new AddrInfo )
+    ,idx_(0)
 {
   *this->addr_ = AddrInfo(ip, port);
   SocketOption::SetNoBlock(this->fd());
@@ -61,7 +62,11 @@ int TcpAcceptor::OnRead()
     return new_fd;
   EventHandler *new_handler = CreateNewHandler(new_fd, info);
   new_handler->set_events(kEventReadable | kEventWriteable);
+
   this->loops_[idx_++]->AddEventHandler(new_handler);
+  if(idx_ >= (int)this->loops_.size())
+    idx_ = 0;
+
   return kOK;
 }
 

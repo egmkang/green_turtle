@@ -36,7 +36,7 @@ class EchoTcpClient : public TcpClient
   virtual void ProcessOutputMessage(const void *data, unsigned int len)
   {
     size_t sent = 0;
-    while(len)
+    while(len - sent)
     {
       CacheLine *cache = GetNewCacheLine();
       sent += cache->Write(reinterpret_cast<const unsigned char*>(data) +
@@ -62,7 +62,7 @@ int main()
   char *str = NewEchoString();
   client.SendMessage(str, strlen(str));
 
-  EventLoop loop(1);
+  EventLoop loop(1024);
   loop.AddEventHandler(&client);
 
   loop.Loop();

@@ -67,6 +67,7 @@ RingBuffer<T>::RingBuffer(size_t buffer_size_):
   ,read_(0)
   ,index_mark_(0)
 {
+  assert(buffer_size_);
   assert(!(buffer_size_ & (buffer_size_-1)));
   index_mark_ = buffer_size_ - 1;
   array_ = new  T[buffer_size_];

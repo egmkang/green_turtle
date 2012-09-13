@@ -15,6 +15,7 @@ static int Epoll_Ctl(int epollfd,int operation,int fd,int events);
 EpollPoller::EpollPoller():
     Poller(kInitEpollSize)
     ,epollfd_(::epoll_create(kInitEpollSize))
+    ,events_(16)
 {
 }
 
@@ -46,7 +47,7 @@ void EpollPoller::RemoveEventHandler(EventHandler *event_handler)
 
 void EpollPoller::PollOnce(int timeout,std::vector<EventHandler*>& fired_handler)
 {
-  int num = ::epoll_wait(epollfd_, &*events_.begin(), (int)events_.size(), timeout);
+  int num = ::epoll_wait(epollfd_, &events_[0], (int)events_.size(), timeout);
   for(int idx = 0; idx < num; ++idx)
   {
     const struct epoll_event& e = events_[idx];
@@ -68,6 +69,11 @@ int Epoll_Ctl(int epollfd, int operation, int fd, int events)
 {
   struct epoll_event event;
   memset(&event, 0, sizeof(event));
-  event.events = events;
-  return ::epoll_ctl(epollfd, operation, fd, &event);
+  event.data.fd = fd;
+
+  if(events & kEventReadable)   event.events |= EPOLLIN;
+  if(events & kEventWriteable)  event.events |= EPOLLOUT;
+
+  int ret = ::epoll_ctl(epollfd, operation, fd, &event);
+  return ret;
 }

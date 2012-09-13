@@ -25,7 +25,7 @@ class EchoTask : public BufferedSocket
   virtual void ProcessOutputMessage(const void *data, unsigned int len)
   {
     size_t sent = 0;
-    while(len)
+    while(len - sent)
     {
       CacheLine *cache = GetNewCacheLine();
       sent += cache->Write(reinterpret_cast<const unsigned char*>(data) +
@@ -49,7 +49,8 @@ int main()
       [](int fd, const AddrInfo& addr){
         return new EchoTask(fd, addr);
       });
-  TcpServer server(128);
+  TcpServer server(1280);
+  server.AddAcceptor(&acceptor);
   server.Run();
   return 0;
 }

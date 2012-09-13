@@ -12,6 +12,7 @@ static const int kInitKqueueSize = 16;
 KqueuePoller::KqueuePoller():
     Poller(kInitKqueueSize)
     ,kqfd_(::kqueue())
+    ,events_(16)
 {
   assert(kqfd_ != -1);
 }

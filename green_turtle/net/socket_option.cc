@@ -40,24 +40,24 @@ int SocketOption::SetNoBlock(int fd)
 }
 int SocketOption::GetSendBuffer(int fd)
 {
-  socklen_t buff_szie = 0;
+  socklen_t buff_szie = sizeof(socklen_t);
   int optname = 0;
   int ret = getsockopt(fd, SOL_SOCKET, SO_SNDBUF, &optname , &buff_szie);
   (void)ret;
   assert(ret != -1);
-  assert(!buff_szie);
-  return buff_szie > 0 ? buff_szie : 0;
+  assert(optname);
+  return optname > 0 ? optname : 0;
 }
 
 int SocketOption::GetRecvBuffer(int fd)
 {
-  socklen_t buff_szie = 0;
+  socklen_t buff_szie = sizeof(socklen_t);
   int optname = 0;
   int ret = getsockopt(fd, SOL_SOCKET, SO_RCVBUF, &optname, &buff_szie);
   (void)ret;
   assert(ret != -1);
-  assert(!buff_szie);
-  return buff_szie > 0 ? buff_szie : 0;
+  assert(optname);
+  return optname > 0 ? optname : 0;
 }
 
 int SocketOption::SetSendBuffer(int fd, int size)
@@ -99,6 +99,8 @@ int SocketOption::Accept(int fd, struct sockaddr_in* addr)
 int SocketOption::Write(int fd, const void *data, size_t len)
 {
   int nwrite = ::write(fd, data, len);
+  int error_no = errno;
+  (void)error_no;
   if(nwrite == -1 && errno == EAGAIN) nwrite = 0;
   return nwrite;
 }
@@ -106,6 +108,8 @@ int SocketOption::Write(int fd, const void *data, size_t len)
 int SocketOption::Read(int fd, void *data, const size_t len)
 {
   int nread = ::read(fd, data, len);
+  int error_no = errno;
+  (void)error_no;
   if(nread == -1 && errno == EAGAIN) nread = 0;
   return nread;
 }

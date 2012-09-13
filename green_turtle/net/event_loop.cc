@@ -24,6 +24,7 @@ EventLoop::~EventLoop()
 void EventLoop::AddEventHandler(EventHandler *pEventHandler)
 {
   poller_->AddEventHandler(pEventHandler);
+  pEventHandler->set_event_loop(this);
 }
 
 void EventLoop::RemoveEventHandler(EventHandler *pEventHandler)

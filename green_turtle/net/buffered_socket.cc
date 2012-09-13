@@ -7,9 +7,9 @@
 using namespace green_turtle;
 using namespace green_turtle::net;
 
-BufferedSocket::BufferedSocket(int fd,const AddrInfo& addr) 
+BufferedSocket::BufferedSocket(int fd,const AddrInfo& addr)
   : EventHandler(fd)
-    , addr_(new AddrInfo(addr))
+    , addr_(addr)
     , cache_line_size_(SocketOption::GetRecvBuffer(fd)/4)
     , rcv_buffer_(SocketOption::GetSendBuffer(fd))
     , write_lock_()
@@ -26,7 +26,7 @@ BufferedSocket::~BufferedSocket()
 }
 const AddrInfo& BufferedSocket::addr() const
 {
-  return *this->addr_;
+  return this->addr_;
 }
 
 int BufferedSocket::OnRead()
@@ -35,14 +35,16 @@ int BufferedSocket::OnRead()
   int nread = SocketOption::Read(fd(), rcv_buffer_.GetEnd(), rcv_buffer_.GetTailSpace());
   if(nread < 0)
     return kErr;
-  rcv_buffer_.SkipWrite(nread);
+  if(nread)
+    rcv_buffer_.SkipWrite(nread);
   ProcessInputData(rcv_buffer_);
   return kOK;
 }
 
 BufferedSocket::CacheLine* BufferedSocket::GetNewCacheLine()
 {
-  CacheLine *cache = snd_queue_.back();
+  CacheLine *cache = nullptr;
+  if(!snd_queue_.empty()) cache = snd_queue_.back();
   if(!cache || !cache->GetTailSpace())
   {
     cache = new CacheLine(cache_line_size_);
@@ -71,22 +73,19 @@ int BufferedSocket::OnWrite()
     //  sent += cache->Write(reinterpret_cast<const unsigned char*>(data) + sent, len - sent);
     //}
   }
+  send_raw_message_queue.clear();
 
-  int ret = 0;
-  while(ret > 0)
+  while(!snd_queue_.empty())
   {
-    while(!snd_queue_.empty())
+    CacheLine *cache = snd_queue_.front();
+    int send_size = SocketOption::Write(fd(), cache->GetBegin(), cache->GetSize());
+    if(send_size < 0)   return kErr;
+    else if(!send_size) return kOK;
+    cache->SkipRead(send_size);
+    if(!cache->GetSize())
     {
-      CacheLine *cache = snd_queue_.front();
-      int send_size = SocketOption::Write(fd(), cache->GetBegin(), cache->GetSize());
-      if(send_size < 0)   return kErr;
-      else if(!send_size) return kOK;
-      cache->SkipRead(send_size);
-      if(!cache->GetSize())
-      {
-        delete cache;
-        snd_queue_.pop_front();
-      }
+      delete cache;
+      snd_queue_.pop_front();
     }
   }
   return kOK;

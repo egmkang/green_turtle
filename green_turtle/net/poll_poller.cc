@@ -24,7 +24,10 @@ void PollPoller::AddEventHandler(EventHandler *event_handler)
   this->SetEventHandler(event_handler->fd(), event_handler);
 
   struct pollfd pfd = {0,0,0};
-  pfd.events = event_handler->events();
+
+  if(event_handler->events() & kEventReadable)   pfd.events |= POLLIN;
+  if(event_handler->events() & kEventWriteable)  pfd.events |= POLLOUT;
+
   pfd.fd = event_handler->fd();
   pollfds_.push_back(pfd);
 

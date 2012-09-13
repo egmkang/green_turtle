@@ -36,12 +36,11 @@
 #include <mutex>
 #include <memory>
 #include <ring_buffer.h>
+#include "addr_info.h"
 #include "event_handler.h"
 
 namespace green_turtle{
 namespace net{
-
-struct AddrInfo;
 
 class BufferedSocket : public EventHandler
 {
@@ -63,7 +62,7 @@ class BufferedSocket : public EventHandler
   virtual void ProcessDeleteSelf() = 0;
  private:
   typedef std::pair<const void*, unsigned int> RawData;
-  std::unique_ptr<AddrInfo>   addr_;
+  AddrInfo                    addr_;
   const size_t                cache_line_size_;
   std::deque<CacheLine*>      snd_queue_;
   std::deque<RawData>         snd_raw_data_queue;
