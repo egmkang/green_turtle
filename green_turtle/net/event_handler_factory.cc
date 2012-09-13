@@ -15,18 +15,18 @@ void EventHandlerFactory::RegisterDefault(FactoryFunction func)
   this->default_ = func;
 }
 
-EventHandler* EventHandlerFactory::NewEventHandler(TcpAcceptor *acceptor, const AddrInfo& addr, int fd)
+EventHandler* EventHandlerFactory::NewEventHandler(TcpAcceptor *acceptor,int fd, const AddrInfo& addr)
 {
   EventHandler *handler = nullptr;
   auto iter = map_.find(acceptor);
   if(iter != end(map_))
   {
-    handler = iter->second(addr,fd);
+    handler = iter->second(fd, addr);
   }
   else
   {
     assert(default_);
-    handler = default_(addr, fd);
+    handler = default_(fd, addr);
   }
   return handler;
 }

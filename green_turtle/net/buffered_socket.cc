@@ -11,7 +11,7 @@ BufferedSocket::BufferedSocket(int fd,const AddrInfo& addr)
   : EventHandler(fd)
     , addr_(new AddrInfo(addr))
     , cache_line_size_(SocketOption::GetRecvBuffer(fd)/4)
-    , rcv_buffer_(new CacheLine(SocketOption::GetSendBuffer(fd)))
+    , rcv_buffer_(SocketOption::GetSendBuffer(fd))
     , write_lock_()
 {
 }
@@ -31,12 +31,12 @@ const AddrInfo& BufferedSocket::addr() const
 
 int BufferedSocket::OnRead()
 {
-  rcv_buffer_->Reset();
-  int nread = SocketOption::Read(fd(), rcv_buffer_->GetEnd(), rcv_buffer_->GetTailSpace());
+  rcv_buffer_.Reset();
+  int nread = SocketOption::Read(fd(), rcv_buffer_.GetEnd(), rcv_buffer_.GetTailSpace());
   if(nread < 0)
     return kErr;
-  rcv_buffer_->SkipWrite(nread);
-  ProcessInputData(*rcv_buffer_);
+  rcv_buffer_.SkipWrite(nread);
+  ProcessInputData(rcv_buffer_);
   return kOK;
 }
 

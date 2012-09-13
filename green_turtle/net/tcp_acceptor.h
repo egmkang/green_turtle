@@ -48,7 +48,7 @@ struct AddrInfo;
 class TcpAcceptor : public EventHandler
 {
   public:
-    TcpAcceptor(const AddrInfo& addr, int rev_buf = kAcceptorWindowRecvSize, int snd_buf = kAcceptorWindowSendSize);
+    TcpAcceptor(const char *ip, unsigned short port, int rev_buf = kAcceptorWindowRecvSize, int snd_buf = kAcceptorWindowSendSize);
     virtual ~TcpAcceptor();
   public:
     bool Listen();
@@ -57,7 +57,7 @@ class TcpAcceptor : public EventHandler
     virtual int OnWrite();
     virtual int OnError();
     virtual void OnAddedIntoEventLoop(EventLoop *loop);
-    EventHandler* CreateNewHandler(const AddrInfo& info, int fd);
+    EventHandler* CreateNewHandler(int fd, const AddrInfo& info);
   private:
     int Accept(AddrInfo& info);
     AddrInfo                *addr_;

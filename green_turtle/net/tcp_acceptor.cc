@@ -10,11 +10,11 @@
 using namespace green_turtle;
 using namespace green_turtle::net;
 
-TcpAcceptor::TcpAcceptor(const AddrInfo& addr, int rev_buf, int snd_buf)
+TcpAcceptor::TcpAcceptor(const char *ip, unsigned short port, int rev_buf, int snd_buf)
   :EventHandler(SocketOption::NewFD())
     ,addr_( new AddrInfo )
 {
-  *this->addr_ = addr;
+  *this->addr_ = AddrInfo(ip, port);
   SocketOption::SetNoBlock(this->fd());
   SocketOption::SetNoDelay(this->fd());
   SocketOption::SetRecvBuffer(this->fd(), rev_buf);
@@ -59,7 +59,7 @@ int TcpAcceptor::OnRead()
   int new_fd = Accept(info);
   if(new_fd <= 0)
     return new_fd;
-  EventHandler *new_handler = CreateNewHandler(info, new_fd);
+  EventHandler *new_handler = CreateNewHandler(new_fd, info);
   new_handler->set_events(kEventReadable | kEventWriteable);
   this->loops_[idx_++]->AddEventHandler(new_handler);
   return kOK;
@@ -86,7 +86,7 @@ void TcpAcceptor::OnAddedIntoEventLoop(EventLoop *loop)
     loops_.push_back(loop);
 }
 
-EventHandler* TcpAcceptor::CreateNewHandler(const AddrInfo& info, int fd)
+EventHandler* TcpAcceptor::CreateNewHandler(int fd, const AddrInfo& info)
 {
-  return EventHandlerFactory::Instance().NewEventHandler(this, info, fd);
+  return EventHandlerFactory::Instance().NewEventHandler(this, fd, info);
 }

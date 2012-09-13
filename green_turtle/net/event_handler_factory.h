@@ -42,14 +42,14 @@ class EventHandler;
 class TcpAcceptor;
 struct AddrInfo;
 
-typedef std::function<EventHandler* (const AddrInfo&, int)> FactoryFunction;
+typedef std::function<EventHandler* (int, const AddrInfo&)> FactoryFunction;
 
 class EventHandlerFactory : public green_turtle::Singleton<EventHandlerFactory>
 {
  public:
   void Register(TcpAcceptor *acceptor,FactoryFunction func);
   void RegisterDefault(FactoryFunction func);
-  EventHandler* NewEventHandler(TcpAcceptor *acceptor, const AddrInfo& addr, int fd);
+  EventHandler* NewEventHandler(TcpAcceptor *acceptor, int fd, const AddrInfo& addr);
  private:
   FactoryFunction default_;
   std::map<TcpAcceptor*, FactoryFunction> map_;

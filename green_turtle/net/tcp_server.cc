@@ -119,8 +119,9 @@ void TcpServer::Run()
     size_t process_end = System::GetMilliSeconds();
     //time cost
     size_t cost = process_end - message_begin;
-    if(cost)
+    if(cost < 20)
     {
+      System::Yield(20 - cost);
     }
   }
   for(auto& thrd : this->threads_)

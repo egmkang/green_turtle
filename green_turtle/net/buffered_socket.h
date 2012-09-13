@@ -35,13 +35,10 @@
 #include <deque>
 #include <mutex>
 #include <memory>
+#include <ring_buffer.h>
 #include "event_handler.h"
 
 namespace green_turtle{
-
-template<class T>
-class RingBuffer;
-
 namespace net{
 
 struct AddrInfo;
@@ -61,8 +58,8 @@ class BufferedSocket : public EventHandler
   virtual int OnRead();
   virtual int OnWrite();
   virtual int OnError();
-  virtual void ProcessInputData(CacheLine& data) = 0;;
-  virtual void ProcessOutputMessage(const void *data, unsigned int len) = 0;;
+  virtual void ProcessInputData(CacheLine& data) = 0;
+  virtual void ProcessOutputMessage(const void *data, unsigned int len) = 0;
   virtual void ProcessDeleteSelf() = 0;
  private:
   typedef std::pair<const void*, unsigned int> RawData;
@@ -70,7 +67,7 @@ class BufferedSocket : public EventHandler
   const size_t                cache_line_size_;
   std::deque<CacheLine*>      snd_queue_;
   std::deque<RawData>         snd_raw_data_queue;
-  std::unique_ptr<CacheLine>  rcv_buffer_;
+  CacheLine                   rcv_buffer_;
   std::mutex                  write_lock_;
 };
 
