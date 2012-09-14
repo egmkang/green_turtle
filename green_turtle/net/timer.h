@@ -34,13 +34,14 @@
 
 #include <cstddef>
 #include <stdint.h>
+#include <noncopyable.h>
 
 namespace green_turtle{
 namespace net{
 
 class TimerQueue;
 
-class Timer
+class Timer : green_turtle::NonCopyable
 {
  public:
   friend class TimerQueue;
@@ -55,8 +56,6 @@ class Timer
  protected:
   virtual void  OnTimeOut(uint64_t current_time) = 0;
  private:
-  Timer(const Timer&) {}
-  Timer& operator = (const Timer&) { return *this;}
   //iter data here
   TimerQueue  *queue_;
   size_t      iter_slot_;

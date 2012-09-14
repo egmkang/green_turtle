@@ -6,7 +6,8 @@ using green_turtle::unordered_list;
 using namespace green_turtle::net;
 
 TimerQueue::TimerQueue(size_t slot_size,size_t interval):
-    last_update_time_(0)
+    slot_size(slot_size)
+    ,last_update_time_(0)
     ,interval_(interval)
     ,current_slot_(0)
     ,interval_exponent_(0)
@@ -14,7 +15,7 @@ TimerQueue::TimerQueue(size_t slot_size,size_t interval):
 {
   assert( ~(slot_size & (slot_size - 1)) && "Slot Size must be 2^n" );
   assert( ~(interval_ & (interval_ - 1)) && "Interval must be 2^n" );
-  queues_.resize(slot_size);
+  queues_ = new list_type[slot_size]();
   for(size_t idx = 0; idx < slot_size; ++idx)
     queues_[idx].set_deleted((Timer*)(void*)(-1l));
   for(uint64_t i = interval_; i != 1; i /= 2)
@@ -23,15 +24,21 @@ TimerQueue::TimerQueue(size_t slot_size,size_t interval):
   }
   circle_time_ = slot_size * interval_;
 }
+
+TimerQueue::~TimerQueue()
+{
+  delete[] queues_;
+}
+
 void TimerQueue::CancelTimer(Timer *timer_ptr)
 {
   if(!timer_ptr || !timer_ptr->queue_)
     return;
-  queue_type& queue = timer_ptr->queue_->queues_;
+  list_type   *queue = timer_ptr->queue_->queues_;
   size_t      slot = timer_ptr->iter_slot_;
   size_t      pos = timer_ptr->iter_pos_;
 
-  if(slot < queue.size())
+  if(slot < slot_size)
   {
     list_type& list_ = queue[slot];
     list_.erase(pos);
@@ -47,7 +54,7 @@ void TimerQueue::ScheduleTimer(Timer *timer_ptr,uint64_t timer_interval,int64_t 
     CancelTimer(timer_ptr);
   }
 
-  size_t    slot_mark = queues_.size() - 1;
+  size_t    slot_mark = slot_size - 1;
   size_t    to_slot = current_slot_
                       + ((time_delay + circle_time_ + timer_interval) >> interval_exponent_);
 
@@ -67,7 +74,7 @@ void TimerQueue::Update(uint64_t current_time)
     last_update_time_ = current_time;
 
   uint64_t delta_time = current_time + this->interval_;
-  size_t   slot_mark = queues_.size() - 1;
+  size_t   slot_mark = slot_size - 1;
   while(last_update_time_ < delta_time)
   {
     list_type& list_ = queues_[current_slot_];

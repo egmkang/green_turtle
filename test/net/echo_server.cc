@@ -2,7 +2,8 @@
 #include <net/tcp_server.h>
 #include <net/buffered_socket.h>
 #include <net/event_handler_factory.h>
-#include <iostream>
+#include <stdlib.h>
+#include <stdio.h>
 
 using namespace green_turtle;
 using namespace green_turtle::net;
@@ -35,9 +36,14 @@ class EchoTask : public BufferedSocket
   }
   virtual void ProcessDeleteSelf()
   {
-    std::cout << "EchoTask will be disposed, " << this << std::endl;
+    printf("EchoTask will be disposed, %p\n", this);
   }
 };
+
+EventHandler* NewEventHanlder(int fd, const AddrInfo& addr)
+{
+  return new EchoTask(fd, addr);
+}
 
 int main()
 {
@@ -45,10 +51,7 @@ int main()
   bool result = acceptor.Listen();
   assert(result);
 
-  EventHandlerFactory::Instance().RegisterDefault(
-      [](int fd, const AddrInfo& addr){
-        return new EchoTask(fd, addr);
-      });
+  EventHandlerFactory::Instance().RegisterDefault(&NewEventHanlder);
   TcpServer server(16);
   server.AddAcceptor(&acceptor);
   server.Run();

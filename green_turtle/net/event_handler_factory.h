@@ -32,7 +32,6 @@
 #ifndef __EVENT_HANDLER_FACTORY__
 #define __EVENT_HANDLER_FACTORY__
 #include <map>
-#include <functional>
 #include <singleton.h>
 
 namespace green_turtle{
@@ -42,7 +41,7 @@ class EventHandler;
 class TcpAcceptor;
 struct AddrInfo;
 
-typedef std::function<EventHandler* (int, const AddrInfo&)> FactoryFunction;
+typedef EventHandler* (*FactoryFunction)(int, const AddrInfo&);
 
 class EventHandlerFactory : public green_turtle::Singleton<EventHandlerFactory>
 {
@@ -51,7 +50,7 @@ class EventHandlerFactory : public green_turtle::Singleton<EventHandlerFactory>
   void RegisterDefault(FactoryFunction func);
   EventHandler* NewEventHandler(TcpAcceptor *acceptor, int fd, const AddrInfo& addr);
  private:
-  FactoryFunction default_;
+  FactoryFunction default_ = nullptr;
   std::map<TcpAcceptor*, FactoryFunction> map_;
 };
 

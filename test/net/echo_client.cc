@@ -2,7 +2,7 @@
 #include <net/event_loop.h>
 #include <message_queue.h>
 #include <stdlib.h>
-#include <iostream>
+#include <stdio.h>
 #include <string>
 
 using namespace green_turtle;
@@ -26,7 +26,8 @@ class EchoTcpClient : public TcpClient
   virtual void ProcessInputData(CacheLine& data)
   {
     size_t size = data.GetSize();
-    std::cout << std::string((char*)data.GetBegin(),(char*)data.GetEnd()) << std::endl;
+    std::string str((char*)data.GetBegin(), (char*)data.GetEnd());
+    printf("%s\n", str.c_str());
     if(size)
     {
       data.SkipRead(size);

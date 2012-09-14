@@ -34,6 +34,7 @@
 #include <stdint.h>
 #include <vector>
 #include <unordered_list.h>
+#include <noncopyable.h>
 
 namespace green_turtle{
 namespace net{
@@ -41,10 +42,11 @@ namespace net{
 class Timer;
 
 //Hash Timer Queues
-class TimerQueue
+class TimerQueue : green_turtle::NonCopyable
 {
  public:
   TimerQueue(size_t slot_size,size_t interval);
+  ~TimerQueue();
 
   //register a timer,unit ms
   void ScheduleTimer(Timer *timer_ptr,uint64_t timer_interval,int64_t time_delay = 0);
@@ -55,9 +57,9 @@ class TimerQueue
   inline uint64_t GetLastUpdateTime() const { return last_update_time_; }
  private:
   typedef green_turtle::unordered_list<Timer*> list_type;
-  typedef std::vector<list_type> queue_type;
 
-  queue_type    queues_;
+  list_type     *queues_;
+  const size_t  slot_size;
   uint64_t      last_update_time_;
   const size_t  interval_;  //must be 2^n ms
   size_t        current_slot_;

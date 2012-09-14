@@ -1,5 +1,4 @@
 #include <assert.h>
-#include <functional>
 #include "tcp_server.h"
 #include "event_loop.h"
 #include "tcp_acceptor.h"
@@ -90,11 +89,16 @@ void TcpServer::InitEventLoop()
   }
 }
 
+static void Loop(EventLoop *loop)
+{
+  loop->Loop();
+}
+
 void TcpServer::InitThreads()
 {
   for(int i = 0; i < thread_count_; ++i)
   {
-    std::thread *thrd = new std::thread(std::bind(&EventLoop::Loop,this->loops_[i]));
+    std::thread *thrd = new std::thread(Loop, this->loops_[i]);
     this->threads_.push_back(thrd);
   }
 }
