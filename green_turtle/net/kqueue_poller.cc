@@ -69,7 +69,7 @@ void KqueuePoller::RemoveEventHandler(EventHandler *event_handler)
 
 void KqueuePoller::PollOnce(int timeout,std::vector<EventHandler*>& fired_handler)
 {
-  int num = ::kevent(kqfd_, NULL, 0, &*events_.begin(), (int)events_.size(), NULL);
+  int num = ::kevent(kqfd_, NULL, 0, &events_[0], (int)events_.size(), NULL);
   for(int idx = 0; idx < num; ++idx)
   {
     const auto& e = events_[idx];
