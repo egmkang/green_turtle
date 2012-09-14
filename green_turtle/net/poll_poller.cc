@@ -52,20 +52,23 @@ void PollPoller::RemoveEventHandler(EventHandler *event_handler)
 void PollPoller::PollOnce(int timeout,std::vector<EventHandler*>& fired_handler)
 {
   polling_ = true;
-  int num = ::poll(&*pollfds_.begin(), pollfds_.size(), timeout);
-  for(int i = 0; i < num; ++i)
+  int num = ::poll(&pollfds_[0], pollfds_.size(), timeout);
+  for(const auto& e : pollfds_)
   {
-    const struct pollfd& e = pollfds_[i];
+    if(e.revents)
+    {
+      EventHandler *handle = GetEventHandler(e.fd);
+      int mark = kEventNone;
+      if(e.revents & POLLIN)   mark |= kEventReadable;
+      if(e.revents & POLLOUT)  mark |= kEventWriteable;
+      if(e.revents & POLLERR)  mark |= kEventWriteable;
+      if(e.revents & POLLHUP)  mark |= kEventWriteable;
+      handle->set_revents(mark);
 
-    EventHandler *handle = GetEventHandler(e.fd);
-    int mark = kEventNone;
-    if(e.events & POLLIN)   mark |= kEventReadable;
-    if(e.events & POLLOUT)  mark |= kEventWriteable;
-    if(e.events & POLLERR)  mark |= kEventWriteable;
-    if(e.events & POLLHUP)  mark |= kEventWriteable;
-    handle->set_revents(mark);
-
-    fired_handler.push_back(handle);
+      fired_handler.push_back(handle);
+      --num;
+      if(!num) break;
+    }
   }
   polling_ = false;
 }

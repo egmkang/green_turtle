@@ -64,7 +64,7 @@ int main()
   char *str = NewEchoString();
   client.SendMessage(str, strlen(str));
 
-  EventLoop loop(1024);
+  EventLoop loop(1);
   loop.AddEventHandler(&client);
 
   loop.Loop();

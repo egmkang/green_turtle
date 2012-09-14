@@ -49,7 +49,7 @@ int main()
       [](int fd, const AddrInfo& addr){
         return new EchoTask(fd, addr);
       });
-  TcpServer server(1280);
+  TcpServer server(16);
   server.AddAcceptor(&acceptor);
   server.Run();
   return 0;
