@@ -13,6 +13,9 @@ TODO:
     4.2) n:1 message queue(use 1:1 message queue)
     5) timer(done)
     6) writing some samples
+    7) error process
+       event loop using a queue to delay remove handler 
+       provide a DeleleSelf interface to call others to delete the object
 3. util
     1) RefObject and RefPtr<T>(Done)
     2) pthread_setaffinity_np
