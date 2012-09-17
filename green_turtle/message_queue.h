@@ -37,6 +37,45 @@
 #include <noncopyable.h>
 
 namespace green_turtle{
+namespace details{
+struct AtomicIndex{
+  AtomicIndex(size_t init = 0) : value_(init){}
+  inline size_t load(std::memory_order memory_order)
+  {
+    return value_.load(memory_order);
+  }
+  inline void store(size_t value, std::memory_order memory_order)
+  {
+    value_.store(value, memory_order);
+  }
+  std::atomic<size_t> value_;
+};
+
+struct PaddedAtomicIndex : public AtomicIndex{
+  size_t padding_values_[7];
+};
+
+struct VolatileIndex
+{
+  VolatileIndex(size_t init = 0) : value_(init){}
+  inline size_t load(std::memory_order memory_order)
+  {
+    (void)memory_order;
+    return value_;
+  }
+  inline void store(size_t value, std::memory_order memory_order)
+  {
+    (void)memory_order;
+    value_ = value;
+  }
+  volatile size_t value_;
+};
+
+struct PaddedVolatileIndex : public VolatileIndex{
+  size_t padding_values_[7];
+};
+
+}
 
 //support POD data only
 //1:1 MessageQueue
@@ -48,8 +87,8 @@ class MessageQueue : NonCopyable
   typedef T value_type;
  public:
   MessageQueue(size_t size = 128*1024)
-    : read_idx_(0)
-    , write_idx_(0)
+    : read_idx_()
+    , write_idx_()
     , size_(size)
     , array_(new T[size]())
   {
@@ -99,8 +138,8 @@ class MessageQueue : NonCopyable
     return true;
   }
 private:
-  std::atomic<size_t> read_idx_;
-  std::atomic<size_t> write_idx_;
+  details::PaddedVolatileIndex  read_idx_;
+  details::PaddedVolatileIndex  write_idx_;
   const size_t        size_;
   value_type          *array_;
 };

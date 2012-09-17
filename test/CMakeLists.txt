@@ -1,7 +1,7 @@
-#ADD_EXECUTABLE(message_queue_test_tc
-#    message_queue_test.cc
-#    )
-#TARGET_LINK_LIBRARIES(message_queue_test_tc green_turtle tcmalloc)
+ADD_EXECUTABLE(message_queue_test_tc
+    message_queue_test.cc
+    )
+TARGET_LINK_LIBRARIES(message_queue_test_tc green_turtle tcmalloc)
 
 ADD_EXECUTABLE(message_queue_test_je
     message_queue_test.cc
