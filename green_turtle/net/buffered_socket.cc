@@ -104,7 +104,7 @@ int BufferedSocket::OnWrite()
 
 int BufferedSocket::OnError()
 {
-  this->event_loop()->RemoveEventHandler(this); 
+  this->event_loop()->RemoveEventHandler(this);
   this->ProcessDeleteSelf();
   return -1;
 }

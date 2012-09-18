@@ -37,6 +37,11 @@ void EventLoop::SetFrameTime(int milliSeconds)
   assert(milliSeconds > 10);
   FrameTime = milliSeconds;
 }
+void EventLoop::RemoveHandlerLater(EventHandler *pEventHandler)
+{
+  std::lock_guard<std::mutex> guard(this->remove_mutex_);
+  this->remove_handler_.push_back(pEventHandler);
+}
 
 void EventLoop::Loop()
 {
@@ -52,11 +57,22 @@ void EventLoop::Loop()
     {
       handler->HandleEvent();
     }
+
     System::UpdateTime();
     size_t cost_time = System::GetMilliSeconds() - begin_time;
     if(cost_time < FrameTime)
     {
       System::Yield(FrameTime - cost_time);
+    }
+
+    std::deque<EventHandler*> temp_queue;
+    {
+      std::lock_guard<std::mutex> guard(this->remove_mutex_);
+      this->remove_handler_.swap(temp_queue);
+    }
+    for(auto handler : temp_queue)
+    {
+      handler->OnError();
     }
   }
 }

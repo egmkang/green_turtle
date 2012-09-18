@@ -67,10 +67,11 @@ class EventHandler : green_turtle::NonCopyable
     event_loop_ = loop;
     OnAddedIntoEventLoop(loop);
   }
+ public:
+  virtual int OnError()           = 0;
  protected:
   virtual int OnRead()            = 0;
   virtual int OnWrite()           = 0;
-  virtual int OnError()           = 0;
   virtual void OnAddedIntoEventLoop(EventLoop *loop)
   {
     (void)loop;

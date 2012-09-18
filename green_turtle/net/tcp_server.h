@@ -44,6 +44,9 @@ class TcpAcceptor;
 class TcpClient;
 class TimerQueue;
 class Timer;
+class TcpServer;
+
+typedef void (*MessageProc)(TcpServer*);
 
 class TcpServer : green_turtle::NonCopyable {
  public:
@@ -55,6 +58,7 @@ class TcpServer : green_turtle::NonCopyable {
   void SetThreadCount(int count);
   void Run();
   void Terminal();
+  void SetMessageProc(MessageProc proc);
  public:
   //register a timer,unit ms
   void ScheduleTimer(Timer *timer_ptr,uint64_t timer_interval,int64_t time_delay = 0);
@@ -64,10 +68,13 @@ class TcpServer : green_turtle::NonCopyable {
   void InitEventLoop();
   void InitThreads();
  private:
+  typedef std::pair<EventHandler*, int> PairMark;
+
   std::vector<EventLoop*>   loops_;
   std::vector<std::thread*> threads_;
-  std::vector<std::pair<EventHandler*, int>>  handler_mark_;
-  TimerQueue*  timer_queue_;
+  std::vector<PairMark>     handler_mark_;
+  TimerQueue    *timer_queue_;
+  MessageProc   message_proc_;
   bool  is_terminal_;
   int   thread_count_;
   int   expected_size_;

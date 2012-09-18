@@ -32,6 +32,8 @@
 #ifndef __event_loop__
 #define __event_loop__
 #include <vector>
+#include <thread>
+#include <deque>
 #include "event_handler.h"
 #include <noncopyable.h>
 
@@ -50,10 +52,13 @@ class EventLoop : NonCopyable
   void RemoveEventHandler(EventHandler *pEventHandler);
   void Loop();
   static void SetFrameTime(int milliSeconds);
+  void RemoveHandlerLater(EventHandler *pEventHandler);
  private:
   Poller  *poller_;
   bool    terminal_;
   std::vector<EventHandler*>  fired_handler_;
+  std::mutex                  remove_mutex_;
+  std::deque<EventHandler*>   remove_handler_;
 };
 
 }

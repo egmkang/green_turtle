@@ -37,6 +37,7 @@ class EchoTask : public BufferedSocket
   virtual void ProcessDeleteSelf()
   {
     printf("EchoTask will be disposed, %p\n", this);
+    delete this;
   }
 };
 
