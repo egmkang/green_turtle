@@ -63,9 +63,9 @@ int TcpAcceptor::OnRead()
   EventHandler *new_handler = CreateNewHandler(new_fd, info);
   new_handler->set_events(kEventReadable | kEventWriteable);
 
-  this->loops_[idx_++]->AddEventHandler(new_handler);
-  if(idx_ >= (int)this->loops_.size())
-    idx_ = 0;
+  //FIXME:egmkang
+  //get current loop and add event handler
+  this->loops_[idx_++ % loops_.size()]->AddEventHandler(new_handler);
 
   return kOK;
 }

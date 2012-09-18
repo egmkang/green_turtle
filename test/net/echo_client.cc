@@ -8,9 +8,7 @@
 using namespace green_turtle;
 using namespace green_turtle::net;
 
-static int send_times_ = 0;
-
-static char * NewEchoString()
+static char * NewEchoString(int& send_times_)
 {
   char * str = (char*)malloc(100);
   snprintf(str, 100, "this is echo string sent by client, %d times",send_times_);
@@ -21,7 +19,7 @@ static char * NewEchoString()
 class EchoTcpClient : public TcpClient
 {
  public:
-  EchoTcpClient(const std::string& ip, unsigned short port) : TcpClient(ip, port){}
+  EchoTcpClient(const std::string& ip, unsigned short port) : TcpClient(ip, port, 16*1024, 16*1024){}
  protected:
   virtual void ProcessInputData(CacheLine& data)
   {
@@ -31,8 +29,12 @@ class EchoTcpClient : public TcpClient
     if(size)
     {
       data.SkipRead(size);
-      char *str = NewEchoString();
+      char *str = NewEchoString(this->send_times_);
       this->SendMessage(str, strlen(str));
+    }
+    if(this->send_times_ > 10000)
+    {
+      this->event_loop()->RemoveHandlerLater(this);
     }
   }
 
@@ -50,23 +52,32 @@ class EchoTcpClient : public TcpClient
 
   virtual void ProcessDeleteSelf()
   {
-    this->event_loop()->Ternimal();
+    delete this;
+    //this->event_loop()->Ternimal();
   }
+ private:
+  int send_times_ = 0;
 };
 
 
 int main()
 {
-  EchoTcpClient client("127.0.0.1", 10001);
-  int errorCode = client.Connect();
-  assert(!errorCode);
-  client.set_events(kEventReadable | kEventWriteable);
-
-  char *str = NewEchoString();
-  client.SendMessage(str, strlen(str));
-
   EventLoop loop(1);
-  loop.AddEventHandler(&client);
+
+  for(int i = 0; i < 512; ++i)
+  {
+    EchoTcpClient *client = new EchoTcpClient("127.0.0.1", 10001);
+    int errorCode = client->Connect();
+    assert(!errorCode);
+    client->set_events(kEventReadable | kEventWriteable);
+
+    int num = 0;
+    char *str = NewEchoString(num);
+    client->SendMessage(str, strlen(str));
+
+    loop.AddEventHandler(client);
+  }
+
 
   loop.Loop();
   return 0;

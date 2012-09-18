@@ -88,6 +88,7 @@ RingBuffer<T>::RingBuffer(size_t buffer_size_):
 template<class T>
 RingBuffer<T>::~RingBuffer()
 {
+  delete[] array_;
 }
 template<class T>
 size_t  RingBuffer<T>::Read(T* dest,size_t count)

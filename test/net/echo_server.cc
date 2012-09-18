@@ -55,7 +55,7 @@ int main()
   EventHandlerFactory::Instance().RegisterDefault(&NewEventHanlder);
   TcpServer server(16);
   server.AddAcceptor(&acceptor);
-  server.SetThreadCount(2);
+  //server.SetThreadCount(2);
   server.Run();
   return 0;
 }
