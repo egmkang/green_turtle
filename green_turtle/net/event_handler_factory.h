@@ -45,12 +45,16 @@ typedef EventHandler* (*FactoryFunction)(int, const AddrInfo&);
 
 class EventHandlerFactory : public green_turtle::Singleton<EventHandlerFactory>
 {
+ private:
+  friend class green_turtle::Singleton<EventHandlerFactory>;
+
+  EventHandlerFactory(): default_(nullptr) {}
  public:
   void Register(TcpAcceptor *acceptor,FactoryFunction func);
   void RegisterDefault(FactoryFunction func);
   EventHandler* NewEventHandler(TcpAcceptor *acceptor, int fd, const AddrInfo& addr);
  private:
-  FactoryFunction default_ = nullptr;
+  FactoryFunction default_;
   std::map<TcpAcceptor*, FactoryFunction> map_;
 };
 

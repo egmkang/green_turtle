@@ -45,6 +45,6 @@ int System::GetSecondsDiffDays(time_t s1, time_t s2)
 
 void System::Yield(uint64_t milliSeconds)
 {
-  ::usleep(milliSeconds);
+  ::usleep(milliSeconds*1000);
 }
 

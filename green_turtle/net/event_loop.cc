@@ -10,7 +10,9 @@ using namespace green_turtle::net;
 
 static size_t FrameTime = 20;
 
-EventLoop::EventLoop(int expected_size) : poller_(nullptr)
+EventLoop::EventLoop(int expected_size) :
+    poller_(nullptr)
+    ,terminal_(false)
 {
   poller_ = Poller::CreatePoller(expected_size);
   assert(poller_);
