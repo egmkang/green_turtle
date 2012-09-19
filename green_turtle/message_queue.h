@@ -32,67 +32,72 @@
 #ifndef __MESSAGE_QUEUE__
 #define __MESSAGE_QUEUE__
 #include <assert.h>
-#include <cstddef>
+#include <stdint.h>
 #include <atomic>
 #include <noncopyable.h>
 
 namespace green_turtle{
-namespace details{
-struct AtomicIndex{
-  AtomicIndex(size_t init = 0) : value_(init){}
-  inline size_t load(std::memory_order memory_order)
+
+namespace internal {
+
+struct AtomicIndex {
+  AtomicIndex(uint64_t init = 0) : value_(init) {}
+  inline uint64_t load(std::memory_order memory_order)
   {
     return value_.load(memory_order);
   }
-  inline void store(size_t value, std::memory_order memory_order)
+  inline void store(uint64_t value, std::memory_order memory_order)
   {
     value_.store(value, memory_order);
   }
-  std::atomic<size_t> value_;
-};
 
-struct PaddedAtomicIndex : public AtomicIndex{
-  size_t padding_values_[7];
+  std::atomic<uint64_t> value_;
 };
 
 struct VolatileIndex
 {
-  VolatileIndex(size_t init = 0) : value_(init){}
-  inline size_t load(std::memory_order memory_order)
+  VolatileIndex(uint64_t init = 0) : value_(init) {}
+  inline uint64_t load(std::memory_order memory_order)
   {
     (void)memory_order;
     return value_;
   }
-  inline void store(size_t value, std::memory_order memory_order)
+  inline void store(uint64_t value, std::memory_order memory_order)
   {
     (void)memory_order;
     value_ = value;
   }
-  volatile size_t value_;
-};
 
-struct PaddedVolatileIndex : public VolatileIndex{
-  size_t padding_values_[7];
+  volatile uint64_t value_;
 };
-
 }
+
+struct PaddedAtomicIndex : public internal::AtomicIndex {
+  uint64_t padding_values_[7];
+};
+
+struct PaddedVolatileIndex : public internal::VolatileIndex {
+  uint64_t padding_values_[7];
+};
 
 //support POD data only
 //1:1 MessageQueue
 //N:1 equals N*(1:1)
-template<class T>
+template<class T, class Counter = PaddedVolatileIndex>
 class MessageQueue : NonCopyable
 {
  public:
   typedef T value_type;
  public:
-  MessageQueue(size_t size = 128*1024)
+  MessageQueue(uint64_t size = 128*1024)
     : read_idx_()
     , write_idx_()
     , size_(size)
+    , mark_(size - 1)
     , array_(new T[size]())
   {
     assert(size >= 2);
+    assert(!(size_ & (size_ -1)) && "size must be 2^n!");
     assert(array_);
   }
 
@@ -103,45 +108,45 @@ class MessageQueue : NonCopyable
 
   bool Push(const value_type& v)
   {
-    size_t const current = write_idx_.load(std::memory_order_relaxed);
-    size_t next = current + 1;
-    if(next == size_)
-    {
-      next = 0;
-    }
+    const auto current_write_ = write_idx_.load(std::memory_order_relaxed);
+    const auto current_read_  = read_idx_.load(std::memory_order_acquire);
 
-    if (next != read_idx_.load(std::memory_order_acquire))
-    {
-      array_[current] = v;
-      write_idx_.store(next, std::memory_order_release);
-      return true;
-    }
+    if(current_write_ - current_read_ == mark_)
+      return false;
 
-    return false;
+    array_[current_write_ & mark_] = v;
+    write_idx_.store(current_write_ + 1, std::memory_order_release);
+
+    return true;
   }
 
   bool Pop(value_type& v)
   {
-    size_t const current = read_idx_.load(std::memory_order_relaxed);
-    if (current == write_idx_.load(std::memory_order_acquire))
-    {
+    const auto current_write_ = write_idx_.load(std::memory_order_acquire);
+    const auto current_read_  = read_idx_.load(std::memory_order_relaxed);
+    if(current_read_ == current_write_)
       return false;
-    }
 
-    size_t next = current + 1;
-    if(next == size_)
-    {
-      next = 0;
-    }
-    v = array_[current];
-    read_idx_.store(next, std::memory_order_release);
+    v = array_[current_read_ & mark_];
+    read_idx_.store(current_read_ + 1, std::memory_order_release);
     return true;
   }
+  uint64_t Size() const
+  {
+    const auto current_read_  = read_idx_.load(std::memory_order_relaxed);
+    const auto current_write_ = write_idx_.load(std::memory_order_relaxed);
+    return (current_read_ - current_write_) & mark_;
+  }
+  uint64_t Capacity() const
+  {
+    return size_;
+  }
 private:
-  details::PaddedVolatileIndex  read_idx_;
-  details::PaddedVolatileIndex  write_idx_;
-  const size_t        size_;
-  value_type          *array_;
+  Counter         read_idx_;
+  Counter         write_idx_;
+  const uint64_t  size_;
+  const uint64_t  mark_;
+  value_type      *array_;
 };
 
 }
