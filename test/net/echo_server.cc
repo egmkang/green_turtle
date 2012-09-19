@@ -4,6 +4,7 @@
 #include <net/event_handler_factory.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <signal.h>
 
 using namespace green_turtle;
 using namespace green_turtle::net;
@@ -48,6 +49,8 @@ EventHandler* NewEventHanlder(int fd, const AddrInfo& addr)
 
 int main()
 {
+  signal(SIGPIPE, SIG_IGN);
+
   TcpAcceptor acceptor("127.0.0.1", 10001, 16*1024, 16*1024);
   bool result = acceptor.Listen();
   assert(result);
