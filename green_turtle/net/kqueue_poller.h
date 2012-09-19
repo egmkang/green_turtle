@@ -51,6 +51,7 @@ class KqueuePoller : public Poller
   private:
    int kqfd_;
    std::vector<struct kevent> events_;
+   polling_ = false;
 };
 
 }

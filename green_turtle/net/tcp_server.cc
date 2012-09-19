@@ -37,14 +37,13 @@ void TcpServer::SetMessageProc(MessageProc proc)
 
 void TcpServer::AddAcceptor(TcpAcceptor *acceptor)
 {
-  this->handler_mask_.push_back({acceptor,-1});
+  this->handlers_.push_back(acceptor);
   acceptor->set_events(kEventReadable);
 }
 
-void TcpServer::AddClient(TcpClient *client, int slot)
+void TcpServer::AddClient(TcpClient *client)
 {
-  assert(slot >= 0 && slot < 32);
-  this->handler_mask_.push_back({client,1 << slot});
+  this->handlers_.push_back(client);
   client->set_events(kEventReadable | kEventWriteable);
 }
 
@@ -82,16 +81,19 @@ void TcpServer::InitEventLoop()
     assert(loop);
     this->loops_.push_back(loop);
   }
-  for(auto& pair : this->handler_mask_)
+
+  auto loop_begin = std::begin(this->loops_);
+  for(auto handler : this->handlers_)
   {
-    for(int shift = 0; shift < thread_count_; ++shift)
-    {
-      if(pair.second & (1 << shift))
-      {
-        this->loops_[shift]->AddEventHandler(pair.first);
-      }
-    }
+    EventLoop *loop = *loop_begin;
+    loop->AddEventHandler(handler);
+    handler->loop_balance(this->loops_);
+
+    loop_begin++;
+    if(loop_begin == std::end(this->loops_))
+      loop_begin = std::begin(this->loops_);
   }
+  this->handlers_.clear();
 }
 
 static void Loop(EventLoop *loop)

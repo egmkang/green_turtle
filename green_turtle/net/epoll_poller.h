@@ -50,6 +50,7 @@ class EpollPoller : public Poller
   private:
    int epollfd_;
    std::vector<struct epoll_event> events_;
+   bool polling_ = false;
 };
 
 }

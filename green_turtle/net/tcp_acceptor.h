@@ -37,32 +37,26 @@
 namespace green_turtle{
 namespace net{
 
-enum
-{
-  kAcceptorWindowRecvSize   = 128*1024,
-  kAcceptorWindowSendSize   = 128*1024,
-};
-
 struct AddrInfo;
 
 class TcpAcceptor : public EventHandler
 {
   public:
-    TcpAcceptor(const char *ip, unsigned short port, int rev_buf = kAcceptorWindowRecvSize, int snd_buf = kAcceptorWindowSendSize);
+    TcpAcceptor(const char *ip, unsigned short port, int rev_buf = kDefaultRecvBufferSize, int snd_buf = kDefaultSendBufferSize);
     virtual ~TcpAcceptor();
   public:
     bool Listen();
+    virtual void loop_balance(const std::vector<EventLoop*>& loops);
   protected:
     virtual int OnRead();
     virtual int OnWrite();
     virtual int OnError();
-    virtual void OnAddedIntoEventLoop(EventLoop *loop);
     EventHandler* CreateNewHandler(int fd, const AddrInfo& info);
   private:
     int Accept(AddrInfo& info);
     AddrInfo                *addr_;
     std::vector<EventLoop*> loops_;
-    int                     idx_; //load balance,not thread safe,so what!
+    size_t                  idx_; //load balance
 };
 
 }

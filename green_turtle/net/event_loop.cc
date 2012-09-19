@@ -39,6 +39,12 @@ void EventLoop::SetFrameTime(int milliSeconds)
   assert(milliSeconds > 10);
   FrameTime = milliSeconds;
 }
+
+void EventLoop::AddHandlerLater(EventHandler *pEventHandler)
+{
+  std::lock_guard<std::mutex> guard(this->add_mutex_);
+  this->add_handler_.push_back(pEventHandler);
+}
 void EventLoop::RemoveHandlerLater(EventHandler *pEventHandler)
 {
   std::lock_guard<std::mutex> guard(this->remove_mutex_);
@@ -67,12 +73,22 @@ void EventLoop::Loop()
       System::Yield(FrameTime - cost_time);
     }
 
-    std::deque<EventHandler*> temp_queue;
+    std::deque<EventHandler*> temp_add_queue;
     {
       std::lock_guard<std::mutex> guard(this->remove_mutex_);
-      this->remove_handler_.swap(temp_queue);
+      this->add_handler_.swap(temp_add_queue);
     }
-    for(auto handler : temp_queue)
+    for(auto handler : temp_add_queue)
+    {
+      this->AddEventHandler(handler);
+    }
+
+    std::deque<EventHandler*> temp_remove_queue;
+    {
+      std::lock_guard<std::mutex> guard(this->remove_mutex_);
+      this->remove_handler_.swap(temp_remove_queue);
+    }
+    for(auto handler : temp_remove_queue)
     {
       handler->OnError();
     }

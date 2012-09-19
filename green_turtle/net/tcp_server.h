@@ -54,7 +54,7 @@ class TcpServer : green_turtle::NonCopyable {
   ~TcpServer();
  public:
   void AddAcceptor(TcpAcceptor *acceptor);
-  void AddClient(TcpClient *client, int slot = 0);
+  void AddClient(TcpClient *client);
   void SetThreadCount(int count);
   void Run();
   void Terminal();
@@ -68,11 +68,9 @@ class TcpServer : green_turtle::NonCopyable {
   void InitEventLoop();
   void InitThreads();
  private:
-  typedef std::pair<EventHandler*, int> PairMask;
-
-  std::vector<EventLoop*>   loops_;
-  std::vector<std::thread*> threads_;
-  std::vector<PairMask>     handler_mask_;
+  std::vector<EventLoop*>     loops_;
+  std::vector<std::thread*>   threads_;
+  std::vector<EventHandler*>  handlers_;
   TimerQueue    *timer_queue_;
   MessageProc   message_proc_;
   bool  is_terminal_;

@@ -26,6 +26,7 @@ EpollPoller::~EpollPoller()
 
 void EpollPoller::AddEventHandler(EventHandler *event_handler)
 {
+  assert(!polling_);
   this->SetEventHandler(event_handler->fd(), event_handler);
   if(event_handler->fd() >= (int)this->events_.size())
   {
@@ -39,6 +40,7 @@ void EpollPoller::AddEventHandler(EventHandler *event_handler)
 
 void EpollPoller::RemoveEventHandler(EventHandler *event_handler)
 {
+  assert(!polling_);
   this->SetEventHandler(event_handler->fd(), nullptr);
   if(Epoll_Ctl(epollfd_, EPOLL_CTL_DEL, event_handler->fd(), event_handler->events()) < 0)
   {
@@ -47,6 +49,7 @@ void EpollPoller::RemoveEventHandler(EventHandler *event_handler)
 
 void EpollPoller::PollOnce(int timeout,std::vector<EventHandler*>& fired_handler)
 {
+  polling_ = true;
   int num = ::epoll_wait(epollfd_, &events_[0], (int)events_.size(), timeout);
   for(int idx = 0; idx < num; ++idx)
   {
@@ -63,6 +66,7 @@ void EpollPoller::PollOnce(int timeout,std::vector<EventHandler*>& fired_handler
 
     fired_handler.push_back(handle);
   }
+  polling_ = false;
 }
 
 int Epoll_Ctl(int epollfd, int operation, int fd, int events)

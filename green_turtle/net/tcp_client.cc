@@ -6,8 +6,8 @@
 using namespace green_turtle;
 using namespace green_turtle::net;
 
-TcpClient::TcpClient(const std::string& ip, unsigned short port, int recvWindowSize, int sendWindowSize)
-  : BufferedSocket(SocketOption::NewFD(), AddrInfo(ip.c_str(), port), recvWindowSize, sendWindowSize)
+TcpClient::TcpClient(const std::string& ip, unsigned short port, int recv_buff, int send_buff)
+  : BufferedSocket(SocketOption::NewFD(), AddrInfo(ip.c_str(), port), recv_buff, send_buff)
 {
 }
 

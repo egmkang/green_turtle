@@ -4,9 +4,12 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string>
+#include <atomic>
 
 using namespace green_turtle;
 using namespace green_turtle::net;
+
+static std::atomic<long> recv_message_count_(0);
 
 static char * NewEchoString(int& send_times_)
 {
@@ -25,12 +28,17 @@ class EchoTcpClient : public TcpClient
   {
     size_t size = data.GetSize();
     std::string str((char*)data.GetBegin(), (char*)data.GetEnd());
-    printf("%s\n", str.c_str());
+    long count = recv_message_count_.load(std::memory_order_acquire);
+    if(count % 1024 == 0)
+    {
+      printf("%p , %s\n", this, str.c_str());
+    }
     if(size)
     {
       data.SkipRead(size);
       char *str = NewEchoString(this->send_times_);
       this->SendMessage(str, strlen(str));
+      recv_message_count_.store(count + 1, std::memory_order_release);
     }
     if(this->send_times_ > 10000)
     {
@@ -62,7 +70,7 @@ class EchoTcpClient : public TcpClient
 
 int main()
 {
-  EventLoop loop(1);
+  EventLoop loop(512);
 
   for(int i = 0; i < 512; ++i)
   {

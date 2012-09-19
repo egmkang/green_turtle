@@ -63,9 +63,11 @@ int TcpAcceptor::OnRead()
   EventHandler *new_handler = CreateNewHandler(new_fd, info);
   new_handler->set_events(kEventReadable | kEventWriteable);
 
-  //FIXME:egmkang
-  //get current loop and add event handler
-  this->loops_[idx_++ % loops_.size()]->AddEventHandler(new_handler);
+  this->loops_[idx_++]->AddHandlerLater(new_handler);
+  if(idx_ >= loops_.size())
+  {
+    idx_ = 0;
+  }
 
   return kOK;
 }
@@ -83,12 +85,10 @@ int TcpAcceptor::OnError()
   }
   return kOK;
 }
-
-void TcpAcceptor::OnAddedIntoEventLoop(EventLoop *loop)
+void TcpAcceptor::loop_balance(const std::vector<EventLoop *> &loops)
 {
-  auto iter = std::find(loops_.begin(), loops_.end(), loop);
-  if(iter == loops_.end())
-    loops_.push_back(loop);
+  this->loops_ = loops;
+  std::random_shuffle(this->loops_.begin(), this->loops_.end());
 }
 
 EventHandler* TcpAcceptor::CreateNewHandler(int fd, const AddrInfo& info)

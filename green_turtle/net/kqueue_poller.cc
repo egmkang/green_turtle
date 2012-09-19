@@ -24,6 +24,7 @@ KqueuePoller::~KqueuePoller()
 
 void KqueuePoller::AddEventHandler(EventHandler *event_handler)
 {
+  assert(!polling_);
   this->SetEventHandler(event_handler->fd(), event_handler);
   if(event_handler->fd() >= this->events_.size())
   {
@@ -52,6 +53,7 @@ void KqueuePoller::AddEventHandler(EventHandler *event_handler)
 
 void KqueuePoller::RemoveEventHandler(EventHandler *event_handler)
 {
+  assert(!polling_);
   this->SetEventHandler(event_handler->fd(), nullptr);
 
   struct kevent ke;
@@ -69,6 +71,7 @@ void KqueuePoller::RemoveEventHandler(EventHandler *event_handler)
 
 void KqueuePoller::PollOnce(int timeout,std::vector<EventHandler*>& fired_handler)
 {
+  polling_ = true;
   int num = ::kevent(kqfd_, NULL, 0, &events_[0], (int)events_.size(), NULL);
   for(int idx = 0; idx < num; ++idx)
   {
@@ -83,5 +86,6 @@ void KqueuePoller::PollOnce(int timeout,std::vector<EventHandler*>& fired_handle
 
     fired_handler.push_back(handle);
   }
+  polling_ = false;
 }
 

@@ -52,11 +52,16 @@ class EventLoop : NonCopyable
   void RemoveEventHandler(EventHandler *pEventHandler);
   void Loop();
   static void SetFrameTime(int milliSeconds);
+ public:
+  void AddHandlerLater(EventHandler *pEventHandler);
   void RemoveHandlerLater(EventHandler *pEventHandler);
  private:
   Poller  *poller_;
   bool    terminal_;
   std::vector<EventHandler*>  fired_handler_;
+
+  std::mutex                  add_mutex_;
+  std::deque<EventHandler*>   add_handler_;
   std::mutex                  remove_mutex_;
   std::deque<EventHandler*>   remove_handler_;
 };

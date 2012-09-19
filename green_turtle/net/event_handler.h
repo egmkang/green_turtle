@@ -32,6 +32,7 @@
 
 #ifndef __EVENT_HANDLER__
 #define __EVENT_HANDLER__
+#include <vector>
 #include <noncopyable.h>
 
 namespace green_turtle{
@@ -41,11 +42,20 @@ enum {
   kOK   = 0,
   kErr  = -1,
 };
+
 enum {
   kEventNone        = 0x0,
   kEventReadable    = 0x1,
   kEventWriteable   = 0x2,
 };
+
+enum {
+  kDefaultRecvBufferSize  = 16*1024,
+  kDefaultSendBufferSize  = 16*1024,
+  kBigRecvBufferSize      = 128*1024,
+  kBigSendBufferSize      = 128*1024,
+};
+
 class EventLoop;
 
 class EventHandler : green_turtle::NonCopyable
@@ -62,20 +72,13 @@ class EventHandler : green_turtle::NonCopyable
   void set_index(int idx) { poll_idx_ = idx; }
   void HandleEvent();
   EventLoop* event_loop() const { return event_loop_; }
-  void set_event_loop(EventLoop *loop)
-  {
-    event_loop_ = loop;
-    OnAddedIntoEventLoop(loop);
-  }
+  void set_event_loop(EventLoop *loop) { event_loop_ = loop; }
  public:
+  virtual void loop_balance(const std::vector<EventLoop*>& loops) { (void)loops;}
   virtual int OnError()           = 0;
  protected:
   virtual int OnRead()            = 0;
   virtual int OnWrite()           = 0;
-  virtual void OnAddedIntoEventLoop(EventLoop *loop)
-  {
-    (void)loop;
-  }
  private:
   int fd_;
   int events_;    //request events

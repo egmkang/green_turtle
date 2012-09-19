@@ -47,8 +47,10 @@ int BufferedSocket::OnRead()
   if(nread < 0)
     return kErr;
   if(nread)
+  {
     rcv_buffer_->SkipWrite(nread);
-  ProcessInputData(*rcv_buffer_);
+    ProcessInputData(*rcv_buffer_);
+  }
   return kOK;
 }
 
@@ -93,7 +95,7 @@ int BufferedSocket::OnWrite()
     if(send_size < 0)   return kErr;
     else if(!send_size) return kOK;
     cache->SkipRead(send_size);
-    if(!cache->GetSize())
+    if(!cache->GetSize() && !cache->GetTailSpace())
     {
       delete cache;
       snd_queue_.pop_front();
