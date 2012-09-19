@@ -54,11 +54,11 @@ void TimerQueue::ScheduleTimer(Timer *timer_ptr,uint64_t timer_interval,int64_t 
     CancelTimer(timer_ptr);
   }
 
-  size_t    slot_mark = slot_size - 1;
+  size_t    slot_mask = slot_size - 1;
   size_t    to_slot = current_slot_
                       + ((time_delay + circle_time_ + timer_interval) >> interval_exponent_);
 
-  to_slot   = to_slot & slot_mark;
+  to_slot   = to_slot & slot_mask;
 
   list_type& list_            = queues_[to_slot];
   timer_ptr->iter_pos_        = list_.insert(timer_ptr);
@@ -74,12 +74,12 @@ void TimerQueue::Update(uint64_t current_time)
     last_update_time_ = current_time;
 
   uint64_t delta_time = current_time + this->interval_;
-  size_t   slot_mark = slot_size - 1;
+  size_t   slot_mask = slot_size - 1;
   while(last_update_time_ < delta_time)
   {
     list_type& list_ = queues_[current_slot_];
 
-    current_slot_ = (current_slot_ + 1) & slot_mark;
+    current_slot_ = (current_slot_ + 1) & slot_mask;
     last_update_time_ += interval_;
 
     //lambda expression

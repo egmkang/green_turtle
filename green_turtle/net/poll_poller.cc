@@ -58,12 +58,12 @@ void PollPoller::PollOnce(int timeout,std::vector<EventHandler*>& fired_handler)
     if(e.revents)
     {
       EventHandler *handle = GetEventHandler(e.fd);
-      int mark = kEventNone;
-      if(e.revents & POLLIN)   mark |= kEventReadable;
-      if(e.revents & POLLOUT)  mark |= kEventWriteable;
-      if(e.revents & POLLERR)  mark |= kEventWriteable;
-      if(e.revents & POLLHUP)  mark |= kEventWriteable;
-      handle->set_revents(mark);
+      int mask = kEventNone;
+      if(e.revents & POLLIN)   mask |= kEventReadable;
+      if(e.revents & POLLOUT)  mask |= kEventWriteable;
+      if(e.revents & POLLERR)  mask |= kEventWriteable;
+      if(e.revents & POLLHUP)  mask |= kEventWriteable;
+      handle->set_revents(mask);
 
       fired_handler.push_back(handle);
       --num;

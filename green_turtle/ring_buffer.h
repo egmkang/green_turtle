@@ -71,18 +71,18 @@ class RingBuffer : NonCopyable{
  private:
   size_t          write_;
   size_t          read_;
-  size_t          index_mark_;
+  size_t          index_mask_;
   T               *array_;
 };
 template<class T>
 RingBuffer<T>::RingBuffer(size_t buffer_size_):
   write_(0)
   ,read_(0)
-  ,index_mark_(0)
+  ,index_mask_(0)
 {
   assert(buffer_size_);
   buffer_size_ = details::nextpow2(buffer_size_);
-  index_mark_ = buffer_size_ - 1;
+  index_mask_ = buffer_size_ - 1;
   array_ = new  T[buffer_size_];
 }
 template<class T>
@@ -99,8 +99,8 @@ size_t  RingBuffer<T>::Read(T* dest,size_t count)
   if(count > size_)
     count = size_;
 
-  size_t from = read_ & index_mark_;
-  size_t to   = (read_ + count) & index_mark_;
+  size_t from = read_ & index_mask_;
+  size_t to   = (read_ + count) & index_mask_;
   if(from <= to)
   {
     std::memcpy(dest, &array_[from], count * sizeof(T));
@@ -122,15 +122,15 @@ size_t  RingBuffer<T>::Write(const T* src,size_t count)
   size_t space_ = GetCapacity() - GetSize();
   if(count > space_)
     count = space_;
-  size_t from = write_ & index_mark_;
-  size_t to   = (write_ + count) & index_mark_;
+  size_t from = write_ & index_mask_;
+  size_t to   = (write_ + count) & index_mask_;
   if(from <= to)
   {
     std::memcpy(&array_[from],src,count * sizeof(T));
   }
   else
   {
-    size_t first_write_ = index_mark_ + 1 - from;
+    size_t first_write_ = index_mask_ + 1 - from;
     std::memcpy(&array_[from], src, first_write_ * sizeof(T));
     std::memcpy(&array_[0], src + first_write_, to * sizeof(T));
   }
@@ -142,7 +142,7 @@ void    RingBuffer<T>::Reset()
 {
   const size_t size_ = GetSize();
   //0--------read--------write------end
-  if((read_ & index_mark_) <= (write_ & index_mark_))
+  if((read_ & index_mask_) <= (write_ & index_mask_))
   {
     std::memmove(&array_[0], GetBegin(), size_ * sizeof(T));
   }
@@ -152,7 +152,7 @@ void    RingBuffer<T>::Reset()
     T array_tmp[write_];
     std::memset(array_tmp,0,sizeof(array_tmp));
     std::memcpy(&array_tmp[0],&array_[0],sizeof(array_tmp));
-    size_t read_index = index_mark_ + 1 - (read_ & index_mark_);
+    size_t read_index = index_mask_ + 1 - (read_ & index_mask_);
     std::memcpy(&array_[0],GetBegin(), read_index * sizeof(T));
     std::memcpy(&array_[read_index],&array_tmp[0],sizeof(array_tmp));
   }
@@ -174,12 +174,12 @@ void    RingBuffer<T>::SkipWrite(int offset)
 template<class T>
 T*      RingBuffer<T>::GetBegin() const
 {
-  return & array_[ read_ & index_mark_ ];
+  return & array_[ read_ & index_mask_ ];
 }
 template<class T>
 T*      RingBuffer<T>::GetEnd() const
 {
-  return & array_[ write_ & index_mark_ ];
+  return & array_[ write_ & index_mask_ ];
 }
 template<class T>
 size_t  RingBuffer<T>::GetSize() const
@@ -190,12 +190,12 @@ size_t  RingBuffer<T>::GetSize() const
 template<class T>
 size_t  RingBuffer<T>::GetTailSpace() const
 {
-  return index_mark_ - (write_ & index_mark_);
+  return index_mask_ - (write_ & index_mask_);
 }
 template<class T>
 size_t  RingBuffer<T>::GetCapacity() const
 {
-  return index_mark_ + 1;
+  return index_mask_ + 1;
 }
 
 }

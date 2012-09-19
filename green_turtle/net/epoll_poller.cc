@@ -54,12 +54,12 @@ void EpollPoller::PollOnce(int timeout,std::vector<EventHandler*>& fired_handler
     EventHandler *handle = this->GetEventHandler(e.data.fd);
     assert(handle);
 
-    int mark = kEventNone;
-    if(e.events & EPOLLIN)  mark |= kEventReadable;
-    if(e.events & EPOLLOUT) mark |= kEventWriteable;
-    if(e.events & EPOLLERR) mark |= kEventWriteable;
-    if(e.events & EPOLLHUP) mark |= kEventWriteable;
-    handle->set_revents(mark);
+    int mask = kEventNone;
+    if(e.events & EPOLLIN)  mask |= kEventReadable;
+    if(e.events & EPOLLOUT) mask |= kEventWriteable;
+    if(e.events & EPOLLERR) mask |= kEventWriteable;
+    if(e.events & EPOLLHUP) mask |= kEventWriteable;
+    handle->set_revents(mask);
 
     fired_handler.push_back(handle);
   }

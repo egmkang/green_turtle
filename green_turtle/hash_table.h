@@ -203,8 +203,8 @@ class hash_map
   value_type* find_position(const key_type& key)
   {
     size_type hash_pair_ = hasher_(key);
-    size_type mark_ = capacity_ - 1;
-    size_type begin_ = hash_pair_ & mark_;
+    size_type mask_ = capacity_ - 1;
+    size_type begin_ = hash_pair_ & mask_;
     size_type times_ = 0;
     value_type *first_deleted_ = NULL;
     while(true)
@@ -219,7 +219,7 @@ class hash_map
       else if(equaler_(key,buckets_[begin_].first))
         return &buckets_[begin_];
 
-      begin_ = (begin_ + 1) &  mark_;
+      begin_ = (begin_ + 1) &  mask_;
       assert(times_++ <= capacity_);
     }
     return NULL;

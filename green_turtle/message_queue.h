@@ -93,7 +93,7 @@ class MessageQueue : NonCopyable
     : read_idx_()
     , write_idx_()
     , size_(size)
-    , mark_(size - 1)
+    , mask_(size - 1)
     , array_(new T[size]())
   {
     assert(size >= 2);
@@ -111,10 +111,10 @@ class MessageQueue : NonCopyable
     const auto current_write_ = write_idx_.load(std::memory_order_relaxed);
     const auto current_read_  = read_idx_.load(std::memory_order_acquire);
 
-    if(current_write_ - current_read_ == mark_)
+    if(current_write_ - current_read_ == mask_)
       return false;
 
-    array_[current_write_ & mark_] = v;
+    array_[current_write_ & mask_] = v;
     write_idx_.store(current_write_ + 1, std::memory_order_release);
 
     return true;
@@ -127,7 +127,7 @@ class MessageQueue : NonCopyable
     if(current_read_ == current_write_)
       return false;
 
-    v = array_[current_read_ & mark_];
+    v = array_[current_read_ & mask_];
     read_idx_.store(current_read_ + 1, std::memory_order_release);
     return true;
   }
@@ -135,7 +135,7 @@ class MessageQueue : NonCopyable
   {
     const auto current_read_  = read_idx_.load(std::memory_order_relaxed);
     const auto current_write_ = write_idx_.load(std::memory_order_relaxed);
-    return (current_read_ - current_write_) & mark_;
+    return (current_read_ - current_write_) & mask_;
   }
   uint64_t Capacity() const
   {
@@ -145,7 +145,7 @@ private:
   Counter         read_idx_;
   Counter         write_idx_;
   const uint64_t  size_;
-  const uint64_t  mark_;
+  const uint64_t  mask_;
   value_type      *array_;
 };
 

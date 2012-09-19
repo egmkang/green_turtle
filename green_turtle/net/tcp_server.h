@@ -68,11 +68,11 @@ class TcpServer : green_turtle::NonCopyable {
   void InitEventLoop();
   void InitThreads();
  private:
-  typedef std::pair<EventHandler*, int> PairMark;
+  typedef std::pair<EventHandler*, int> PairMask;
 
   std::vector<EventLoop*>   loops_;
   std::vector<std::thread*> threads_;
-  std::vector<PairMark>     handler_mark_;
+  std::vector<PairMask>     handler_mask_;
   TimerQueue    *timer_queue_;
   MessageProc   message_proc_;
   bool  is_terminal_;

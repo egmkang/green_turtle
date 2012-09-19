@@ -37,14 +37,14 @@ void TcpServer::SetMessageProc(MessageProc proc)
 
 void TcpServer::AddAcceptor(TcpAcceptor *acceptor)
 {
-  this->handler_mark_.push_back({acceptor,-1});
+  this->handler_mask_.push_back({acceptor,-1});
   acceptor->set_events(kEventReadable);
 }
 
 void TcpServer::AddClient(TcpClient *client, int slot)
 {
   assert(slot >= 0 && slot < 32);
-  this->handler_mark_.push_back({client,1 << slot});
+  this->handler_mask_.push_back({client,1 << slot});
   client->set_events(kEventReadable | kEventWriteable);
 }
 
@@ -82,7 +82,7 @@ void TcpServer::InitEventLoop()
     assert(loop);
     this->loops_.push_back(loop);
   }
-  for(auto& pair : this->handler_mark_)
+  for(auto& pair : this->handler_mask_)
   {
     for(int shift = 0; shift < thread_count_; ++shift)
     {

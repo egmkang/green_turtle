@@ -76,10 +76,10 @@ void KqueuePoller::PollOnce(int timeout,std::vector<EventHandler*>& fired_handle
     EventHandler *handle = this->GetEventHandler(e.ident);
     assert(handle);
 
-    int mark = kEventNone;
-    if(e.filter & EVFILT_READ)  mark |= kEventReadable;
-    if(e.filter & EVFILT_WRITE) mark |= kEventWriteable;
-    handle->set_revents(mark);
+    int mask = kEventNone;
+    if(e.filter & EVFILT_READ)  mask |= kEventReadable;
+    if(e.filter & EVFILT_WRITE) mask |= kEventWriteable;
+    handle->set_revents(mask);
 
     fired_handler.push_back(handle);
   }
