@@ -135,7 +135,7 @@ class MessageQueue : NonCopyable
   {
     const auto current_read_  = read_idx_.load(std::memory_order_relaxed);
     const auto current_write_ = write_idx_.load(std::memory_order_relaxed);
-    return (current_read_ - current_write_) & mask_;
+    return (current_write_ - current_read_);
   }
   uint64_t Capacity() const
   {

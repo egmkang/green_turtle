@@ -95,7 +95,7 @@ int BufferedSocket::OnWrite()
     if(send_size < 0)   return kErr;
     else if(!send_size) return kOK;
     cache->SkipRead(send_size);
-    if(!cache->GetSize() && !cache->GetTailSpace())
+    if(!cache->GetSize())
     {
       delete cache;
       snd_queue_.pop_front();
