@@ -75,6 +75,9 @@ int SocketOption::SetRecvBuffer(int fd, int size)
 }
 int SocketOption::Listen(int fd, const struct sockaddr* addr, int len)
 {
+  int optval = 1;
+  ::setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval));
+
   int ret = ::bind(fd, addr, len);
   if(ret == -1)
   {
