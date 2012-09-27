@@ -93,4 +93,5 @@ void EventLoop::Loop()
       handler->OnError();
     }
   }
+  assert(false);
 }

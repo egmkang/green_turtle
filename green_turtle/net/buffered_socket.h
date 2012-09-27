@@ -38,6 +38,7 @@
 #include <ring_buffer.h>
 #include "addr_info.h"
 #include "event_handler.h"
+#include "message.h"
 
 namespace green_turtle{
 namespace net{
@@ -49,25 +50,23 @@ class BufferedSocket : public EventHandler
  public:
   BufferedSocket(int fd,const AddrInfo& addr, int recv_buff = 0, int send_buff = 0);
   ~BufferedSocket();
-  //data must in heap,cannot be an object on stack
-  void SendMessage(const void *data, size_t len);
+  void SendMessage(std::shared_ptr<Message>& message);
   const AddrInfo& addr() const;
-  CacheLine* GetNewCacheLine();
  protected:
   virtual int OnRead();
   virtual int OnWrite();
   virtual int OnError();
   virtual void ProcessInputData(CacheLine& data) = 0;
-  virtual void ProcessOutputMessage(const void *data, unsigned int len) = 0;
   virtual void ProcessDeleteSelf() = 0;
  private:
-  typedef std::pair<const void*, unsigned int> RawData;
+  typedef std::shared_ptr<Message>  RawData;
+
   AddrInfo                    addr_;
-  const size_t                cache_line_size_;
-  std::deque<CacheLine*>      snd_queue_;
+  std::deque<RawData>         snd_queue_;
   std::deque<RawData>         snd_raw_data_queue;
   CacheLine                   *rcv_buffer_;
   std::mutex                  write_lock_;
+  size_t                      current_send_ = 0;
 };
 
 }

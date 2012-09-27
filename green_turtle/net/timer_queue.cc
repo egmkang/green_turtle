@@ -73,9 +73,9 @@ void TimerQueue::Update(uint64_t current_time)
   if(!last_update_time_)
     last_update_time_ = current_time;
 
-  uint64_t delta_time = current_time + this->interval_;
+  //uint64_t delta_time = current_time + this->interval_;
   size_t   slot_mask = slot_size - 1;
-  while(last_update_time_ < delta_time)
+  while(last_update_time_ + this->interval_ < current_time)
   {
     list_type& list_ = queues_[current_slot_];
 

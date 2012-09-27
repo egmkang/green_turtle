@@ -107,6 +107,14 @@ int SocketOption::Write(int fd, const void *data, size_t len)
   if(nwrite == -1 && errno == EAGAIN) nwrite = 0;
   return nwrite;
 }
+int SocketOption::Writev(int fd, const struct iovec *data, size_t len)
+{
+  int nwrite = ::writev(fd, data, len);
+  int error_no = errno;
+  (void)error_no;
+  if(nwrite == -1 && errno == EAGAIN) nwrite = 0;
+  return nwrite;
+}
 
 int SocketOption::Read(int fd, void *data, const size_t len)
 {
