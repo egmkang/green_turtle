@@ -8,6 +8,7 @@
 #include <atomic>
 #include <system.h>
 #include <iostream>
+#include "simple_message.h"
 
 using namespace green_turtle;
 using namespace green_turtle::net;
@@ -40,23 +41,6 @@ class PrintMessageCount : public Timer
   }
 };
 
-class EchoMessage : public Message
-{
- public:
-  EchoMessage(const char *data)
-      :data_(data)
-  {
-  }
-  EchoMessage(const char *data, size_t len)
-      :data_(data, data+len)
-  {
-  }
-  void* data() const { return (void*)&data_[0]; }
-  size_t length() const { return data_.length(); }
- private:
-  std::string data_;
-};
-
 class EchoTask : public BufferedSocket
 {
  public:
@@ -69,7 +53,7 @@ class EchoTask : public BufferedSocket
     {
       ++message_count;
       message_size += data.GetSize();
-      std::shared_ptr<Message> message(new EchoMessage((char*)data.GetBegin(), data.GetSize()));
+      std::shared_ptr<Message> message(new SimpleMessage((char*)data.GetBegin(), data.GetSize()));
       data.SkipRead(data.GetSize());
       this->SendMessage(message);
     }
