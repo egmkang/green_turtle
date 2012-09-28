@@ -82,7 +82,7 @@ int main()
 
   for(int i = 0; i < CLIENT_NUM; ++i)
   {
-    EchoTcpClient *client = new EchoTcpClient("127.0.0.1", 10001);
+    EchoTcpClient *client = new EchoTcpClient("192.168.89.56", 10001);
     int errorCode = client->Connect();
     assert(!errorCode);
     client->set_events(kEventReadable | kEventWriteable);

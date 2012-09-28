@@ -86,7 +86,6 @@ int BufferedSocket::OnWrite()
                            std::min(len - sent, cache->GetTailSpace()));
     }
   }
-  send_raw_message_queue.clear();
 
   while(!snd_queue_.empty())
   {
@@ -97,13 +96,15 @@ int BufferedSocket::OnWrite()
     cache->SkipRead(send_size);
     if(!cache->GetTailSpace())
     {
+      if(snd_queue_.size() == 1)
+      {
+        cache->Reset();
+        break;
+      }
       delete cache;
       snd_queue_.pop_front();
     }
-    else
-    {
-      break;
-    }
+    break;
   }
   return kOK;
 }
