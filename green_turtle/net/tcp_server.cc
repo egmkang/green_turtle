@@ -10,13 +10,15 @@
 using namespace green_turtle;
 using namespace green_turtle::net;
 
-TcpServer::TcpServer(int expected_size) : 
+TcpServer::TcpServer(int expected_size) :
     timer_queue_(new TimerQueue(2048,16))
     ,message_proc_(nullptr)
     ,is_terminal_(false)
     ,thread_count_(1)
     ,expected_size_(expected_size)
 {
+  System::UpdateTime();
+  timer_queue_->Update(System::GetMilliSeconds());
 }
 
 TcpServer::~TcpServer()

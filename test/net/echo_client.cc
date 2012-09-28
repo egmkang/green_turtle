@@ -5,11 +5,30 @@
 #include <stdio.h>
 #include <string>
 #include <atomic>
+#include <memory>
+#include <iostream>
 
 using namespace green_turtle;
 using namespace green_turtle::net;
 
 static std::atomic<long> recv_message_count_(0);
+
+class EchoMessage : public Message
+{
+ public:
+  EchoMessage(const char *data)
+      :data_(data)
+  {
+  }
+  EchoMessage(const char *data, size_t len)
+      :data_(data, data+len)
+  {
+  }
+  void* data() const { return (void*)&data_[0]; }
+  size_t length() const { return data_.length(); }
+ private:
+  std::string data_;
+};
 
 static char * NewEchoString(int& send_times_)
 {
@@ -31,13 +50,15 @@ class EchoTcpClient : public TcpClient
     long count = recv_message_count_.load(std::memory_order_acquire);
     if(count % 1024 == 0)
     {
-      printf("%p , %s\n", this, str.c_str());
+      std::cout << "=============================================" << std::endl << str << std::endl;
     }
     if(size)
     {
       data.SkipRead(size);
       char *str = NewEchoString(this->send_times_);
-      this->SendMessage(str, strlen(str));
+      std::shared_ptr<Message> message(new EchoMessage(str));
+      this->SendMessage(message);
+      free(str);
       recv_message_count_.store(count + 1, std::memory_order_release);
     }
     if(this->send_times_ > 10000)
@@ -46,33 +67,20 @@ class EchoTcpClient : public TcpClient
     }
   }
 
-  virtual void ProcessOutputMessage(const void *data, unsigned int len)
-  {
-    size_t sent = 0;
-    while(len - sent)
-    {
-      CacheLine *cache = GetNewCacheLine();
-      sent += cache->Write(reinterpret_cast<const unsigned char*>(data) +
-                           sent, len - sent);
-    }
-    free((void*)data);
-  }
-
   virtual void ProcessDeleteSelf()
   {
     delete this;
-    //this->event_loop()->Ternimal();
   }
  private:
   int send_times_ = 0;
 };
 
-
+#define CLIENT_NUM    400
 int main()
 {
-  EventLoop loop(512);
+  EventLoop loop(CLIENT_NUM);
 
-  for(int i = 0; i < 512; ++i)
+  for(int i = 0; i < CLIENT_NUM; ++i)
   {
     EchoTcpClient *client = new EchoTcpClient("127.0.0.1", 10001);
     int errorCode = client->Connect();
@@ -81,8 +89,9 @@ int main()
 
     int num = 0;
     char *str = NewEchoString(num);
-    client->SendMessage(str, strlen(str));
-
+    std::shared_ptr<Message> message(new EchoMessage(str));
+    client->SendMessage(message);
+    free(str);
     loop.AddEventHandler(client);
   }
 

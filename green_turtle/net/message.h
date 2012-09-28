@@ -29,46 +29,19 @@
 //
 // author: egmkang (egmkang@gmail.com)
 
-#ifndef __BUFFERED_SOCKET__
-#define __BUFFERED_SOCKET__
+#ifndef __NET_MESSAGE__
+#define __NET_MESSAGE__
+#include <noncopyable.h>
 #include <cstddef>
-#include <deque>
-#include <mutex>
-#include <memory>
-#include <ring_buffer.h>
-#include "addr_info.h"
-#include "event_handler.h"
-#include "message.h"
-
 namespace green_turtle{
 namespace net{
-
-class BufferedSocket : public EventHandler
-{
+class Message : green_turtle::NonCopyable {
  public:
-  typedef green_turtle::RingBuffer<unsigned char> CacheLine;
- public:
-  BufferedSocket(int fd,const AddrInfo& addr, int recv_buff = 0, int send_buff = 0);
-  ~BufferedSocket();
-  void SendMessage(std::shared_ptr<Message>& data);
-  const AddrInfo& addr() const;
-  CacheLine* GetNewCacheLine();
- protected:
-  virtual int OnRead();
-  virtual int OnWrite();
-  virtual int OnError();
-  virtual void ProcessInputData(CacheLine& data) = 0;
-  virtual void ProcessDeleteSelf() = 0;
- private:
-  typedef std::shared_ptr<Message>  RawData;
-  AddrInfo                    addr_;
-  const size_t                cache_line_size_;
-  std::deque<CacheLine*>      snd_queue_;
-  std::deque<RawData>         snd_raw_data_queue;
-  CacheLine                   *rcv_buffer_;
-  std::mutex                  write_lock_;
+  virtual ~Message() {}
+  virtual void*   data()    const = 0;
+  virtual size_t  length()  const = 0;
 };
+}
+}
 
-}
-}
 #endif

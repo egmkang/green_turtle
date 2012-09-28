@@ -10,7 +10,7 @@ using namespace green_turtle::net;
 BufferedSocket::BufferedSocket(int fd,const AddrInfo& addr, int recv_buff, int send_buff)
   : EventHandler(fd)
     , addr_(addr)
-    , cache_line_size_(SocketOption::GetSendBuffer(fd)/4)
+    , cache_line_size_(SocketOption::GetSendBuffer(fd))
     , rcv_buffer_(nullptr)
     , write_lock_()
 {
@@ -22,7 +22,7 @@ BufferedSocket::BufferedSocket(int fd,const AddrInfo& addr, int recv_buff, int s
   if(send_buff)
   {
     SocketOption::SetSendBuffer(fd, send_buff);
-    constructor(const_cast<size_t*>(&cache_line_size_), send_buff/4);
+    constructor(const_cast<size_t*>(&cache_line_size_), send_buff);
   }
 }
 
@@ -50,6 +50,7 @@ int BufferedSocket::OnRead()
   {
     rcv_buffer_->SkipWrite(nread);
     ProcessInputData(*rcv_buffer_);
+    rcv_buffer_->Reset();
   }
   return kOK;
 }
@@ -73,18 +74,17 @@ int BufferedSocket::OnWrite()
     std::lock_guard<std::mutex> lock(this->write_lock_);
     send_raw_message_queue.swap(this->snd_raw_data_queue);
   }
-  //use process here
-  for(auto pair : send_raw_message_queue)
+  for(const auto& message: send_raw_message_queue)
   {
-    const void    *data = pair.first;
-    unsigned int  len = pair.second;
-    this->ProcessOutputMessage(data, len);
-    //size_t sent = 0;
-    //while(len)
-    //{
-    //  CacheLine *cache = GetNewCacheLine();
-    //  sent += cache->Write(reinterpret_cast<const unsigned char*>(data) + sent, len - sent);
-    //}
+    const void    *data = message->data();
+    unsigned int  len = message->length();
+    size_t sent = 0;
+    while(len - sent)
+    {
+      CacheLine *cache = GetNewCacheLine();
+      sent += cache->Write(reinterpret_cast<const unsigned char*>(data) + sent,
+                           std::min(len - sent, cache->GetTailSpace()));
+    }
   }
   send_raw_message_queue.clear();
 
@@ -95,10 +95,14 @@ int BufferedSocket::OnWrite()
     if(send_size < 0)   return kErr;
     else if(!send_size) return kOK;
     cache->SkipRead(send_size);
-    if(!cache->GetSize())
+    if(!cache->GetTailSpace())
     {
       delete cache;
       snd_queue_.pop_front();
+    }
+    else
+    {
+      break;
     }
   }
   return kOK;
@@ -111,8 +115,8 @@ int BufferedSocket::OnError()
   return -1;
 }
 
-void BufferedSocket::SendMessage(const void *data, size_t len)
+void BufferedSocket::SendMessage(std::shared_ptr<Message>& data)
 {
   std::lock_guard<std::mutex> lock(this->write_lock_);
-  this->snd_raw_data_queue.push_back({data,len});
+  this->snd_raw_data_queue.push_back(data);
 }

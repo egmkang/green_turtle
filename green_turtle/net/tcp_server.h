@@ -34,6 +34,7 @@
 #include <vector>
 #include <thread>
 #include <noncopyable.h>
+#include "timer.h"
 
 namespace green_turtle{
 namespace net{
@@ -43,7 +44,6 @@ class EventLoop;
 class TcpAcceptor;
 class TcpClient;
 class TimerQueue;
-class Timer;
 class TcpServer;
 
 typedef void (*MessageProc)(TcpServer*);
