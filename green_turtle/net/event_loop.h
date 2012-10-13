@@ -32,7 +32,7 @@
 #ifndef __event_loop__
 #define __event_loop__
 #include <vector>
-#include <thread>
+#include <mutex>
 #include <deque>
 #include "event_handler.h"
 #include <noncopyable.h>

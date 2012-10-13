@@ -32,6 +32,7 @@
 #ifndef __TCP_ACCEPTOR__
 #define __TCP_ACCEPTOR__
 #include <vector>
+#include <cstddef>
 #include "event_handler.h"
 
 namespace green_turtle{
