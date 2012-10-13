@@ -39,10 +39,10 @@ static char * NewEchoString(int& send_times_)
   return str;
 }
 
-class BroadCastClient : public TcpClient
+class EchoClient : public TcpClient
 {
  public:
-  BroadCastClient(const std::string& ip, unsigned short port) : TcpClient(ip, port, 16*1024, 16*1024){}
+  EchoClient(const std::string& ip, unsigned short port) : TcpClient(ip, port, 16*1024, 16*1024){}
  protected:
   virtual void Decoding(CacheLine& data)
   {
@@ -85,7 +85,7 @@ int main()
 
   for(int i = 0; i < CLIENT_NUM; ++i)
   {
-    BroadCastClient *client = new BroadCastClient("192.168.89.56", 10001);
+    EchoClient *client = new EchoClient("192.168.89.56", 10001);
     int errorCode = client->Connect();
     assert(!errorCode);
     client->set_events(kEventReadable | kEventWriteable);
