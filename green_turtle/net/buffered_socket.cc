@@ -104,7 +104,10 @@ int BufferedSocket::OnWrite()
       delete cache;
       snd_queue_.pop_front();
     }
-    break;
+    else
+    {
+      break;
+    }
   }
   return kOK;
 }
