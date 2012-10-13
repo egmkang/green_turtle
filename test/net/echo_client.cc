@@ -14,35 +14,25 @@ using namespace green_turtle::net;
 
 static std::atomic<long> recv_message_count_(0);
 
-static char * NewEchoString(int& send_times_)
-{
-  char * str = (char*)malloc(100);
-  snprintf(str, 100, "this is echo string sent by client, %d times",send_times_);
-  send_times_++;
-  return str;
-}
-
-class EchoTcpClient : public TcpClient
+class BroadCastClient : public TcpClient
 {
  public:
-  EchoTcpClient(const std::string& ip, unsigned short port) : TcpClient(ip, port, 16*1024, 16*1024){}
+  BroadCastClient(const std::string& ip, unsigned short port) : TcpClient(ip, port, 16*1024, 16*1024){}
  protected:
-  virtual void ProcessInputData(CacheLine& data)
+  virtual void Decoding(CacheLine& data)
   {
     size_t size = data.GetSize();
     std::string str((char*)data.GetBegin(), (char*)data.GetEnd());
     long count = recv_message_count_.load(std::memory_order_acquire);
+
     if(count % 1024 == 0)
     {
       std::cout << "=============================================" << std::endl << str << std::endl;
     }
     if(size)
     {
-      data.SkipRead(size);
-      char *str = NewEchoString(this->send_times_);
-      std::shared_ptr<Message> message(new SimpleMessage(str));
-      this->SendMessage(message);
-      free(str);
+      //this->SendMessage(message);
+
       recv_message_count_.store(count + 1, std::memory_order_release);
     }
     if(this->send_times_ > 10000)
@@ -51,7 +41,7 @@ class EchoTcpClient : public TcpClient
     }
   }
 
-  virtual void ProcessDeleteSelf()
+  virtual void DeleteSelf()
   {
     delete this;
   }
@@ -66,16 +56,13 @@ int main()
 
   for(int i = 0; i < CLIENT_NUM; ++i)
   {
-    EchoTcpClient *client = new EchoTcpClient("192.168.89.56", 10001);
+    BroadCastClient *client = new BroadCastClient("192.168.89.56", 10001);
     int errorCode = client->Connect();
     assert(!errorCode);
     client->set_events(kEventReadable | kEventWriteable);
 
-    int num = 0;
-    char *str = NewEchoString(num);
-    std::shared_ptr<Message> message(new SimpleMessage(str));
-    client->SendMessage(message);
-    free(str);
+    //TODO:egmkang
+
     loop.AddEventHandler(client);
   }
 

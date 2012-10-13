@@ -57,8 +57,8 @@ class BufferedSocket : public EventHandler
   virtual int OnRead();
   virtual int OnWrite();
   virtual int OnError();
-  virtual void ProcessInputData(CacheLine& data) = 0;
-  virtual void ProcessDeleteSelf() = 0;
+  virtual void Decoding(CacheLine& data) = 0;
+  virtual void DeleteSelf() = 0;
  private:
   typedef std::shared_ptr<Message>  RawData;
   AddrInfo                    addr_;

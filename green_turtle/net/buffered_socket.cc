@@ -49,7 +49,7 @@ int BufferedSocket::OnRead()
   if(nread)
   {
     rcv_buffer_->SkipWrite(nread);
-    ProcessInputData(*rcv_buffer_);
+    Decoding(*rcv_buffer_);
     rcv_buffer_->Reset();
   }
   return kOK;
@@ -115,7 +115,7 @@ int BufferedSocket::OnWrite()
 int BufferedSocket::OnError()
 {
   this->event_loop()->RemoveEventHandler(this);
-  this->ProcessDeleteSelf();
+  this->DeleteSelf();
   return -1;
 }
 

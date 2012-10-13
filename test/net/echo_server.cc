@@ -46,7 +46,7 @@ class EchoTask : public BufferedSocket
  public:
   EchoTask(int fd,const AddrInfo& addr):BufferedSocket(fd, addr){}
  protected:
-  virtual void ProcessInputData(CacheLine& data)
+  virtual void Decoding(CacheLine& data)
   {
     size_t size = data.GetSize();
     if(size)
@@ -58,7 +58,7 @@ class EchoTask : public BufferedSocket
       this->SendMessage(message);
     }
   }
-  virtual void ProcessDeleteSelf()
+  virtual void DeleteSelf()
   {
     printf("EchoTask will be disposed, %p\n", this);
     delete this;
