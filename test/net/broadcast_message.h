@@ -1,20 +1,25 @@
-#ifndef __BROADCAST_MESSAGE__
-#define __BROADCAST_MESSAGE__
+#ifndef __BROADCAST_Command__
+#define __BROADCAST_Command__
 #include <stdint.h>
 
-struct Message
+enum
 {
-  explicit Message(uint16_t type) : type(type) {}
+  kCommandMaxLen  = 4*1024,
+};
+
+struct Command
+{
+  explicit Command(uint16_t type) : type(type) {}
   uint16_t  len;
   uint16_t  type;
 };
 
-enum MessageType
+enum CommandType
 {
-  kMessageType_NULL           = 0,
-  kMessageType_Echo           = 1,
-  kMessageType_EchoResponse   = 1,
-  kMessageType_BroadCast      = 2,
+  kCommandType_NULL           = 0,
+  kCommandType_Echo           = 1,
+  kCommandType_EchoResponse   = 1,
+  kCommandType_BroadCast      = 2,
 };
 
 template<typename T>
@@ -23,9 +28,9 @@ struct PodLength
   uint16_t Length() const{ return sizeof(*this); }
 };
 
-struct EchoMessage : public Message
+struct EchoCommand : public Command
 {
-  EchoMessage() : Message(kMessageType_Echo)
+  EchoCommand() : Command(kCommandType_Echo)
   {
   }
   uint16_t  data_len;
@@ -36,16 +41,16 @@ struct EchoMessage : public Message
   }
 };
 
-struct EchoResponseMessage : public Message, public PodLength<EchoResponseMessage>
+struct EchoResponseCommand : public Command, public PodLength<EchoResponseCommand>
 {
-  EchoResponseMessage() : Message(kMessageType_EchoResponse)
+  EchoResponseCommand() : Command(kCommandType_EchoResponse)
   {
   }
 };
 
-struct BroadCastMessage : public Message
+struct BroadCastCommand : public Command
 {
-  BroadCastMessage() : Message(kMessageType_BroadCast)
+  BroadCastCommand() : Command(kCommandType_BroadCast)
   {
   }
   uint16_t  data_len;

@@ -7,3 +7,8 @@ ADD_EXECUTABLE(echo_client
     echo_client.cc
     )
 TARGET_LINK_LIBRARIES(echo_client green_turtle tcmalloc)
+
+ADD_EXECUTABLE(broadcast_server
+    broadcast_server.cc
+    )
+TARGET_LINK_LIBRARIES(broadcast_server green_turtle tcmalloc)

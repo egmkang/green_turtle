@@ -55,9 +55,13 @@ class EventLoop : NonCopyable
  public:
   void AddHandlerLater(EventHandler *pEventHandler);
   void RemoveHandlerLater(EventHandler *pEventHandler);
+ public:
+  int   LoopIndex() const { return loop_index_; }
+  void  SetLoopIndex(int index) { loop_index_ = index; }
  private:
   Poller  *poller_;
   bool    terminal_;
+  int     loop_index_ = 0;
   std::vector<EventHandler*>  fired_handler_;
 
   std::mutex                  add_mutex_;
