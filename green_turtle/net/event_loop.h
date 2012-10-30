@@ -41,6 +41,8 @@ namespace green_turtle{
 namespace net{
 
 class Poller;
+class Timer;
+class TimerQueue;
 
 class EventLoop : NonCopyable
 {
@@ -56,13 +58,21 @@ class EventLoop : NonCopyable
   void AddHandlerLater(EventHandler *pEventHandler);
   void RemoveHandlerLater(EventHandler *pEventHandler);
  public:
+  //register a timer,unit ms
+  void ScheduleTimer(Timer *timer_ptr,uint64_t timer_interval,int64_t time_delay = 0);
+  //unregister a timer
+  void CancelTimer(Timer *timer_ptr);
+ public:
   int   LoopIndex() const { return loop_index_; }
   void  SetLoopIndex(int index) { loop_index_ = index; }
+ private:
+  void LazyInitTimerQueue();
  private:
   Poller  *poller_;
   bool    terminal_;
   int     loop_index_ = 0;
   std::vector<EventHandler*>  fired_handler_;
+  TimerQueue  *timer_queue_;
 
   std::mutex                  add_mutex_;
   std::deque<EventHandler*>   add_handler_;

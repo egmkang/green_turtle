@@ -1,74 +1,51 @@
 #include <net/tcp_client.h>
 #include <net/event_loop.h>
+#include <net/timer_queue.h>
+#include <net/timer.h>
 #include <message_queue.h>
+#include <constructor_in_place.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string>
 #include <atomic>
 #include <memory>
 #include <iostream>
+#include <random>
 #include "simple_message.h"
 #include "broadcast_message.h"
 
 using namespace green_turtle;
 using namespace green_turtle::net;
 
-static std::atomic<long> recv_message_count_(0);
+static std::random_device rd;
+static std::mt19937 gen(rd());
+static std::uniform_int_distribution<int> dis(1, 100);
+static std::uniform_int_distribution<int> next_timer(100, 400);
 
-class EchoMessage : public Message
+static long recv_message_count[3] = {0};
+
+static void RandMessage(TcpClient *pClient);
+
+class BroadCastClient : public TcpClient, public Timer
 {
  public:
-  EchoMessage(const char *data)
-      :data_(data)
-  {
-  }
-  EchoMessage(const char *data, size_t len)
-      :data_(data, data+len)
-  {
-  }
-  void* data() const { return (void*)&data_[0]; }
-  size_t length() const { return data_.length(); }
- private:
-  std::string data_;
-};
-
-static char * NewEchoString(int& send_times_)
-{
-  char * str = (char*)malloc(100);
-  snprintf(str, 100, "this is echo string sent by client, %d times",send_times_);
-  send_times_++;
-  return str;
-}
-
-class EchoClient : public TcpClient
-{
- public:
-  EchoClient(const std::string& ip, unsigned short port) : TcpClient(ip, port, 16*1024, 16*1024){}
+  BroadCastClient(const std::string& ip, unsigned short port) : TcpClient(ip, port, 16*1024, 16*1024){}
  protected:
   virtual void Decoding(CacheLine& data)
   {
-    size_t size = data.GetSize();
-    std::string str((char*)data.GetBegin(), (char*)data.GetEnd());
-    long count = recv_message_count_.load(std::memory_order_acquire);
+    Command *pCommand = (Command*)(data.GetBegin());
+    if(data.GetSize() >= pCommand->len)
+    {
+      ++recv_message_count[pCommand->type];
+      data.SkipRead(pCommand->len);
+    }
+  }
 
-    if(count % 1024 == 0)
-    {
-      std::cout << "=============================================" << std::endl << str << std::endl;
-    }
-    if(size)
-    {
-      data.SkipRead(size);
-      char *str = NewEchoString(this->send_times_);
-      std::shared_ptr<Message> message(new EchoMessage(str));
-      this->SendMessage(message);
-      free(str);
-
-      recv_message_count_.store(count + 1, std::memory_order_release);
-    }
-    if(this->send_times_ > 10000)
-    {
-      this->event_loop()->RemoveHandlerLater(this);
-    }
+  virtual void OnTimeOut(uint64_t current_time)
+  {
+    (void)current_time;
+    this->event_loop()->ScheduleTimer(this, next_timer(gen));
+    RandMessage(this);
   }
 
   virtual void DeleteSelf()
@@ -79,6 +56,30 @@ class EchoClient : public TcpClient
   int send_times_ = 0;
 };
 
+static void RandMessage(TcpClient *pClient)
+{
+  std::shared_ptr<Message> message;
+  char raw_data[1024];
+  int rand = dis(gen);
+  if(rand < 50)
+  {
+    EchoCommand *pEchoCmd = (EchoCommand*)(raw_data);
+    constructor(pEchoCmd);
+    pEchoCmd->data_len = snprintf(pEchoCmd->data, 300, "this is a EchoMessage, random value %lu",
+                                  gen());
+    message = std::shared_ptr<Message>(new SimpleMessage(raw_data, pEchoCmd->Length()));
+  }
+  else
+  {
+    BroadCastCommand *pBroadCast = (BroadCastCommand*)(raw_data);
+    constructor(pBroadCast);
+    pBroadCast->data_len = snprintf(pBroadCast->data, 300, "this is a BroadCastMessage, random value %lu",
+                                    gen());
+    message = std::shared_ptr<Message>(new SimpleMessage(raw_data, pBroadCast->Length()));
+  }
+  pClient->SendMessage(message);
+}
+
 #define CLIENT_NUM    400
 int main()
 {
@@ -86,21 +87,14 @@ int main()
 
   for(int i = 0; i < CLIENT_NUM; ++i)
   {
-    EchoClient *client = new EchoClient("192.168.89.56", 10001);
+    BroadCastClient *client = new BroadCastClient("192.168.89.56", 10001);
     int errorCode = client->Connect();
     assert(!errorCode);
     client->set_events(kEventReadable | kEventWriteable);
 
-    int num = 0;
-    char *str = NewEchoString(num);
-    std::shared_ptr<Message> message(new EchoMessage(str));
-    client->SendMessage(message);
-    free(str);
-
     loop.AddEventHandler(client);
+    loop.ScheduleTimer(client, next_timer(gen));
   }
-
-
   loop.Loop();
   return 0;
 }

@@ -80,6 +80,7 @@ class BroadCastTask : public BufferedSocket
           char *raw_data = (char*)malloc(pCommand->len);
           memcpy(raw_data, data.GetBegin(), pCommand->len);
           PushMessage(this->fd(), (Command*)raw_data, this->event_loop()->LoopIndex());
+          data.SkipRead(pCommand->len);
         }
       }
     }
@@ -106,7 +107,7 @@ static void _MessageProc(TcpServer *pServer)
       Command *pCmd = pair.second;
       if(pCmd->type == kCommandType_Echo)
       {
-        if(gen() <= 75)
+        if(dis(gen) <= 75)
         {
           SendMesageByPercent(75, (const char*)pCmd, pCmd->len);
         }
