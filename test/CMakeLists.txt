@@ -13,11 +13,6 @@ ADD_EXECUTABLE(ref_obj_test
     )
 TARGET_LINK_LIBRARIES(ref_obj_test green_turtle)
 
-ADD_EXECUTABLE(ring_buffer_test
-    ring_buffer_test.cc
-    )
-TARGET_LINK_LIBRARIES(ring_buffer_test green_turtle)
-
 ADD_EXECUTABLE(buffer_test
     buffer_test.cc
     )
