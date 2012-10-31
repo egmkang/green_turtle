@@ -1,4 +1,3 @@
-#include <algorithm>
 #include <assert.h>
 #include "addr_info.h"
 #include "socket_option.h"
@@ -88,7 +87,6 @@ int TcpAcceptor::OnError()
 void TcpAcceptor::loop_balance(const std::vector<EventLoop *> &loops)
 {
   this->loops_ = loops;
-  std::random_shuffle(this->loops_.begin(), this->loops_.end());
 }
 
 EventHandler* TcpAcceptor::CreateNewHandler(int fd, const AddrInfo& info)
