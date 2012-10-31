@@ -83,7 +83,7 @@ struct PaddedVolatileIndex : public internal::VolatileIndex {
 //support POD data only
 //1:1 MessageQueue
 //N:1 equals N*(1:1)
-template<class T, class Counter = PaddedVolatileIndex>
+template<class T, class Counter = PaddedAtomicIndex>
 class MessageQueue : NonCopyable
 {
  public:

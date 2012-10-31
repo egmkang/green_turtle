@@ -11,6 +11,7 @@
 #include <memory>
 #include <iostream>
 #include <random>
+#include <system.h>
 #include "simple_message.h"
 #include "broadcast_message.h"
 
@@ -33,11 +34,20 @@ class BroadCastClient : public TcpClient, public Timer
  protected:
   virtual void Decoding(CacheLine& data)
   {
-    Command *pCommand = (Command*)(data.GetBegin());
-    if(data.GetSize() >= pCommand->len)
+    while(true)
     {
-      ++recv_message_count[pCommand->type];
-      data.SkipRead(pCommand->len);
+      Command *pCommand = (Command*)(data.GetBegin());
+      if(data.GetSize() > 4 && data.GetSize() >= pCommand->len)
+      {
+        assert(pCommand->len < 2000);
+        assert(pCommand->type < 3);
+        ++recv_message_count[pCommand->type];
+        data.SkipRead(pCommand->len);
+      }
+      else
+      {
+        break;
+      }
     }
   }
 
@@ -67,6 +77,9 @@ static void RandMessage(TcpClient *pClient)
     constructor(pEchoCmd);
     pEchoCmd->data_len = snprintf(pEchoCmd->data, 300, "this is a EchoMessage, random value %lu",
                                   gen());
+    pEchoCmd->len = pEchoCmd->Length();
+    assert(pEchoCmd->len < 2000);
+    assert(pEchoCmd->type < 3);
     message = std::shared_ptr<Message>(new SimpleMessage(raw_data, pEchoCmd->Length()));
   }
   else
@@ -75,15 +88,19 @@ static void RandMessage(TcpClient *pClient)
     constructor(pBroadCast);
     pBroadCast->data_len = snprintf(pBroadCast->data, 300, "this is a BroadCastMessage, random value %lu",
                                     gen());
+    pBroadCast->len = pBroadCast->Length();
+    assert(pBroadCast->len < 2000);
+    assert(pBroadCast->type < 3);
     message = std::shared_ptr<Message>(new SimpleMessage(raw_data, pBroadCast->Length()));
   }
   pClient->SendMessage(message);
 }
 
-#define CLIENT_NUM    400
+#define CLIENT_NUM    200
 int main()
 {
   EventLoop loop(CLIENT_NUM);
+  System::UpdateTime();
 
   for(int i = 0; i < CLIENT_NUM; ++i)
   {

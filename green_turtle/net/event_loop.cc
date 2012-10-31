@@ -40,7 +40,7 @@ void EventLoop::LazyInitTimerQueue()
 {
   if(!timer_queue_)
   {
-    timer_queue_ = new TimerQueue(2024, 16);
+    timer_queue_ = new TimerQueue(2048, 16);
     System::UpdateTime();
     timer_queue_->Update(System::GetMilliSeconds());
   }
@@ -82,6 +82,9 @@ void EventLoop::Loop()
   {
     System::UpdateTime();
     size_t begin_time = System::GetMilliSeconds();
+
+    if(timer_queue_)
+      timer_queue_->Update(begin_time);
 
     fired_handler_.clear();
     poller_->PollOnce(0,fired_handler_);
