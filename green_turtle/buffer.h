@@ -27,48 +27,66 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-// author: egmkang (egmkang@gmail.com)
-
-#ifndef __BUFFERED_SOCKET__
-#define __BUFFERED_SOCKET__
+// auhor: egmkang (egmkang@gmail.com)
+#ifndef __BUFFER_H__
+#define __BUFFER_H__
 #include <cstddef>
-#include <deque>
-#include <mutex>
-#include <memory>
-#include <buffer.h>
-#include "addr_info.h"
-#include "event_handler.h"
-#include "message.h"
+#include <cstring>
+
+#include <noncopyable.h>
 
 namespace green_turtle{
-namespace net{
 
-class BufferedSocket : public EventHandler
+class Buffer : NonCopyable
 {
  public:
-  typedef green_turtle::Buffer  CacheLine;
+  Buffer(int init_size)
+      : array_(new char[init_size]),
+      write_(0),
+      read_(0),
+      size_(init_size)
+  {
+  }
+  ~Buffer()
+  {
+    delete[] array_;
+  }
  public:
-  BufferedSocket(int fd,const AddrInfo& addr, int recv_buff = 0, int send_buff = 0);
-  ~BufferedSocket();
-  void SendMessage(std::shared_ptr<Message>& data);
-  const AddrInfo& addr() const;
-  CacheLine* GetNewCacheLine();
- protected:
-  virtual int OnRead();
-  virtual int OnWrite();
-  virtual int OnError();
-  virtual void Decoding(CacheLine& data) = 0;
-  virtual void DeleteSelf() = 0;
+  size_t Append(const void *data, size_t size)
+  {
+    return Append(static_cast<const char*>(data),size);
+  }
+  size_t Append(const char *data, size_t size)
+  {
+    size_t len = (size < WritableLength() ? size : WritableLength());
+    std::memcpy(array_ + write_, data, len);
+    write_ += len;
+    return len;
+  }
+  size_t Capacity() const { return size_; }
+  size_t WritableLength() const { return size_ - write_; }
+  size_t ReadableLength() const { return write_ - read_; }
+  char* BeginWrite() const { return array_ + write_; }
+  char* BeginRead() const { return array_ + read_; }
+  void HasWritten(size_t size) { write_ += size; }
+  void HasRead(size_t size) { read_ += size; }
+  void Retrieve()
+  {
+    size_t len = ReadableLength();
+    if(!read_)
+    {
+      std::memmove(array_, BeginRead(), len);
+    }
+    read_ = 0;
+    write_ = len;
+  }
  private:
-  typedef std::shared_ptr<Message>  RawData;
-  AddrInfo                    addr_;
-  const size_t                cache_line_size_;
-  std::deque<CacheLine*>      snd_queue_;
-  std::deque<RawData>         snd_raw_data_queue;
-  CacheLine                   *rcv_buffer_;
-  std::mutex                  write_lock_;
+  char    *array_;
+  size_t  write_;
+  size_t  read_;
+  size_t  size_;
 };
 
 }
-}
+
 #endif

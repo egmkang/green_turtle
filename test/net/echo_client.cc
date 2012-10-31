@@ -46,8 +46,8 @@ class EchoClient : public TcpClient
  protected:
   virtual void Decoding(CacheLine& data)
   {
-    size_t size = data.GetSize();
-    std::string str((char*)data.GetBegin(), (char*)data.GetEnd());
+    size_t size = data.ReadableLength();
+    std::string str(data.BeginRead(), data.BeginWrite());
     long count = recv_message_count_.load(std::memory_order_acquire);
 
     if(count % 1024 == 0)
@@ -56,7 +56,7 @@ class EchoClient : public TcpClient
     }
     if(size)
     {
-      data.SkipRead(size);
+      data.HasRead(size);
       char *str = NewEchoString(this->send_times_);
       std::shared_ptr<Message> message(new EchoMessage(str));
       this->SendMessage(message);

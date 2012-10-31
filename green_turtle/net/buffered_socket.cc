@@ -42,15 +42,14 @@ const AddrInfo& BufferedSocket::addr() const
 
 int BufferedSocket::OnRead()
 {
-  rcv_buffer_->Reset();
-  int nread = SocketOption::Read(fd(), rcv_buffer_->GetEnd(), rcv_buffer_->GetTailSpace());
+  int nread = SocketOption::Read(fd(), rcv_buffer_->BeginWrite(), rcv_buffer_->WritableLength());
   if(nread < 0)
     return kErr;
   if(nread)
   {
-    rcv_buffer_->SkipWrite(nread);
+    rcv_buffer_->HasWritten(nread);
     Decoding(*rcv_buffer_);
-    rcv_buffer_->Reset();
+    rcv_buffer_->Retrieve();
   }
   return kOK;
 }
@@ -59,7 +58,7 @@ BufferedSocket::CacheLine* BufferedSocket::GetNewCacheLine()
 {
   CacheLine *cache = nullptr;
   if(!snd_queue_.empty()) cache = snd_queue_.back();
-  if(!cache || !cache->GetTailSpace())
+  if(!cache || !cache->WritableLength())
   {
     cache = new CacheLine(cache_line_size_);
     snd_queue_.push_back(cache);
@@ -76,29 +75,28 @@ int BufferedSocket::OnWrite()
   }
   for(const auto& message: send_raw_message_queue)
   {
-    const void    *data = message->data();
+    const char   *data = (char*)message->data();
     unsigned int  len = message->length();
     size_t sent = 0;
     while(len - sent)
     {
       CacheLine *cache = GetNewCacheLine();
-      sent += cache->Write(reinterpret_cast<const unsigned char*>(data) + sent,
-                           std::min(len - sent, cache->GetTailSpace()));
+      sent += cache->Append(data + sent, std::min(len - sent, cache->WritableLength()));
     }
   }
 
   while(!snd_queue_.empty())
   {
     CacheLine *cache = snd_queue_.front();
-    int send_size = SocketOption::Write(fd(), cache->GetBegin(), cache->GetSize());
+    int send_size = SocketOption::Write(fd(), cache->BeginRead(), cache->ReadableLength());
     if(send_size < 0)   return kErr;
     else if(!send_size) return kOK;
-    cache->SkipRead(send_size);
-    if(!cache->GetTailSpace())
+    cache->HasRead(send_size);
+    if(!cache->WritableLength())
     {
       if(snd_queue_.size() == 1)
       {
-        cache->Reset();
+        cache->Retrieve();
         break;
       }
       delete cache;

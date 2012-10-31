@@ -48,13 +48,13 @@ class EchoTask : public BufferedSocket
  protected:
   virtual void Decoding(CacheLine& data)
   {
-    size_t size = data.GetSize();
+    size_t size = data.ReadableLength();
     if(size)
     {
       ++message_count;
-      message_size += data.GetSize();
-      std::shared_ptr<Message> message(new SimpleMessage((char*)data.GetBegin(), data.GetSize()));
-      data.SkipRead(data.GetSize());
+      message_size += data.ReadableLength();
+      std::shared_ptr<Message> message(new SimpleMessage(data.BeginRead(), data.ReadableLength()));
+      data.HasRead(size);
       this->SendMessage(message);
     }
   }

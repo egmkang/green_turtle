@@ -36,13 +36,13 @@ class BroadCastClient : public TcpClient, public Timer
   {
     while(true)
     {
-      Command *pCommand = (Command*)(data.GetBegin());
-      if(data.GetSize() > 4 && data.GetSize() >= pCommand->len)
+      Command *pCommand = (Command*)(data.BeginRead());
+      if(data.ReadableLength() > 4 && data.ReadableLength() >= pCommand->len)
       {
         assert(pCommand->len < 2000);
         assert(pCommand->type < 3);
         ++recv_message_count[pCommand->type];
-        data.SkipRead(pCommand->len);
+        data.HasRead(pCommand->len);
       }
       else
       {

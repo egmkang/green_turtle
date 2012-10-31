@@ -72,15 +72,15 @@ class BroadCastTask : public BufferedSocket
   {
     while(true)
     {
-      Command *pCommand = (Command*)(data.GetBegin());
-      if(data.GetSize() > 4 && data.GetSize() >= pCommand->len)
+      Command *pCommand = (Command*)(data.BeginRead());
+      if(data.ReadableLength() > 4 && data.ReadableLength() >= pCommand->len)
       {
         assert(pCommand->len < 2000);
         assert(pCommand->type < 3);
         char *raw_data = (char*)malloc(pCommand->len);
-        memcpy(raw_data, data.GetBegin(), pCommand->len);
+        memcpy(raw_data, data.BeginRead(), pCommand->len);
         PushMessage(this->fd(), (Command*)raw_data, this->event_loop()->LoopIndex());
-        data.SkipRead(pCommand->len);
+        data.HasRead(pCommand->len);
       }
       else
       {
