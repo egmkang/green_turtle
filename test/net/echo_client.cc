@@ -7,6 +7,7 @@
 #include <atomic>
 #include <memory>
 #include <iostream>
+#include "simple_message.h"
 
 using namespace green_turtle;
 using namespace green_turtle::net;
@@ -38,23 +39,24 @@ static char * NewEchoString(int& send_times_)
   return str;
 }
 
-class EchoTcpClient : public TcpClient
+class EchoClient : public TcpClient
 {
  public:
-  EchoTcpClient(const std::string& ip, unsigned short port) : TcpClient(ip, port, 16*1024, 16*1024){}
+  EchoClient(const std::string& ip, unsigned short port) : TcpClient(ip, port, 16*1024, 16*1024){}
  protected:
-  virtual void ProcessInputData(CacheLine& data)
+  virtual void Decoding(CacheLine& data)
   {
-    size_t size = data.GetSize();
-    std::string str((char*)data.GetBegin(), (char*)data.GetEnd());
+    size_t size = data.ReadableLength();
+    std::string str(data.BeginRead(), data.BeginWrite());
     long count = recv_message_count_.load(std::memory_order_acquire);
+
     if(count % 1024 == 0)
     {
       std::cout << "=============================================" << std::endl << str << std::endl;
     }
     if(size)
     {
-      data.SkipRead(size);
+      data.HasRead(size);
       char *str = NewEchoString(this->send_times_);
       std::shared_ptr<Message> message(new EchoMessage(str));
       this->SendMessage(message);
@@ -67,7 +69,7 @@ class EchoTcpClient : public TcpClient
     }
   }
 
-  virtual void ProcessDeleteSelf()
+  virtual void DeleteSelf()
   {
     delete this;
   }
@@ -82,7 +84,7 @@ int main()
 
   for(int i = 0; i < CLIENT_NUM; ++i)
   {
-    EchoTcpClient *client = new EchoTcpClient("127.0.0.1", 10001);
+    EchoClient *client = new EchoClient("192.168.89.56", 10001);
     int errorCode = client->Connect();
     assert(!errorCode);
     client->set_events(kEventReadable | kEventWriteable);

@@ -165,7 +165,7 @@ class unordered_list
       list_[idx] = tmp;
     }
   }
-  inline const T& get(size_t idx) const {return list_[idx]; }
+  inline T get(size_t idx) const { return list_[idx] == deleted_ ? T() : list_[idx]; }
   inline size_t size() const { return size_; }
   inline size_t capacity() const { return capacity_; }
   inline bool empty() const { return size_ == 0; }

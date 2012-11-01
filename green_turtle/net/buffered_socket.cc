@@ -37,14 +37,14 @@ const AddrInfo& BufferedSocket::addr() const
 
 int BufferedSocket::OnRead()
 {
-  rcv_buffer_->Reset();
-  int nread = SocketOption::Read(fd(), rcv_buffer_->GetEnd(), rcv_buffer_->GetTailSpace());
+  int nread = SocketOption::Read(fd(), rcv_buffer_->BeginWrite(), rcv_buffer_->WritableLength());
   if(nread < 0)
     return kErr;
   if(nread)
   {
-    rcv_buffer_->SkipWrite(nread);
-    ProcessInputData(*rcv_buffer_);
+    rcv_buffer_->HasWritten(nread);
+    Decoding(*rcv_buffer_);
+    rcv_buffer_->Retrieve();
   }
   return kOK;
 }
@@ -94,6 +94,10 @@ int BufferedSocket::OnWrite()
       this->snd_queue_.pop_front();
       send_size -= io.iov_len;
     }
+    else
+    {
+      break;
+    }
   }
   this->current_send_ = send_size;
   return kOK;
@@ -102,7 +106,7 @@ int BufferedSocket::OnWrite()
 int BufferedSocket::OnError()
 {
   this->event_loop()->RemoveEventHandler(this);
-  this->ProcessDeleteSelf();
+  this->DeleteSelf();
   return -1;
 }
 

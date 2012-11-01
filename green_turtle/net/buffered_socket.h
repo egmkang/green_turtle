@@ -35,7 +35,7 @@
 #include <deque>
 #include <mutex>
 #include <memory>
-#include <ring_buffer.h>
+#include <buffer.h>
 #include "addr_info.h"
 #include "event_handler.h"
 #include "message.h"
@@ -46,21 +46,20 @@ namespace net{
 class BufferedSocket : public EventHandler
 {
  public:
-  typedef green_turtle::RingBuffer<unsigned char> CacheLine;
+  typedef green_turtle::Buffer  CacheLine;
  public:
   BufferedSocket(int fd,const AddrInfo& addr, int recv_buff = 0, int send_buff = 0);
   ~BufferedSocket();
-  void SendMessage(std::shared_ptr<Message>& message);
+  void SendMessage(std::shared_ptr<Message>& data);
   const AddrInfo& addr() const;
  protected:
   virtual int OnRead();
   virtual int OnWrite();
   virtual int OnError();
-  virtual void ProcessInputData(CacheLine& data) = 0;
-  virtual void ProcessDeleteSelf() = 0;
+  virtual void Decoding(CacheLine& data) = 0;
+  virtual void DeleteSelf() = 0;
  private:
   typedef std::shared_ptr<Message>  RawData;
-
   AddrInfo                    addr_;
   std::deque<RawData>         snd_queue_;
   std::deque<RawData>         snd_raw_data_queue;

@@ -81,6 +81,7 @@ void TcpServer::InitEventLoop()
   {
     EventLoop *loop = new EventLoop(event_handler_size_per_thread);
     assert(loop);
+    loop->SetLoopIndex(idx);
     this->loops_.push_back(loop);
   }
 

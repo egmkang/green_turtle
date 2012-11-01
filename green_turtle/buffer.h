@@ -27,41 +27,66 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-// author: egmkang (egmkang@gmail.com)
-
-#ifndef __TCP_ACCEPTOR__
-#define __TCP_ACCEPTOR__
-#include <vector>
+// auhor: egmkang (egmkang@gmail.com)
+#ifndef __BUFFER_H__
+#define __BUFFER_H__
 #include <cstddef>
-#include "event_handler.h"
+#include <cstring>
+
+#include <noncopyable.h>
 
 namespace green_turtle{
-namespace net{
 
-struct AddrInfo;
-
-class TcpAcceptor : public EventHandler
+class Buffer : NonCopyable
 {
-  public:
-    TcpAcceptor(const char *ip, unsigned short port, int rev_buf = kDefaultRecvBufferSize, int snd_buf = kDefaultSendBufferSize);
-    virtual ~TcpAcceptor();
-  public:
-    bool Listen();
-    virtual void loop_balance(const std::vector<EventLoop*>& loops);
-  protected:
-    virtual int OnRead();
-    virtual int OnWrite();
-    virtual int OnError();
-    EventHandler* CreateNewHandler(int fd, const AddrInfo& info);
-  private:
-    int Accept(AddrInfo& info);
-    AddrInfo                *addr_;
-    std::vector<EventLoop*> loops_;
-    size_t                  idx_; //load balance
+ public:
+  Buffer(int init_size)
+      : array_(new char[init_size]),
+      write_(0),
+      read_(0),
+      size_(init_size)
+  {
+  }
+  ~Buffer()
+  {
+    delete[] array_;
+  }
+ public:
+  size_t Append(const void *data, size_t size)
+  {
+    return Append(static_cast<const char*>(data),size);
+  }
+  size_t Append(const char *data, size_t size)
+  {
+    size_t len = (size < WritableLength() ? size : WritableLength());
+    std::memcpy(array_ + write_, data, len);
+    write_ += len;
+    return len;
+  }
+  size_t Capacity() const { return size_; }
+  size_t WritableLength() const { return size_ - write_; }
+  size_t ReadableLength() const { return write_ - read_; }
+  char* BeginWrite() const { return array_ + write_; }
+  char* BeginRead() const { return array_ + read_; }
+  void HasWritten(size_t size) { write_ += size; }
+  void HasRead(size_t size) { read_ += size; }
+  void Retrieve()
+  {
+    size_t len = ReadableLength();
+    if(!read_)
+    {
+      std::memmove(array_, BeginRead(), len);
+    }
+    read_ = 0;
+    write_ = len;
+  }
+ private:
+  char    *array_;
+  size_t  write_;
+  size_t  read_;
+  size_t  size_;
 };
 
 }
-}
 
 #endif
-

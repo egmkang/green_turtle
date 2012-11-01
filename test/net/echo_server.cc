@@ -8,6 +8,7 @@
 #include <atomic>
 #include <system.h>
 #include <iostream>
+#include "simple_message.h"
 
 using namespace green_turtle;
 using namespace green_turtle::net;
@@ -40,41 +41,24 @@ class PrintMessageCount : public Timer
   }
 };
 
-class EchoMessage : public Message
-{
- public:
-  EchoMessage(const char *data)
-      :data_(data)
-  {
-  }
-  EchoMessage(const char *data, size_t len)
-      :data_(data, data+len)
-  {
-  }
-  void* data() const { return (void*)&data_[0]; }
-  size_t length() const { return data_.length(); }
- private:
-  std::string data_;
-};
-
 class EchoTask : public BufferedSocket
 {
  public:
   EchoTask(int fd,const AddrInfo& addr):BufferedSocket(fd, addr){}
  protected:
-  virtual void ProcessInputData(CacheLine& data)
+  virtual void Decoding(CacheLine& data)
   {
-    size_t size = data.GetSize();
+    size_t size = data.ReadableLength();
     if(size)
     {
       ++message_count;
-      message_size += data.GetSize();
-      std::shared_ptr<Message> message(new EchoMessage((char*)data.GetBegin(), data.GetSize()));
-      data.SkipRead(data.GetSize());
+      message_size += data.ReadableLength();
+      std::shared_ptr<Message> message(new SimpleMessage(data.BeginRead(), data.ReadableLength()));
+      data.HasRead(size);
       this->SendMessage(message);
     }
   }
-  virtual void ProcessDeleteSelf()
+  virtual void DeleteSelf()
   {
     printf("EchoTask will be disposed, %p\n", this);
     delete this;
@@ -93,7 +77,7 @@ int main()
   ::last_update_time_ = System::GetMilliSeconds();
   signal(SIGPIPE, SIG_IGN);
 
-  TcpAcceptor acceptor("127.0.0.1", 10001, 16*1024, 16*1024);
+  TcpAcceptor acceptor("192.168.89.56", 10001, 16*1024, 16*1024);
   bool result = acceptor.Listen();
   assert(result);
 
