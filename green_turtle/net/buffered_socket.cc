@@ -92,7 +92,7 @@ int BufferedSocket::OnWrite()
     if(send_size < 0)   return kErr;
     else if(!send_size) return kOK;
     cache->HasRead(send_size);
-    if(!cache->WritableLength())
+    if(!cache->ReadableLength())
     {
       if(snd_queue_.size() == 1)
       {
