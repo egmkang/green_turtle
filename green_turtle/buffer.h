@@ -73,7 +73,7 @@ class Buffer : NonCopyable
   void Retrieve()
   {
     size_t len = ReadableLength();
-    if(!read_)
+    if(read_)
     {
       std::memmove(array_, BeginRead(), len);
     }
