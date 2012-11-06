@@ -1,22 +1,17 @@
-TODO:
-1. colletctions
-    1) unordered_list(Done)
-    2) hash_map(Done)
-    3) ring buffer(Done)
-2. network
-    1) reactor(almost done)
-    2) socket send/recv buffer queue(not test)
-        send message abstraction
-    3) acceptor(not test)
-    4) message queue
-    4.1) 1:1 message queue(done)
-    4.2) n:1 message queue(use 1:1 message queue)
-    5) timer(done)
-    6) writing some samples
-    7) error process
-       event loop using a queue to delay remove handler 
-       provide a DeleleSelf interface to call others to delete the object
-3. util
-    1) RefObject and RefPtr<T>(Done)
-    2) pthread_setaffinity_np
-    3) get cpu count
+ToDoList:
+
+[ ]0.1 version release
+[ ]basic optimize
+[ ]tcp client reconnect
+[ ]CPU binding(pthread_setaffinity_np)
+[D]samples
+[D]Delete/Add queue
+[x]remove writev version
+[x]unordered_list
+[x]hash_map
+[x]buffer
+[x]reactor
+[x]message queue(1:1)
+[x]timer
+[x]RefObject and RefPtr
+
