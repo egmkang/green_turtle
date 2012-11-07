@@ -115,7 +115,7 @@ static void _MessageProc(TcpServer *pServer)
         {
           BroadCastTask *pTask = GetTask(pair.first);
           std::shared_ptr<Message> message(new SimpleMessage((const char*)pCmd, pCmd->len));
-          if(pTask) pTask->SendMessage(message);
+          if(pTask) pTask->SendMessage(std::move(message));
           ++send_count;
         }
       }

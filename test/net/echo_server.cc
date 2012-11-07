@@ -55,7 +55,7 @@ class EchoTask : public BufferedSocket
       message_size += data.ReadableLength();
       std::shared_ptr<Message> message(new SimpleMessage(data.BeginRead(), data.ReadableLength()));
       data.HasRead(size);
-      this->SendMessage(message);
+      this->SendMessage(std::move(message));
     }
   }
   virtual void DeleteSelf()

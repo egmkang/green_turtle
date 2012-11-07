@@ -93,7 +93,7 @@ int main()
     int num = 0;
     char *str = NewEchoString(num);
     std::shared_ptr<Message> message(new EchoMessage(str));
-    client->SendMessage(message);
+    client->SendMessage(std::move(message));
     free(str);
 
     loop.AddEventHandler(client);

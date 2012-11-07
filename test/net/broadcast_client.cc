@@ -93,7 +93,7 @@ static void RandMessage(TcpClient *pClient)
     assert(pBroadCast->type < 3);
     message = std::shared_ptr<Message>(new SimpleMessage(raw_data, pBroadCast->Length()));
   }
-  pClient->SendMessage(message);
+  pClient->SendMessage(std::move(message));
 }
 
 #define CLIENT_NUM    200
