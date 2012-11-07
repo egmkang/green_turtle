@@ -56,16 +56,19 @@ int TcpAcceptor::Accept(AddrInfo& info)
 int TcpAcceptor::OnRead()
 {
   AddrInfo info;
-  int new_fd = Accept(info);
-  if(new_fd <= 0)
-    return new_fd;
-  EventHandler *new_handler = CreateNewHandler(new_fd, info);
-  new_handler->set_events(kEventReadable | kEventWriteable);
-
-  this->loops_[idx_++]->AddHandlerLater(new_handler);
-  if(idx_ >= loops_.size())
+  while(true)
   {
-    idx_ = 0;
+    int new_fd = Accept(info);
+    if(new_fd <= 0)
+      return new_fd;
+    EventHandler *new_handler = CreateNewHandler(new_fd, info);
+    new_handler->set_events(kEventReadable | kEventWriteable);
+
+    this->loops_[idx_++]->AddHandlerLater(new_handler);
+    if(idx_ >= loops_.size())
+    {
+      idx_ = 0;
+    }
   }
 
   return kOK;

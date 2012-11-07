@@ -95,7 +95,18 @@ int SocketOption::Accept(int fd, struct sockaddr_in* addr)
 {
   socklen_t salen = sizeof(*addr);
   int accept_fd = ::accept(fd, reinterpret_cast<struct sockaddr*>(addr), &salen);
-  if(accept_fd == -1 && errno == EAGAIN)
+  int error_no = errno;
+  //from linux accept(2) man page
+  if(accept_fd == -1 && 
+     (error_no == EAGAIN ||
+      error_no == ENETDOWN ||
+      error_no == EPROTO ||
+      error_no == ENOPROTOOPT ||
+      error_no == EHOSTDOWN ||
+      error_no == ENONET ||
+      error_no == EHOSTUNREACH ||
+      error_no == EOPNOTSUPP ||
+      error_no == ENETUNREACH))
     accept_fd = 0;
   return accept_fd;
 }
@@ -103,8 +114,7 @@ int SocketOption::Write(int fd, const void *data, size_t len)
 {
   int nwrite = ::write(fd, data, len);
   int error_no = errno;
-  (void)error_no;
-  if(nwrite == -1 && errno == EAGAIN) nwrite = 0;
+  if(nwrite == -1 && error_no == EAGAIN) nwrite = 0;
   return nwrite;
 }
 
