@@ -34,7 +34,7 @@
 #include <cstddef>
 #include <string>
 #include <stdint.h>
-#include "common_hash_function.h"
+#include "SpookyV2.h"
 
 //hash function impl
 namespace green_turtle{
@@ -84,7 +84,7 @@ struct hash<float>
 {
   size_t operator()(const float& f) const
   {
-    return static_cast<size_t>(burtle_hash((uint8_t*)&f,sizeof(f),0));
+    return SpookyHash::Hash64(&f, sizeof(f), 0);
   }
 };
 template<>
@@ -92,7 +92,7 @@ struct hash<double>
 {
   size_t operator()(const double& f) const
   {
-    return static_cast<size_t>(burtle_hash((uint8_t*)&f,sizeof(f),0));
+    return SpookyHash::Hash64(&f, sizeof(f), 0);
   }
 };
 template<>
@@ -100,7 +100,7 @@ struct hash<std::string>
 {
   size_t operator()(const std::string& s) const
   {
-    return static_cast<size_t>(burtle_hash((uint8_t*)s.data(),s.length(),0));
+    return SpookyHash::Hash64(s.data(), s.length(), 0);
   }
 };
 

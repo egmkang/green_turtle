@@ -66,14 +66,26 @@ BufferedSocket::CacheLine* BufferedSocket::GetNewCacheLine()
   return cache;
 }
 
+bool BufferedSocket::HasData() const
+{
+  if(snd_messages_.size() ||
+     snd_queue_.size() > 1) return true;
+  if(snd_queue_.size() == 1 &&
+     snd_queue_.front()->ReadableLength())
+    return true;
+  return false;
+}
+
 int BufferedSocket::OnWrite()
 {
-  std::deque<RawData> send_raw_message_queue;
+  if(!HasData())
+    return kOK;
+  std::deque<SharedMessage> tmp_messages;
   {
     std::lock_guard<std::mutex> lock(this->write_lock_);
-    send_raw_message_queue.swap(this->snd_raw_data_queue);
+    tmp_messages.swap(this->snd_messages_);
   }
-  for(const auto& message: send_raw_message_queue)
+  for(const auto& message: tmp_messages)
   {
     const char   *data = (char*)message->data();
     unsigned int  len = message->length();
@@ -117,8 +129,14 @@ int BufferedSocket::OnError()
   return -1;
 }
 
+void BufferedSocket::SendMessage(std::shared_ptr<Message> &&data)
+{
+  std::lock_guard<std::mutex> lock(this->write_lock_);
+  this->snd_messages_.emplace_back(data);
+}
+
 void BufferedSocket::SendMessage(std::shared_ptr<Message>& data)
 {
   std::lock_guard<std::mutex> lock(this->write_lock_);
-  this->snd_raw_data_queue.push_back(data);
+  this->snd_messages_.push_back(data);
 }

@@ -50,6 +50,7 @@ class BufferedSocket : public EventHandler
  public:
   BufferedSocket(int fd,const AddrInfo& addr, int recv_buff = 0, int send_buff = 0);
   ~BufferedSocket();
+  void SendMessage(std::shared_ptr<Message>&& data);
   void SendMessage(std::shared_ptr<Message>& data);
   const AddrInfo& addr() const;
   CacheLine* GetNewCacheLine();
@@ -60,11 +61,13 @@ class BufferedSocket : public EventHandler
   virtual void Decoding(CacheLine& data) = 0;
   virtual void DeleteSelf() = 0;
  private:
-  typedef std::shared_ptr<Message>  RawData;
+  bool HasData() const;
+ private:
+  typedef std::shared_ptr<Message>  SharedMessage;
   AddrInfo                    addr_;
   const size_t                cache_line_size_;
   std::deque<CacheLine*>      snd_queue_;
-  std::deque<RawData>         snd_raw_data_queue;
+  std::deque<SharedMessage>   snd_messages_;
   CacheLine                   *rcv_buffer_;
   std::mutex                  write_lock_;
 };
