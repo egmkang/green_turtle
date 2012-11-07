@@ -50,10 +50,8 @@ enum {
 };
 
 enum {
-  kDefaultRecvBufferSize  = 16*1024,
-  kDefaultSendBufferSize  = 16*1024,
-  kBigRecvBufferSize      = 128*1024,
-  kBigSendBufferSize      = 128*1024,
+  kBigRecvWindow          = 256*1024,
+  kBigSendWindow          = 256*1024
 };
 
 class EventLoop;

@@ -32,7 +32,6 @@
 #define __BUFFER_H__
 #include <cstddef>
 #include <cstring>
-
 #include <noncopyable.h>
 
 namespace green_turtle{

@@ -43,7 +43,7 @@ struct AddrInfo;
 class TcpAcceptor : public EventHandler
 {
   public:
-    TcpAcceptor(const char *ip, unsigned short port, int rev_buf = kDefaultRecvBufferSize, int snd_buf = kDefaultSendBufferSize);
+    TcpAcceptor(const char *ip, unsigned short port, int rcv_window , int snd_window);
     virtual ~TcpAcceptor();
   public:
     bool Listen();

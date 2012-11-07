@@ -9,7 +9,7 @@
 using namespace green_turtle;
 using namespace green_turtle::net;
 
-TcpAcceptor::TcpAcceptor(const char *ip, unsigned short port, int rev_buf, int snd_buf)
+TcpAcceptor::TcpAcceptor(const char *ip, unsigned short port, int rcv_window, int snd_window)
   :EventHandler(SocketOption::NewFD())
     ,addr_( new AddrInfo )
     ,idx_(0)
@@ -17,8 +17,10 @@ TcpAcceptor::TcpAcceptor(const char *ip, unsigned short port, int rev_buf, int s
   *this->addr_ = AddrInfo(ip, port);
   SocketOption::SetNoBlock(this->fd());
   SocketOption::SetNoDelay(this->fd());
-  SocketOption::SetRecvBuffer(this->fd(), rev_buf);
-  SocketOption::SetSendBuffer(this->fd(), snd_buf);
+  if(rcv_window)
+    SocketOption::SetRecvBuffer(this->fd(), rcv_window);
+  if(snd_window)
+    SocketOption::SetSendBuffer(this->fd(), snd_window);
 
   this->set_events(kEventReadable);
 }

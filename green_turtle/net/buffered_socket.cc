@@ -6,23 +6,34 @@
 
 using namespace green_turtle;
 using namespace green_turtle::net;
+  
+static inline unsigned int nextpow2(unsigned int x)
+{
+  --x;
+  x |= x >> 1;
+  x |= x >> 2;
+  x |= x >> 4;
+  x |= x >> 8;
+  x |= x >> 16;
+  return x+1;
+}
 
-BufferedSocket::BufferedSocket(int fd,const AddrInfo& addr, int recv_buff, int send_buff)
+BufferedSocket::BufferedSocket(int fd,const AddrInfo& addr, int rcv_window, int snd_window)
   : EventHandler(fd)
     , addr_(addr)
-    , cache_line_size_(SocketOption::GetSendBuffer(fd))
+    , cache_line_size_(nextpow2(SocketOption::GetSendBuffer(fd)))
     , rcv_buffer_(nullptr)
     , write_lock_()
 {
-  if(recv_buff)
+  if(rcv_window)
   {
-    SocketOption::SetRecvBuffer(fd, recv_buff);
+    SocketOption::SetRecvBuffer(fd, rcv_window);
   }
-  rcv_buffer_ = new CacheLine(SocketOption::GetRecvBuffer(fd));
-  if(send_buff)
+  rcv_buffer_ = new CacheLine(nextpow2(SocketOption::GetRecvBuffer(fd)));
+  if(snd_window)
   {
-    SocketOption::SetSendBuffer(fd, send_buff);
-    constructor(const_cast<size_t*>(&cache_line_size_), send_buff);
+    SocketOption::SetSendBuffer(fd, snd_window);
+    constructor(const_cast<size_t*>(&cache_line_size_), snd_window);
   }
 }
 
