@@ -97,6 +97,10 @@ class MessageQueue : NonCopyable
     assert(size >= 2);
     assert(!(size_ & (size_ -1)) && "size must be 2^n!");
     assert(array_);
+    long addr = reinterpret_cast<long>(&read_idx_);
+    assert(addr % 64 == 0);
+    addr = reinterpret_cast<long>(&write_idx_);
+    assert(addr % 64 == 0);
   }
 
   ~MessageQueue()
@@ -140,8 +144,8 @@ class MessageQueue : NonCopyable
     return size_;
   }
 private:
-  Counter         read_idx_;
-  Counter         write_idx_;
+  alignas(64) Counter  read_idx_;
+  alignas(64) Counter  write_idx_;
   const uint64_t  size_;
   const uint64_t  mask_;
   value_type      *array_;
