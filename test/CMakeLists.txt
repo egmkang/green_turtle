@@ -8,6 +8,10 @@ ADD_EXECUTABLE(message_queue_test_je
     )
 TARGET_LINK_LIBRARIES(message_queue_test_je green_turtle jemalloc)
 
+ADD_EXECUTABLE(blocking_queue
+    blocking_queue_test.cc
+    )
+
 ADD_EXECUTABLE(ref_obj_test
     ref_obj_test.cc
     )
