@@ -52,9 +52,9 @@ class BlockingQueue : NonCopyable
 
   bool Pop(value_type& v)
   {
+    std::lock_guard<std::mutex> guard(mutex_);
     if(!queue_.empty())
     {
-      std::lock_guard<std::mutex> guard(mutex_);
       v = queue_.front();
       queue_.pop_front();
       return true;
