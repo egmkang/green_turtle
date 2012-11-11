@@ -239,7 +239,7 @@ class hash_map
   {
     if(size_ > (capacity_ >> 1))
     {
-      hash_map _m(*this,capacity_ >> 1);
+      hash_map _m(*this,capacity_ << 1);
       swap(_m);
     }
   }
