@@ -11,7 +11,7 @@
 // copyright notice, this list of conditions and the following disclaimer
 // in the documentation and/or other materials provided with the
 // distribution.
-//     * Neither the name of green_turtle. nor the names of its
+//     * Neither the name of green_turtle nor the names of its
 // contributors may be used to endorse or promote products derived from
 // this software without specific prior written permission.
 //
@@ -26,3 +26,50 @@
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
+// author: egmkang (egmkang@gmail.com)
+
+#ifndef __POLLER__
+#define __POLLER__
+#include <assert.h>
+#include <vector>
+#include <noncopyable.h>
+
+#ifdef __linux__
+#define HAVE_EPOLL 1
+#endif
+#if (defined(__APPLE__) && defined(MAC_OS_X_VERSION_10_6)) || defined(__FreeBSD__) || defined(__OpenBSD__) || defined (__NetBSD__)
+#define HAVE_KQUEUE 1
+#endif
+
+namespace green_turtle{
+namespace net{
+
+class EventHandler;
+
+class Poller : green_turtle::NonCopyable
+{
+ public:
+  Poller(int init_size);
+  virtual ~Poller();
+ public:
+  virtual void AddEventHandler(EventHandler *pEventHandler)       = 0;
+  virtual void RemoveEventHandler(EventHandler *pEventHandler)    = 0;
+  virtual void PollOnce(int timeout,std::vector<EventHandler*>& fired_handlers) = 0;
+ protected:
+  void SetEventHandler(int fd,EventHandler *handler);
+  inline EventHandler* GetEventHandler(int fd)
+  {
+    assert(fd <= (int)event_handlers_.size());
+    return event_handlers_[fd];
+  }
+ public:
+  static Poller* CreatePoller(int expected_size);
+ private:
+  std::vector<EventHandler*> event_handlers_;
+};
+
+}
+}
+
+#endif

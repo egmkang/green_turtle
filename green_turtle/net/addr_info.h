@@ -11,7 +11,7 @@
 // copyright notice, this list of conditions and the following disclaimer
 // in the documentation and/or other materials provided with the
 // distribution.
-//     * Neither the name of green_turtle. nor the names of its
+//     * Neither the name of green_turtle nor the names of its
 // contributors may be used to endorse or promote products derived from
 // this software without specific prior written permission.
 //
@@ -26,3 +26,53 @@
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
+// author: egmkang (egmkang@gmail.com)
+
+#ifndef __ADDR_INFO__
+#define __ADDR_INFO__
+#include <assert.h>
+#include <string>
+#include <string.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+
+namespace green_turtle{
+namespace net{
+
+struct AddrInfo
+{
+  AddrInfo()
+  {
+    memset(&addr_, 0, sizeof(addr_));
+    addr_port_ = 0;
+  }
+  AddrInfo(const char *ip, const unsigned short port) : addr_str_(ip), addr_port_(port)
+  {
+    assert(ip);
+    addr_.sin_family      = AF_INET;
+    addr_.sin_port        = htons(port);
+    addr_.sin_addr.s_addr = inet_addr(ip);
+  }
+  AddrInfo(const sockaddr_in& addr_) : addr_(addr_)
+  {
+    addr_port_ = ntohs(addr_.sin_port);
+    addr_str_ = inet_ntoa(addr_.sin_addr);
+  }
+  const struct sockaddr* sockaddr() const
+  {
+    return static_cast<const struct sockaddr*>(static_cast<const void*>(&addr_));
+  }
+  int sockaddr_len() const
+  {
+    return sizeof(addr_);
+  }
+
+  std::string     addr_str_;
+  unsigned short  addr_port_;
+  sockaddr_in     addr_;
+};
+
+}
+}
+#endif

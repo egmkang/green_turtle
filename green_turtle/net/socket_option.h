@@ -11,7 +11,7 @@
 // copyright notice, this list of conditions and the following disclaimer
 // in the documentation and/or other materials provided with the
 // distribution.
-//     * Neither the name of green_turtle. nor the names of its
+//     * Neither the name of green_turtle nor the names of its
 // contributors may be used to endorse or promote products derived from
 // this software without specific prior written permission.
 //
@@ -26,3 +26,34 @@
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
+// author: egmkang (egmkang@gmail.com)
+// author: yywei
+
+#ifndef __SOCKET_OPTION__
+#define __SOCKET_OPTION__
+#include <cstddef>
+struct sockaddr;
+
+namespace green_turtle{
+namespace net{
+
+class SocketOption{
+  public:
+   static int   NewFD();
+   static int   DestoryFD(int fd);
+   static int   SetNoDelay(int fd);
+   static int   SetNoBlock(int fd);
+   static int   GetSendBuffer(int fd);
+   static int   GetRecvBuffer(int fd);
+   static int   SetSendBuffer(int fd, int size);
+   static int   SetRecvBuffer(int fd, int size);
+   static int   Listen(int fd, const struct sockaddr* addr, int len);
+   static int   Accept(int fd, struct sockaddr_in* info);
+   static int   Write(int fd, const void *data, size_t len);
+   static int   Read(int fd, void *data, const size_t len);
+   static int   Connect(int fd, const struct sockaddr* addr, int len);
+};
+}
+}
+#endif

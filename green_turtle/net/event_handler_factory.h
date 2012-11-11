@@ -11,7 +11,7 @@
 // copyright notice, this list of conditions and the following disclaimer
 // in the documentation and/or other materials provided with the
 // distribution.
-//     * Neither the name of green_turtle. nor the names of its
+//     * Neither the name of green_turtle nor the names of its
 // contributors may be used to endorse or promote products derived from
 // this software without specific prior written permission.
 //
@@ -26,3 +26,39 @@
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
+// author: egmkang (egmkang@gmail.com)
+
+#ifndef __EVENT_HANDLER_FACTORY__
+#define __EVENT_HANDLER_FACTORY__
+#include <map>
+#include <singleton.h>
+
+namespace green_turtle{
+namespace net{
+
+class EventHandler;
+class TcpAcceptor;
+struct AddrInfo;
+
+typedef EventHandler* (*FactoryFunction)(int, const AddrInfo&);
+
+class EventHandlerFactory : public green_turtle::Singleton<EventHandlerFactory>
+{
+ private:
+  friend class green_turtle::Singleton<EventHandlerFactory>;
+
+  EventHandlerFactory(): default_(nullptr) {}
+ public:
+  void Register(TcpAcceptor *acceptor,FactoryFunction func);
+  void RegisterDefault(FactoryFunction func);
+  EventHandler* NewEventHandler(TcpAcceptor *acceptor, int fd, const AddrInfo& addr);
+ private:
+  FactoryFunction default_;
+  std::map<TcpAcceptor*, FactoryFunction> map_;
+};
+
+}
+}
+
+#endif

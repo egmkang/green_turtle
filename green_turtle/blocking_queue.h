@@ -11,7 +11,7 @@
 // copyright notice, this list of conditions and the following disclaimer
 // in the documentation and/or other materials provided with the
 // distribution.
-//     * Neither the name of green_turtle. nor the names of its
+//     * Neither the name of green_turtle nor the names of its
 // contributors may be used to endorse or promote products derived from
 // this software without specific prior written permission.
 //
@@ -26,3 +26,50 @@
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
+// author: egmkang (egmkang@gmail.com)
+
+#ifndef __BLOCKING_QUEUE_H__
+#define __BLOCKING_QUEUE_H__
+#include <mutex>
+#include <deque>
+#include <noncopyable.h>
+
+namespace green_turtle{
+
+template<class T>
+class BlockingQueue : NonCopyable
+{
+ public:
+  typedef T value_type;
+ public:
+  bool Push(const value_type& v)
+  {
+    std::lock_guard<std::mutex> guard(mutex_);
+    queue_.push_back(v);
+    return true;
+  }
+
+  bool Pop(value_type& v)
+  {
+    if(!queue_.empty())
+    {
+      std::lock_guard<std::mutex> guard(mutex_);
+      v = queue_.front();
+      queue_.pop_front();
+      return true;
+    }
+    return false;
+  }
+  uint64_t Size() const
+  {
+    return queue_.size();
+  }
+ private:
+  std::deque<value_type>  queue_;
+  std::mutex              mutex_;
+};
+
+}
+
+#endif

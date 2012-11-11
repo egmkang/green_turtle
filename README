@@ -1,5 +1,17 @@
-TODO:
-1. colletctions
-1) unordered_list(Almost Done)
-2) hash_map(a fast implement)
-2. network
+ToDoList:
+
+[ ]0.1 version release
+[ ]basic optimize
+[ ]tcp client reconnect
+[ ]CPU binding(pthread_setaffinity_np)
+[D]samples
+[D]Delete/Add queue
+[x]remove writev version
+[x]unordered_list
+[x]hash_map
+[x]buffer
+[x]reactor
+[x]message queue(1:1)
+[x]timer
+[x]RefObject and RefPtr
+

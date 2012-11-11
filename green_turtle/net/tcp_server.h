@@ -11,7 +11,7 @@
 // copyright notice, this list of conditions and the following disclaimer
 // in the documentation and/or other materials provided with the
 // distribution.
-//     * Neither the name of green_turtle. nor the names of its
+//     * Neither the name of green_turtle nor the names of its
 // contributors may be used to endorse or promote products derived from
 // this software without specific prior written permission.
 //
@@ -26,3 +26,57 @@
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
+// author: egmkang (egmkang@gmail.com)
+
+#ifndef __tcp__server__
+#define __tcp__server__
+#include <vector>
+#include <thread>
+#include <noncopyable.h>
+#include "timer.h"
+
+namespace green_turtle{
+namespace net{
+
+class EventHandler;
+class EventLoop;
+class TcpAcceptor;
+class TcpClient;
+class TimerQueue;
+class TcpServer;
+
+typedef void (*MessageProc)(TcpServer*);
+
+class TcpServer : green_turtle::NonCopyable {
+ public:
+  TcpServer(int expected_size);
+  ~TcpServer();
+ public:
+  void AddAcceptor(TcpAcceptor *acceptor);
+  void AddClient(TcpClient *client);
+  void SetThreadCount(int count);
+  void Run();
+  void Terminal();
+  void SetMessageProc(MessageProc proc);
+ public:
+  //register a timer,unit ms
+  void ScheduleTimer(Timer *timer_ptr,uint64_t timer_interval,int64_t time_delay = 0);
+  //unregister a timer
+  void CancelTimer(Timer *timer_ptr);
+ private:
+  void InitEventLoop();
+  void InitThreads();
+ private:
+  std::vector<EventLoop*>     loops_;
+  std::vector<std::thread*>   threads_;
+  std::vector<EventHandler*>  handlers_;
+  TimerQueue    *timer_queue_;
+  MessageProc   message_proc_;
+  bool  is_terminal_;
+  int   thread_count_;
+  int   expected_size_;
+};
+}
+}
+#endif

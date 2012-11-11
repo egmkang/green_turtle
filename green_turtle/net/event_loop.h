@@ -11,7 +11,7 @@
 // copyright notice, this list of conditions and the following disclaimer
 // in the documentation and/or other materials provided with the
 // distribution.
-//     * Neither the name of green_turtle. nor the names of its
+//     * Neither the name of green_turtle nor the names of its
 // contributors may be used to endorse or promote products derived from
 // this software without specific prior written permission.
 //
@@ -26,3 +26,60 @@
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
+// author: egmkang (egmkang@gmail.com)
+
+#ifndef __event_loop__
+#define __event_loop__
+#include <vector>
+#include <mutex>
+#include <deque>
+#include "event_handler.h"
+#include <noncopyable.h>
+
+namespace green_turtle{
+namespace net{
+
+class Poller;
+class Timer;
+class TimerQueue;
+
+class EventLoop : NonCopyable
+{
+ public:
+  EventLoop(int expected_size);
+  ~EventLoop();
+  void Ternimal() { terminal_ = true; }
+  void AddEventHandler(EventHandler *pEventHandler);
+  void RemoveEventHandler(EventHandler *pEventHandler);
+  void Loop();
+  static void SetFrameTime(int milliSeconds);
+ public:
+  void AddHandlerLater(EventHandler *pEventHandler);
+  void RemoveHandlerLater(EventHandler *pEventHandler);
+ public:
+  //register a timer,unit ms
+  void ScheduleTimer(Timer *timer_ptr,uint64_t timer_interval,int64_t time_delay = 0);
+  //unregister a timer
+  void CancelTimer(Timer *timer_ptr);
+ public:
+  int   LoopIndex() const { return loop_index_; }
+  void  SetLoopIndex(int index) { loop_index_ = index; }
+ private:
+  void LazyInitTimerQueue();
+ private:
+  Poller  *poller_;
+  bool    terminal_;
+  int     loop_index_ = 0;
+  std::vector<EventHandler*>  fired_handler_;
+  TimerQueue  *timer_queue_;
+
+  std::mutex                  add_mutex_;
+  std::deque<EventHandler*>   add_handler_;
+  std::mutex                  remove_mutex_;
+  std::deque<EventHandler*>   remove_handler_;
+};
+
+}
+}
+#endif
