@@ -125,7 +125,7 @@ class RefPtr
   }
   RefPtr<T>& operator = (const RefPtr& ref_ptr)
   {
-    if(impl_ptr_ == ref_ptr.impl_ptr)
+    if(impl_ptr_ == ref_ptr.impl_ptr_)
       return *this;
     if(impl_ptr_)
     {
