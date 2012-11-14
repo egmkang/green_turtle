@@ -56,6 +56,7 @@ void KqueuePoller::RemoveEventHandler(EventHandler *event_handler)
   assert(!polling_);
   this->SetEventHandler(event_handler->fd(), nullptr);
 
+#ifndef LAZY
   struct kevent ke;
   if(event_handler->events() & kEventReadable)
   {
@@ -67,6 +68,7 @@ void KqueuePoller::RemoveEventHandler(EventHandler *event_handler)
     EV_SET(&ke, event_handler->fd(), EVFILT_WRITE, EV_DELETE, 0, 0, NULL);
     kevent(kqfd_, &ke, 1, NULL, 0, NULL);
   }
+#endif
 }
 
 void KqueuePoller::PollOnce(int timeout,std::vector<EventHandler*>& fired_handler)
