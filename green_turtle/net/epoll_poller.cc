@@ -55,7 +55,7 @@ void EpollPoller::PollOnce(int timeout,std::vector<EventHandler*>& fired_handler
   {
     const struct epoll_event& e = events_[idx];
     EventHandler *handle = this->GetEventHandler(e.data.fd);
-    assert(handle);
+    if(!handle) continue;
 
     int mask = kEventNone;
     if(e.events & EPOLLIN)  mask |= kEventReadable;

@@ -77,7 +77,7 @@ void KqueuePoller::PollOnce(int timeout,std::vector<EventHandler*>& fired_handle
   {
     const auto& e = events_[idx];
     EventHandler *handle = this->GetEventHandler(e.ident);
-    assert(handle);
+    if(!handle) continue;
 
     int mask = kEventNone;
     if(e.filter & EVFILT_READ)  mask |= kEventReadable;
