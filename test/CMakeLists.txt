@@ -1,12 +1,24 @@
-ADD_EXECUTABLE(message_queue_test_tc
-    message_queue_test.cc
-    )
-TARGET_LINK_LIBRARIES(message_queue_test_tc green_turtle tcmalloc)
 
-ADD_EXECUTABLE(message_queue_test_je
-    message_queue_test.cc
-    )
-TARGET_LINK_LIBRARIES(message_queue_test_je green_turtle jemalloc)
+IF(TCMALLOC_LIBRARY OR JEMALLOC_LIBRARY)
+    IF(TCMALLOC_LIBRARY)
+        ADD_EXECUTABLE(message_queue_test_tc
+            message_queue_test.cc
+            )
+        TARGET_LINK_LIBRARIES(message_queue_test_tc green_turtle tcmalloc)
+    ENDIF(TCMALLOC_LIBRARY)
+    IF(JEMALLOC_LIBRARY)
+        ADD_EXECUTABLE(message_queue_test_je
+            message_queue_test.cc
+            )
+        TARGET_LINK_LIBRARIES(message_queue_test_je green_turtle jemalloc)
+    ENDIF(JEMALLOC_LIBRARY)
+ELSE(TCMALLOC_LIBRARY OR JEMALLOC_LIBRARY)
+    ADD_EXECUTABLE(message_queue_test
+        message_queue_test.cc
+        )
+    TARGET_LINK_LIBRARIES(message_queue_test green_turtle)
+ENDIF(TCMALLOC_LIBRARY OR JEMALLOC_LIBRARY)
+
 
 ADD_EXECUTABLE(blocking_queue
     blocking_queue_test.cc
