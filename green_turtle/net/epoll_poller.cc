@@ -42,9 +42,11 @@ void EpollPoller::RemoveEventHandler(EventHandler *event_handler)
 {
   assert(!polling_);
   this->SetEventHandler(event_handler->fd(), nullptr);
+#ifndef LAZY
   if(Epoll_Ctl(epollfd_, EPOLL_CTL_DEL, event_handler->fd(), event_handler->events()) < 0)
   {
   }
+#endif
 }
 
 void EpollPoller::PollOnce(int timeout,std::vector<EventHandler*>& fired_handler)

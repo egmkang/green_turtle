@@ -43,6 +43,12 @@ class BlockingQueue : NonCopyable
  public:
   typedef T value_type;
  public:
+  bool Push(value_type&& v)
+  {
+    std::lock_guard<std::mutex> guard(mutex_);
+    queue_.push_back(v);
+    return true;
+  }
   bool Push(const value_type& v)
   {
     std::lock_guard<std::mutex> guard(mutex_);
