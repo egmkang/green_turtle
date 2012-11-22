@@ -27,6 +27,7 @@ void KqueuePoller::AddEventHandler(EventHandler *event_handler)
   assert(!polling_);
   this->SetEventHandler(event_handler->fd(), event_handler);
   if(event_handler->fd() >= this->events_.size())
+  if((size_t)event_handler->fd() >= this->events_.size())
   {
     events_.resize(events_.size() * 2);
   }
@@ -56,6 +57,7 @@ void KqueuePoller::RemoveEventHandler(EventHandler *event_handler)
   assert(!polling_);
   this->SetEventHandler(event_handler->fd(), nullptr);
 
+#ifndef LAZY
   struct kevent ke;
   if(event_handler->events() & kEventReadable)
   {
@@ -67,12 +69,14 @@ void KqueuePoller::RemoveEventHandler(EventHandler *event_handler)
     EV_SET(&ke, event_handler->fd(), EVFILT_WRITE, EV_DELETE, 0, 0, NULL);
     kevent(kqfd_, &ke, 1, NULL, 0, NULL);
   }
+#endif
 }
 
 void KqueuePoller::PollOnce(int timeout,std::vector<EventHandler*>& fired_handler)
 {
   polling_ = true;
-  int num = ::kevent(kqfd_, NULL, 0, &events_[0], (int)events_.size(), NULL);
+  timespec timeout_ = {0, timeout * 1000 * 1000};
+  int num = ::kevent(kqfd_, NULL, 0, &events_[0], (int)events_.size(), &timeout_);
   for(int idx = 0; idx < num; ++idx)
   {
     const auto& e = events_[idx];

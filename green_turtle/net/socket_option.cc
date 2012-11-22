@@ -103,7 +103,9 @@ int SocketOption::Accept(int fd, struct sockaddr_in* addr)
       error_no == EPROTO ||
       error_no == ENOPROTOOPT ||
       error_no == EHOSTDOWN ||
+#ifdef HAVE_EPOLL
       error_no == ENONET ||
+#endif
       error_no == EHOSTUNREACH ||
       error_no == EOPNOTSUPP ||
       error_no == ENETUNREACH))

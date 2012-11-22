@@ -31,6 +31,7 @@
 
 #ifndef __KQUEUE_POLLER__
 #define __KQUEUE_POLLER__
+#include <sys/types.h>
 #include <sys/event.h>
 #include <sys/time.h>
 #include "poller.h"
@@ -51,7 +52,7 @@ class KqueuePoller : public Poller
   private:
    int kqfd_;
    std::vector<struct kevent> events_;
-   polling_ = false;
+   bool polling_ = false;
 };
 
 }

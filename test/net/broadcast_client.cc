@@ -62,8 +62,6 @@ class BroadCastClient : public TcpClient, public Timer
   {
     delete this;
   }
- private:
-  int send_times_ = 0;
 };
 
 static void RandMessage(TcpClient *pClient)
@@ -75,23 +73,23 @@ static void RandMessage(TcpClient *pClient)
   {
     EchoCommand *pEchoCmd = (EchoCommand*)(raw_data);
     constructor(pEchoCmd);
-    pEchoCmd->data_len = snprintf(pEchoCmd->data, 300, "this is a EchoMessage, random value %lu",
-                                  gen());
+    pEchoCmd->data_len = snprintf(pEchoCmd->data, 300, "this is a EchoMessage, random value %u",
+                                  (unsigned int)gen());
     pEchoCmd->len = pEchoCmd->Length();
     assert(pEchoCmd->len < 2000);
     assert(pEchoCmd->type < 3);
-    message = std::shared_ptr<Message>(new SimpleMessage(raw_data, pEchoCmd->Length()));
+    message = std::make_shared<SimpleMessage>(raw_data, pEchoCmd->Length());
   }
   else
   {
     BroadCastCommand *pBroadCast = (BroadCastCommand*)(raw_data);
     constructor(pBroadCast);
-    pBroadCast->data_len = snprintf(pBroadCast->data, 300, "this is a BroadCastMessage, random value %lu",
-                                    gen());
+    pBroadCast->data_len = snprintf(pBroadCast->data, 300, "this is a BroadCastMessage, random value %u",
+                                    (unsigned int)gen());
     pBroadCast->len = pBroadCast->Length();
     assert(pBroadCast->len < 2000);
     assert(pBroadCast->type < 3);
-    message = std::shared_ptr<Message>(new SimpleMessage(raw_data, pBroadCast->Length()));
+    message = std::make_shared<SimpleMessage>(raw_data, pBroadCast->Length());
   }
   pClient->SendMessage(std::move(message));
 }

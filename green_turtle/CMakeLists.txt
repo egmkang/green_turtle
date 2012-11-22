@@ -28,4 +28,4 @@ ADD_LIBRARY(green_turtle STATIC
     ${GREEN_TURTLE}
     ${GREEN_TURTLE_NET}
     )
-TARGET_LINK_LIBRARIES(green_turtle)
+TARGET_LINK_LIBRARIES(green_turtle pthread)
