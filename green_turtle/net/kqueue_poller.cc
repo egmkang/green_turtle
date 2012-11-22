@@ -26,7 +26,6 @@ void KqueuePoller::AddEventHandler(EventHandler *event_handler)
 {
   assert(!polling_);
   this->SetEventHandler(event_handler->fd(), event_handler);
-  if(event_handler->fd() >= this->events_.size())
   if((size_t)event_handler->fd() >= this->events_.size())
   {
     events_.resize(events_.size() * 2);
