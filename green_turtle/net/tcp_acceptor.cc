@@ -57,6 +57,7 @@ int TcpAcceptor::Accept(AddrInfo& info)
 
 int TcpAcceptor::OnRead()
 {
+  int count = 0;
   AddrInfo info;
   while(true)
   {
@@ -67,10 +68,9 @@ int TcpAcceptor::OnRead()
     new_handler->set_events(kEventReadable | kEventWriteable);
 
     this->loops_[idx_++]->AddHandlerLater(new_handler);
-    if(idx_ >= loops_.size())
-    {
-      idx_ = 0;
-    }
+    if(idx_ >= loops_.size()) idx_ = 0;
+
+    if(++count >= 10) break;
   }
 
   return kOK;
