@@ -38,21 +38,6 @@
 
 namespace green_turtle{
 
-struct AtomicCounter
-{
-  AtomicCounter() : value_(0) {}
-  inline uint64_t load(std::memory_order memory_order)
-  {
-    return value_.load(memory_order);
-  }
-  inline void store(uint64_t value, std::memory_order memory_order)
-  {
-    value_.store(value, memory_order);
-  }
-
-  std::atomic<uint64_t> value_;
-};
-
 struct VolatileCounter
 {
   VolatileCounter(uint64_t init = 0) : value_(init) {}
@@ -70,18 +55,11 @@ struct VolatileCounter
   volatile uint64_t value_;
 };
 
-struct PaddedAtomicCounter : public AtomicCounter {
-  uint64_t padding_values_[7];
-};
-
-struct PaddedVolatileCounter : public VolatileCounter {
-  uint64_t padding_values_[7];
-};
-
 //support POD data only
 //1:1 MessageQueue
 //N:1 equals N*(1:1)
-template<class T, class Counter = PaddedVolatileCounter>
+//you can change VolatileCounter into std::atomic<uint64_t>
+template<class T, class Counter = VolatileCounter >
 class MessageQueue : NonCopyable
 {
  public:
