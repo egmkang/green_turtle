@@ -1,2 +1,4 @@
 bin/*
 build/*
+qt-build/*
+CMakeLists.txt.*

@@ -77,6 +77,15 @@ namespace details{
   };
 };
 
+/**
+ * Object will be reference by other object.
+ * When object is deleted, the refereces will get null.
+ * For Example, ObjA will be ref bt others, you can write codes like:
+ *
+ * class ObjA : public RefObject;
+ *
+ * RefPtr<ObjA> ptr = pObjA;
+ */
 class RefObject{
  public:
   RefObject():impl_ptr_(NULL)
@@ -95,31 +104,63 @@ class RefObject{
  private:
   details::RefCountImpl *impl_ptr_;
 };
+
+/**
+ * A smart pointer just like std::weak_ptr, which don't hold the resources.
+ * you should delete RefObject by yourself. Then all references will get null.
+ */
 template<class T>
 class RefPtr
 {
  public:
+  /**
+   * reference to nullptr.
+   */
   RefPtr():impl_ptr_(NULL){}
+  /**
+   * dereferene to anything.
+   */
   ~RefPtr()
   {
     if(impl_ptr_) impl_ptr_->SubRefCount();
   }
+  /**
+   * @param ref_obj reference to which object
+   */
   RefPtr(RefObject *ref_obj)
   {
     impl_ptr_ = ref_obj ? ref_obj->GetRefCountImpl() : nullptr;
     if(impl_ptr_) impl_ptr_->AddRefCount();
   }
+  /**
+   * @param ref_obj reference to which object
+   */
+  //FIXME:T is const type
   RefPtr(const RefObject *ref_obj)
   {
     static_assert(std::is_const<T>::value,"const RefObjct* cannot be converted to RefPtr<T>,T is non const");
     impl_ptr_ = ref_obj ? ref_obj->GetRefCountImpl() : nullptr;
     if(impl_ptr_) impl_ptr_->AddRefCount();
   }
+  /**
+   * @param ref_ptr reference to which object
+   */
   RefPtr(const RefPtr& ref_ptr)
   {
     impl_ptr_ = ref_ptr.impl_ptr_;
     if(impl_ptr_) impl_ptr_->AddRefCount();
   }
+  /**
+   * @param ref_obj reference to which object, mybey replace this's ptr to another.
+   */
+  RefPtr<T>& operator = (RefObject *ref_obj)
+  {
+    RefPtr<T> p(ref_obj);
+    return *this = p;
+  }
+  /**
+   * @param ref_ptr reference to which object, mybey replace this's ptr to another.
+   */
   RefPtr<T>& operator = (const RefPtr& ref_ptr)
   {
     if(impl_ptr_ == ref_ptr.impl_ptr_)
@@ -135,11 +176,14 @@ class RefPtr
     }
     return *this;
   }
+  /**
+   * return the object's ptr
+   * @return referece object ptr
+   */
   T* Get() const
   {
     return impl_ptr_ ? (static_cast<T*>(impl_ptr_->Get())) : NULL;
   }
-
   T* operator->() const
   {
     return Get();

@@ -24,11 +24,6 @@ ADD_EXECUTABLE(blocking_queue
     blocking_queue_test.cc
     )
 
-ADD_EXECUTABLE(ref_obj_test
-    ref_obj_test.cc
-    )
-TARGET_LINK_LIBRARIES(ref_obj_test green_turtle)
-
 ADD_EXECUTABLE(time_test
     time.cc
     )
