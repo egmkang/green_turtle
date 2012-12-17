@@ -52,4 +52,26 @@ TEST(Buffer, ReadWrite)
 
 TEST(Buffer, Retrieve)
 {
+  Buffer buffer(16);
+  auto begin_ptr = buffer.BeginRead();
+
+  buffer.Retrieve();
+  EXPECT_EQ(begin_ptr, buffer.BeginRead());
+  EXPECT_EQ(begin_ptr, buffer.BeginWrite());
+
+  auto str = "0123456789";
+  buffer.Append(str, strlen(str));
+  buffer.HasRead(strlen(str));
+  EXPECT_NE(begin_ptr, buffer.BeginRead());
+  EXPECT_EQ(buffer.BeginRead(), buffer.BeginWrite());
+
+  buffer.Retrieve();
+  EXPECT_EQ(begin_ptr, buffer.BeginRead());
+  EXPECT_EQ(begin_ptr, buffer.BeginWrite());
+
+  buffer.Append(str, strlen(str));
+  buffer.Retrieve();
+  EXPECT_EQ(strlen(str), buffer.ReadableLength());
+  EXPECT_EQ(str, std::string(buffer.BeginRead(), buffer.BeginRead()+buffer.ReadableLength()));
+
 }

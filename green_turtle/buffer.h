@@ -85,7 +85,7 @@ class Buffer : NonCopyable
   size_t Capacity() const { return size_; }
   /**
    * current max writable length.
-   *@return count in bytes
+   * @return count in bytes
    */
   size_t WritableLength() const { return size_ - write_; }
   /**
