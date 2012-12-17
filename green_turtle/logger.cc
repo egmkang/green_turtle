@@ -38,7 +38,8 @@ void Logger::CreateLink()
     {
       link = link.substr(pos + 1, link.size() - pos - 1);
     }
-    symlink(link.c_str(), link_name_.c_str());
+    int result = symlink(link.c_str(), link_name_.c_str());
+    (void)result;
   }
 }
 
@@ -171,6 +172,6 @@ void Logger::VTrace(const char *prefix, const char *pattern, va_list ap)
 void Logger::LogMessage(char *str, size_t len)
 {
   str[len] = '\n';
-  ::write(fd_, str, len+1);
-  size_ += len;
+  int write_size = write(fd_, str, len+1);
+  size_ += write_size;
 }

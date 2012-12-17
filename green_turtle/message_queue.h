@@ -35,6 +35,7 @@
 #include <stdint.h>
 #include <atomic>
 #include <noncopyable.h>
+#include <utils.h>
 
 namespace green_turtle{
 
@@ -91,7 +92,7 @@ class MessageQueue : NonCopyable
     const auto current_write_ = write_idx_.load(std::memory_order_relaxed);
     const auto current_read_  = read_idx_.load(std::memory_order_acquire);
 
-    if(current_write_ - current_read_ == mask_)
+    if(UNLIKELY(current_write_ - current_read_ == mask_))
       return false;
 
     array_[current_write_ & mask_] = v;
@@ -104,7 +105,7 @@ class MessageQueue : NonCopyable
   {
     const auto current_write_ = write_idx_.load(std::memory_order_acquire);
     const auto current_read_  = read_idx_.load(std::memory_order_relaxed);
-    if(current_read_ == current_write_)
+    if(UNLIKELY(current_read_ == current_write_))
       return false;
 
     v = array_[current_read_ & mask_];
