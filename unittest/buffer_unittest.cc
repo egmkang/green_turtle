@@ -1,5 +1,7 @@
 #include <gtest/gtest.h>
 #include <buffer.h>
+#include <strings.h>
+#include <string>
 
 using namespace green_turtle;
 
@@ -22,11 +24,32 @@ TEST(Buffer, Full)
   EXPECT_EQ(1ul, buffer.WritableLength());
 
   buffer.Append(&c, sizeof(c));
+  auto size = buffer.Append(&c, sizeof(c));
+  EXPECT_EQ(0ul, size);
   EXPECT_EQ(0ul, buffer.WritableLength());
   EXPECT_EQ(1024ul, buffer.ReadableLength());
 }
 
 TEST(Buffer, ReadWrite)
 {
-  Buffer buffer(1024);
+  Buffer buffer(16);
+  auto begin_ptr = buffer.BeginRead();
+  auto str = "0123456789";
+  auto write_size = buffer.Append(str, strlen(str));
+  EXPECT_EQ(strlen(str), write_size);
+  EXPECT_EQ(strlen(str), buffer.ReadableLength());
+  EXPECT_EQ(strlen(str), size_t(buffer.BeginWrite() - begin_ptr));
+  std::string s(buffer.BeginRead(), buffer.BeginWrite());
+  EXPECT_EQ(s, str);
+  buffer.HasRead(s.size());
+
+  auto size = buffer.Append(str, strlen(str));
+  EXPECT_EQ(size, buffer.Capacity() - strlen(str));
+  s.assign(std::string(buffer.BeginRead(), buffer.BeginWrite()));
+  EXPECT_EQ(std::string(str, str + size), s);
+  EXPECT_EQ(begin_ptr + buffer.Capacity(), buffer.BeginWrite());
+}
+
+TEST(Buffer, Retrieve)
+{
 }

@@ -35,10 +35,16 @@
 #include <noncopyable.h>
 
 namespace green_turtle{
-
+/**
+ * Simple Buffer support only Read/Write/Retrieve.
+ * Not RingBuffer.
+ */
 class Buffer : NonCopyable
 {
  public:
+  /**
+   * @param init_size The Buffer MaxSize, Capacity.
+   */
   Buffer(int init_size)
       : array_(new char[init_size]),
       write_(0),
@@ -51,10 +57,20 @@ class Buffer : NonCopyable
     delete[] array_;
   }
  public:
+  /**
+   * @param data Raw data will be appended into the buffer.
+   * @param size Raw data's length.
+   * @return appended size
+   */
   size_t Append(const void *data, size_t size)
   {
     return Append(static_cast<const char*>(data),size);
   }
+  /**
+   * @param data Raw data will be appended into the buffer.
+   * @param size Raw data's length.
+   * @return appended size
+   */
   size_t Append(const char *data, size_t size)
   {
     size_t len = (size < WritableLength() ? size : WritableLength());
@@ -62,13 +78,47 @@ class Buffer : NonCopyable
     write_ += len;
     return len;
   }
+  /**
+   * the buffer's max size.
+   * @return count in bytes
+   */
   size_t Capacity() const { return size_; }
+  /**
+   * current max writable length.
+   *@return count in bytes
+   */
   size_t WritableLength() const { return size_ - write_; }
+  /**
+   * current max readable length.
+   * @return count in bytes
+   */
   size_t ReadableLength() const { return write_ - read_; }
+  /**
+   * current writable pointer.
+   * @return current writable pointer.
+   */
   char* BeginWrite() const { return array_ + write_; }
+  /**
+   * current reabable pointer.
+   * @return current reabable pointer.
+   */
   char* BeginRead() const { return array_ + read_; }
+  /**
+   * move the current writable pointer back
+   * @param size count in bytes
+   */
   void HasWritten(size_t size) { write_ += size; }
+  /**
+   * move the current readable pointer back
+   * @param size count in bytes
+   */
   void HasRead(size_t size) { read_ += size; }
+  /**
+   * try reset the writable/readable pointer.
+   * don't clear data, just move all data toward to begin.
+   * using HasRead to clear data.
+   * @see HasRead
+   */
   void Retrieve()
   {
     size_t len = ReadableLength();
