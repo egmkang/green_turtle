@@ -14,6 +14,7 @@ static size_t FrameTime = 20;
 EventLoop::EventLoop(int expected_size) :
     poller_(nullptr)
     ,terminal_(false)
+    ,loop_index_(0)
     ,timer_queue_(nullptr)
 {
   poller_ = Poller::CreatePoller(expected_size);

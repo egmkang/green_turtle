@@ -70,7 +70,7 @@ class EventLoop : NonCopyable
  private:
   Poller  *poller_;
   bool    terminal_;
-  int     loop_index_ = 0;
+  int     loop_index_;
   std::vector<EventHandler*>  fired_handler_;
   TimerQueue  *timer_queue_;
 

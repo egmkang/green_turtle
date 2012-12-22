@@ -70,7 +70,7 @@ class hash_map
   }
   ~hash_map()
   {
-    delete[] buckets_;
+    delete_buckets();
   }
   hash_map(const hash_map& m,size_type capacity = 32)
   {
@@ -97,7 +97,7 @@ class hash_map
     capacity_ = m.capacity_;
     hasher_ = m.hasher_;
     equaler_ = m.equaler_;
-    delete[] buckets_;
+    delete_buckets();
 
     buckets_ = (value_type*)malloc(sizeof(value_type)*capacity_);
     constructor_array<value_type,key_type,mapped_type>(buckets_,capacity_,empty_key_,mapped_type());
@@ -133,8 +133,14 @@ class hash_map
     value_type *pair_ = find_position(key);
     if(!pair_ || equaler_(key,pair_->first))
       return NULL;
-    pair_->~value_type();
-    constructor<value_type,key_type,mapped_type>(pair_,key,value);
+
+    auto& k1 = const_cast<key_type&>(pair_->first);
+    auto& v1 = const_cast<mapped_type&>(pair_->second);
+    auto& k2 = const_cast<key_type&>(key);
+    auto& v2 = const_cast<mapped_type&>(value);
+
+    k1 = std::move(k2);
+    v1 = std::move(v2);
 
     ++size_;
     return pair_;
@@ -258,6 +264,14 @@ class hash_map
   }
   inline bool is_key_deleted(const key_type& key) const { return equaler_(key,deleted_key_); }
   inline bool is_key_empty(const key_type& key) const { return equaler_(key,empty_key_); }
+  void delete_buckets()
+  {
+    for(size_type idx = 0; idx < capacity_; ++idx)
+    {
+      buckets_[idx].~value_type();
+    }
+    free(buckets_);
+  }
  private:
   key_type    empty_key_;
   key_type    deleted_key_;

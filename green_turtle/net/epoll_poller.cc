@@ -16,6 +16,7 @@ EpollPoller::EpollPoller():
     Poller(kInitEpollSize)
     ,epollfd_(::epoll_create(kInitEpollSize))
     ,events_(16)
+    ,polling_(false)
 {
 }
 
