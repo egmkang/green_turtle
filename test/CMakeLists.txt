@@ -20,10 +20,6 @@ ELSE(TCMALLOC_LIBRARY OR JEMALLOC_LIBRARY)
 ENDIF(TCMALLOC_LIBRARY OR JEMALLOC_LIBRARY)
 
 
-ADD_EXECUTABLE(blocking_queue
-    blocking_queue_test.cc
-    )
-
 ADD_EXECUTABLE(timer_test
     timer_test.cc
     )

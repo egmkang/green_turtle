@@ -80,6 +80,7 @@ int main()
   TcpAcceptor acceptor("192.168.89.56", 10001, 16*1024, 16*1024);
   bool result = acceptor.Listen();
   assert(result);
+  (void)result;
 
   PrintMessageCount timer;
 

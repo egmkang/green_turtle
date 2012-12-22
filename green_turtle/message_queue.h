@@ -123,10 +123,8 @@ class MessageQueue : NonCopyable
     return size_;
   }
 private:
-  /*alignas(64)*/ Counter  read_idx_;
-  uint64_t r1, r2, r3, r4, r5, r6, r7;
-  /*alignas(64)*/ Counter  write_idx_;
-  uint64_t w1, w2, w3, w4, w5, w6, w7;
+  alignas(64) Counter  read_idx_;
+  alignas(64) Counter  write_idx_;
   const uint64_t  size_;
   const uint64_t  mask_;
   value_type      *array_;

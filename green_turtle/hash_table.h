@@ -227,6 +227,7 @@ class hash_map
 
       begin_ = (begin_ + 1) &  mask_;
       assert(times_++ <= capacity_);
+      (void)times_;
     }
     return NULL;
   }

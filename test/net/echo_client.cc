@@ -88,6 +88,7 @@ int main()
     EchoClient *client = new EchoClient("192.168.89.56", 10001);
     int errorCode = client->Connect();
     assert(!errorCode);
+    (void)errorCode;
     client->set_events(kEventReadable | kEventWriteable);
 
     int num = 0;

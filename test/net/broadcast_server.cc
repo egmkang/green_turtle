@@ -194,6 +194,7 @@ static int SendMesageByPercent(int percent, const char *data, int len)
   const Command *pCmd = (const Command*)data;
   assert(pCmd->len < 2000);
   assert(pCmd->type < 3);
+  (void)pCmd;
   int count = 0;
   Message *pMessage = new SimpleMessage(data, len);
   std::shared_ptr<Message> p(pMessage);
@@ -234,6 +235,7 @@ int main()
   TcpAcceptor acceptor("192.168.89.56", 10001, 32*1024, 32*1024);
   bool result = acceptor.Listen();
   assert(result);
+  (void)result;
 
   PrintMessageCount timer;
 
