@@ -64,9 +64,9 @@ size_t GetHashMapInt2StrCostTime()
     for(auto const& pair : int_to_str)
     {
         auto find = map_.find(pair.first);
-        if(!find)
+        if(find == map_.end())
         {
-            map_.insert(pair.first, pair.second);
+            map_.insert(std::make_pair(pair.first, pair.second));
         }
     }
 
@@ -84,9 +84,9 @@ size_t GetHashMapStr2StrCostTime()
     for(auto const& pair : str_to_str)
     {
         auto find = map_.find(pair.first);
-        if(!find)
+        if(find == map_.end())
         {
-            map_.insert(pair.first, pair.second);
+            map_.insert(std::make_pair(pair.first, pair.second));
         }
     }
 

@@ -40,12 +40,6 @@ namespace green_turtle{
 using green_turtle::constructor;
 using green_turtle::constructor_array;
 
-//TODO:egmkang
-//1. std::pair<iter, bool> insert(const value_type& pair)
-//2. std::pair<iter, bool> insert(P&& pair)
-//3. iter find(const key_type& key)
-//4. end()
-
 //hash_table with linear probing
 template<class Key,
         class T,
@@ -60,6 +54,7 @@ class hash_map
   typedef size_t                  size_type;
   typedef Hash                    hash_fn;
   typedef KeyEqual                equal_fn;
+  typedef value_type*             iterator;
 
   hash_map(size_type capacity = 32,key_type empty = key_type(),key_type deleted = key_type()):
     empty_key_(empty)
@@ -119,37 +114,38 @@ class hash_map
     std::swap(equaler_ , m.equaler_);
     std::swap(buckets_ , m.buckets_);
   }
-  
-  const value_type* find(const key_type& key)
+
+  iterator end() { return nullptr; }
+  iterator end() const { return nullptr; }
+
+  iterator find(const key_type& key)
   {
     if(is_key_empty(key) || is_key_deleted(key))
       return NULL;
-    value_type *pair_ = find_position(key);
+    iterator pair_ = find_position(key);
     if(!pair_ || !equaler_(key,pair_->first))
       return NULL;
     return pair_;
   }
 
-  value_type* insert(const key_type& key,const mapped_type& value)
+  std::pair<iterator, bool> insert(const value_type& v)
   {
-    if(is_key_deleted(key) || is_key_empty(key))
-      return NULL;
-    increase_capacity();
-    value_type *pair_ = find_position(key);
-    if(!pair_ || equaler_(key,pair_->first))
-      return NULL;
-
-    auto& k1 = const_cast<key_type&>(pair_->first);
-    auto& v1 = const_cast<mapped_type&>(pair_->second);
-    auto& k2 = const_cast<key_type&>(key);
-    auto& v2 = const_cast<mapped_type&>(value);
-
-    k1 = std::move(k2);
-    v1 = std::move(v2);
-
-    ++size_;
-    return pair_;
+    std::pair<iterator, bool> result(nullptr, false);
+    result.first = _insert(v.first, v.second);
+    result.second = result.first ? true : false;
+    return result;
   }
+
+  template<class P>
+  std::pair<iterator, bool> insert(P&& p)
+  {
+    auto&& _v = std::forward<P>(p);
+    std::pair<iterator, bool> result(nullptr, false);
+    result.first = _insert(std::forward<decltype(_v.first)>(_v.first), std::forward<decltype(_v.second)>(_v.second));
+    result.second = result.first ? true : false;
+    return result;
+  }
+
   mapped_type& operator[](const key_type& key)
   {
     value_type *pair_ = find(key);
@@ -244,7 +240,7 @@ class hash_map
       if(is_key_deleted(buckets_[idx].first) ||
          is_key_empty(buckets_[idx].first))
         continue;
-      insert(buckets_[idx].first,buckets_[idx].second);
+      _insert(std::move(buckets_[idx].first), std::move(buckets_[idx].second));
     }
   }
   void increase_capacity()
@@ -277,6 +273,40 @@ class hash_map
       buckets_[idx].~value_type();
     }
     free(buckets_);
+  }
+  value_type* _insert(const key_type& key,const mapped_type& value)
+  {
+    if(is_key_deleted(key) || is_key_empty(key))
+      return NULL;
+    value_type *pair_ = find_position(key);
+    if(!pair_ || equaler_(key,pair_->first))
+      return NULL;
+    increase_capacity();
+
+    auto& k1 = const_cast<key_type&>(pair_->first);
+    auto& v1 = const_cast<mapped_type&>(pair_->second);
+    k1 = key;
+    v1 = value;
+
+    ++size_;
+    return pair_;
+  }
+  value_type* _insert(key_type&& key, mapped_type&& value)
+  {
+    if(is_key_deleted(key) || is_key_empty(key))
+      return NULL;
+    value_type *pair_ = find_position(key);
+    if(!pair_ || equaler_(key,pair_->first))
+      return NULL;
+    increase_capacity();
+
+    auto& k1 = const_cast<key_type&>(pair_->first);
+    auto& v1 = const_cast<mapped_type&>(pair_->second);
+    k1 = std::move(key);
+    v1 = std::move(value);
+
+    ++size_;
+    return pair_;
   }
  private:
   key_type    empty_key_;

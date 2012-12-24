@@ -1,5 +1,4 @@
 #include <unordered_list.h>
-#include <hash_table.h>
 #include <stdint.h>
 #include <iostream>
 
@@ -59,14 +58,5 @@ int main()
 
   std::cout << "hash_table test" << std::endl;
 
-  hash_map<int,int> table;
-
-  table.insert(1,1);
-  table.insert(2,2);
-  
-  for_each_hash_table e1;
-
-  table.for_each(e1);
-  
   return 0;
 }
