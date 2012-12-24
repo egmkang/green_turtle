@@ -35,7 +35,6 @@
 #include <functional>
 #include <cstddef>
 #include <stdlib.h>
-#include "hash_function.h"
 #include "constructor_in_place.h"
 namespace green_turtle{
 using green_turtle::constructor;
@@ -44,7 +43,7 @@ using green_turtle::constructor_array;
 //hash_table with linear probing
 template<class Key,
         class T,
-        class Hash = hash<Key>,
+        class Hash = std::hash<Key>,
         class KeyEqual = std::equal_to<Key> >
 class hash_map
 {

@@ -26,27 +26,6 @@ size_t GetMilliSeconds()
   return green_turtle::System::GetMilliSeconds();
 }
 
-namespace green_turtle
-{
-    template<class _Ty>
-    struct equal_to
-        : public std::binary_function<_Ty, _Ty, bool>
-    {
-        bool operator()(const _Ty& _Left, const _Ty& _Right) const
-        {
-            return (_Left == _Right);
-        }
-    };
-    template<>
-    struct equal_to<std::string>
-    {
-        bool operator()(const std::string& l, const std::string& r) const
-        {
-            return (l.size() == r.size()) && (l == r);
-        }
-    };
-}
-
 std::string BuildSimpleString(int i)
 {
     char str[40] = {0};
@@ -80,7 +59,7 @@ size_t GetHashMapInt2StrCostTime()
 {
     size_t hash_map_begin_time = GetMilliSeconds();
 
-    green_turtle::hash_map<int, std::string, green_turtle::hash<int>> map_(2<<18);
+    green_turtle::hash_map<int, std::string > map_;
 
     for(auto const& pair : int_to_str)
     {
@@ -100,7 +79,7 @@ size_t GetHashMapStr2StrCostTime()
 {
     size_t hash_map_begin_time = GetMilliSeconds();
 
-    green_turtle::hash_map<std::string, std::string, std::hash<std::string>, green_turtle::equal_to<std::string>> map_(2<<18);
+    green_turtle::hash_map<std::string, std::string> map_;
 
     for(auto const& pair : str_to_str)
     {
