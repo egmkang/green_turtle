@@ -136,11 +136,11 @@ class hash_map
     return result;
   }
 
-  template<class P>
-  std::pair<iterator, bool> insert(P&& p)
+  template<class... Args>
+  std::pair<iterator, bool> emplace(Args&&... args)
   {
-    auto&& _v = std::forward<P>(p);
     std::pair<iterator, bool> result(nullptr, false);
+    value_type _v(std::forward<Args>(args)...);
     result.first = _insert(std::forward<decltype(_v.first)>(_v.first), std::forward<decltype(_v.second)>(_v.second));
     result.second = result.first ? true : false;
     return result;
