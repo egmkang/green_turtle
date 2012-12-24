@@ -40,6 +40,12 @@ namespace green_turtle{
 using green_turtle::constructor;
 using green_turtle::constructor_array;
 
+//TODO:egmkang
+//1. std::pair<iter, bool> insert(const value_type& pair)
+//2. std::pair<iter, bool> insert(P&& pair)
+//3. iter find(const key_type& key)
+//4. end()
+
 //hash_table with linear probing
 template<class Key,
         class T,
