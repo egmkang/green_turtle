@@ -10,7 +10,7 @@ SET(EXECUTABLE_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/bin)
 #LINK_DIRECTORIES(${CMAKE_SOURCE_DIR}/lib)
 
 IF(NOT CMAKE_BUILD_TYPE)
-        SET(CMAKE_BUILD_TYPE "Debug")
+    SET(CMAKE_BUILD_TYPE "Release")
 ENDIF()
 
 SET(CXX_FLAGS
@@ -19,7 +19,7 @@ SET(CXX_FLAGS
     -Wextra
     -Werror
     -std=c++11
-    -stdlib=libc++
+    #-stdlib=libc++
     -fomit-frame-pointer
     -fstack-protector-all
     -fno-rtti
@@ -33,7 +33,7 @@ STRING(REPLACE ";" " " CMAKE_CXX_FLAGS "${CXX_FLAGS}")
 MESSAGE(STATUS "CXX flags : " "${CMAKE_CXX_FLAGS}")
 
 SET(CMAKE_CXX_COMPILER "clang++")
-SET(CMAKE_CXX_FLAGS_DEBUG   "-DDEBUG -D_DEBUG -D_LIBCPP_DEBUG2=1 -D_GLIBCXX_DEBUG -O0 -pthread")
+SET(CMAKE_CXX_FLAGS_DEBUG   "-DDEBUG -D_DEBUG -D_LIBCPP_DEBUG2=1 -O0 -pthread")
 SET(CMAKE_CXX_FLAGS_RELEASE "-DNDEBUG -O2 -pthread")
 
 FIND_LIBRARY(TCMALLOC_LIBRARY NAMES tcmalloc)

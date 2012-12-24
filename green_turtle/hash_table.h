@@ -278,10 +278,10 @@ class hash_map
   {
     if(is_key_deleted(key) || is_key_empty(key))
       return NULL;
+    increase_capacity();
     value_type *pair_ = find_position(key);
     if(!pair_ || equaler_(key,pair_->first))
       return NULL;
-    increase_capacity();
 
     auto& k1 = const_cast<key_type&>(pair_->first);
     auto& v1 = const_cast<mapped_type&>(pair_->second);
@@ -295,10 +295,10 @@ class hash_map
   {
     if(is_key_deleted(key) || is_key_empty(key))
       return NULL;
+    increase_capacity();
     value_type *pair_ = find_position(key);
     if(!pair_ || equaler_(key,pair_->first))
       return NULL;
-    increase_capacity();
 
     auto& k1 = const_cast<key_type&>(pair_->first);
     auto& v1 = const_cast<mapped_type&>(pair_->second);
