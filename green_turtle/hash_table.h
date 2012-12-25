@@ -127,11 +127,29 @@ class hash_map
       return NULL;
     return pair_;
   }
+  iterator find(const key_type& key) const
+  {
+    if(is_key_empty(key) || is_key_deleted(key))
+      return NULL;
+    iterator pair_ = find_position(key);
+    if(!pair_ || !equaler_(key,pair_->first))
+      return NULL;
+    return pair_;
+  }
 
   std::pair<iterator, bool> insert(const value_type& v)
   {
     std::pair<iterator, bool> result(nullptr, false);
-    result.first = _insert(v.first, v.second);
+    result.first = _insert(v);
+    result.second = result.first ? true : false;
+    return result;
+  }
+
+  template<class P>
+  std::pair<iterator, bool> insert(P&& p)
+  {
+    std::pair<iterator, bool> result(nullptr, false);
+    result.first = _insert(std::forward<P>(p));
     result.second = result.first ? true : false;
     return result;
   }
@@ -141,7 +159,7 @@ class hash_map
   {
     std::pair<iterator, bool> result(nullptr, false);
     value_type _v(std::forward<Args>(args)...);
-    result.first = _insert(std::forward<decltype(_v.first)>(_v.first), std::forward<decltype(_v.second)>(_v.second));
+    result.first = _insert(std::move(_v));
     result.second = result.first ? true : false;
     return result;
   }
@@ -151,10 +169,21 @@ class hash_map
     value_type *pair_ = find(key);
     if(!pair_)
     {
-      pair_ = insert(key,mapped_type());
+      pair_ = insert(std::make_pair(key,mapped_type()));
     }
     return pair_->second;
   }
+
+  mapped_type& operator[](key_type&& key)
+  {
+    value_type *pair_ = find(key);
+    if(!pair_)
+    {
+      pair_ = insert(std::make_pair(std::move(key), std::move(mapped_type())));
+    }
+    return pair_->second;
+  }
+
   void erase(const key_type& key)
   {
     assert(empty_key_ != deleted_key_ && "you must set a deleted key value before delete it");
@@ -207,7 +236,7 @@ class hash_map
   //return key equal position
   //or first deleted postion
   //or empty postion
-  value_type* find_position(const key_type& key)
+  value_type* find_position(const key_type& key) const
   {
     size_type hash_pair_ = hasher_(key);
     size_type mask_ = capacity_ - 1;
@@ -240,7 +269,7 @@ class hash_map
       if(is_key_deleted(buckets_[idx].first) ||
          is_key_empty(buckets_[idx].first))
         continue;
-      _insert(std::move(buckets_[idx].first), std::move(buckets_[idx].second));
+      _insert(std::move(buckets_[idx]));
     }
   }
   void increase_capacity()
@@ -274,8 +303,9 @@ class hash_map
     }
     free(buckets_);
   }
-  value_type* _insert(const key_type& key,const mapped_type& value)
+  value_type* _insert(const value_type& _v)
   {
+    const key_type&     key = _v.first;
     if(is_key_deleted(key) || is_key_empty(key))
       return NULL;
     increase_capacity();
@@ -286,13 +316,16 @@ class hash_map
     auto& k1 = const_cast<key_type&>(pair_->first);
     auto& v1 = const_cast<mapped_type&>(pair_->second);
     k1 = key;
-    v1 = value;
+    v1 = _v.second;
 
     ++size_;
     return pair_;
   }
-  value_type* _insert(key_type&& key, mapped_type&& value)
+  template<class P>
+  value_type* _insert(P&& p)
   {
+    std::pair<key_type, mapped_type> _v(p.first, p.second);
+    const key_type&     key = _v.first;
     if(is_key_deleted(key) || is_key_empty(key))
       return NULL;
     increase_capacity();
@@ -302,8 +335,8 @@ class hash_map
 
     auto& k1 = const_cast<key_type&>(pair_->first);
     auto& v1 = const_cast<mapped_type&>(pair_->second);
-    k1 = std::move(key);
-    v1 = std::move(value);
+    k1 = std::move(_v.first);
+    v1 = std::move(_v.second);
 
     ++size_;
     return pair_;

@@ -19,7 +19,7 @@ SET(CXX_FLAGS
     -Wextra
     -Werror
     -std=c++11
-    #-stdlib=libc++
+    -stdlib=libc++
     -fomit-frame-pointer
     -fstack-protector-all
     -fno-rtti
