@@ -30,9 +30,4 @@ ADD_EXECUTABLE(unordered_list_test
     )
 TARGET_LINK_LIBRARIES(unordered_list_test green_turtle)
 
-ADD_EXECUTABLE(hash_test
-    hash_test.cc
-    )
-TARGET_LINK_LIBRARIES(hash_test green_turtle jemalloc)
-
 ADD_SUBDIRECTORY(net)
