@@ -35,10 +35,7 @@
 #include <functional>
 #include <cstddef>
 #include <stdlib.h>
-#include "constructor_in_place.h"
 namespace green_turtle{
-using green_turtle::constructor;
-using green_turtle::constructor_array;
 
 //hash_table with linear probing
 template<class Key,
@@ -61,18 +58,18 @@ class hash_map
     ,deleted_key_(deleted)
     ,size_(0)
     ,capacity_(capacity)
-    ,buckets_()
+    ,buckets_(nullptr)
     ,hasher_()
     ,equaler_()
   {
-    buckets_ = (value_type*) malloc(sizeof(value_type) * capacity_);
-    constructor_array<value_type,key_type,mapped_type>(buckets_,capacity_,empty_key_,mapped_type());
+    init_buckets();
   }
   ~hash_map()
   {
     delete_buckets();
   }
-  hash_map(const hash_map& m,size_type capacity = 32)
+  hash_map(hash_map&& m,size_type capacity = 32):
+      buckets_(nullptr)
   {
     empty_key_ = m.empty_key_;
     deleted_key_ = m.deleted_key_;
@@ -84,8 +81,7 @@ class hash_map
     hasher_ = m.hasher_;
     equaler_ = m.equaler_;
 
-    buckets_ = (value_type*)malloc(sizeof(value_type)*capacity_);
-    constructor_array<value_type,key_type,mapped_type>(buckets_,capacity_,empty_key_,mapped_type());
+    init_buckets();
 
     copy_from(m);
   }
@@ -97,10 +93,8 @@ class hash_map
     capacity_ = m.capacity_;
     hasher_ = m.hasher_;
     equaler_ = m.equaler_;
-    delete_buckets();
 
-    buckets_ = (value_type*)malloc(sizeof(value_type)*capacity_);
-    constructor_array<value_type,key_type,mapped_type>(buckets_,capacity_,empty_key_,mapped_type());
+    init_buckets();
 
     copy_from(m);
   }
@@ -261,22 +255,33 @@ class hash_map
     }
     return NULL;
   }
+  void copy_from(hash_map&& m)
+  {
+    if(m.empty()) return;
+    for(size_t idx = 0; idx < m.capacity_; ++idx)
+    {
+      if(is_key_deleted(m.buckets_[idx].first) ||
+         is_key_empty(m.buckets_[idx].first))
+        continue;
+      _insert(std::move(m.buckets_[idx]));
+    }
+  }
   void copy_from(const hash_map& m)
   {
     if(m.empty()) return;
-    for(size_t idx = 0; idx < capacity_; ++idx)
+    for(size_t idx = 0; idx < m.capacity_; ++idx)
     {
-      if(is_key_deleted(buckets_[idx].first) ||
-         is_key_empty(buckets_[idx].first))
+      if(is_key_deleted(m.buckets_[idx].first) ||
+         is_key_empty(m.buckets_[idx].first))
         continue;
-      _insert(std::move(buckets_[idx]));
+      _insert(m.buckets_[idx]);
     }
   }
   void increase_capacity()
   {
     if(size_ > (capacity_ >> 1))
     {
-      hash_map _m(*this,capacity_ << 1);
+      hash_map _m(std::move(*this),capacity_ << 1);
       swap(_m);
     }
   }
@@ -295,13 +300,21 @@ class hash_map
   }
   inline bool is_key_deleted(const key_type& key) const { return equaler_(key,deleted_key_); }
   inline bool is_key_empty(const key_type& key) const { return equaler_(key,empty_key_); }
+  void init_buckets()
+  {
+    delete[] buckets_;
+    buckets_ = new value_type[capacity_]();
+    if(empty_key_ != key_type())
+    {
+      for(unsigned idx = 0; idx < capacity_; ++idx)
+      {
+        const_cast<key_type&>(buckets_[idx].first) = empty_key_;
+      }
+    }
+  }
   void delete_buckets()
   {
-    for(size_type idx = 0; idx < capacity_; ++idx)
-    {
-      buckets_[idx].~value_type();
-    }
-    free(buckets_);
+    delete[] buckets_;
   }
   value_type* _insert(const value_type& _v)
   {

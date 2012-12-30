@@ -3,7 +3,6 @@
 #include <net/timer_queue.h>
 #include <net/timer.h>
 #include <message_queue.h>
-#include <constructor_in_place.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string>
@@ -72,7 +71,7 @@ static void RandMessage(TcpClient *pClient)
   if(rand < 50)
   {
     EchoCommand *pEchoCmd = (EchoCommand*)(raw_data);
-    constructor(pEchoCmd);
+    new (pEchoCmd) EchoCommand();
     pEchoCmd->data_len = snprintf(pEchoCmd->data, 300, "this is a EchoMessage, random value %u",
                                   (unsigned int)gen());
     pEchoCmd->len = pEchoCmd->Length();
@@ -83,7 +82,7 @@ static void RandMessage(TcpClient *pClient)
   else
   {
     BroadCastCommand *pBroadCast = (BroadCastCommand*)(raw_data);
-    constructor(pBroadCast);
+    new (pBroadCast) BroadCastCommand();
     pBroadCast->data_len = snprintf(pBroadCast->data, 300, "this is a BroadCastMessage, random value %u",
                                     (unsigned int)gen());
     pBroadCast->len = pBroadCast->Length();

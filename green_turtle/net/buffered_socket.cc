@@ -1,4 +1,3 @@
-#include <constructor_in_place.h>
 #include "buffered_socket.h"
 #include "addr_info.h"
 #include "socket_option.h"
@@ -33,7 +32,7 @@ BufferedSocket::BufferedSocket(int fd,const AddrInfo& addr, int rcv_window, int 
   if(snd_window)
   {
     SocketOption::SetSendBuffer(fd, snd_window);
-    constructor(const_cast<size_t*>(&cache_line_size_), snd_window);
+    const_cast<size_t&>(cache_line_size_) = snd_window;
   }
 }
 

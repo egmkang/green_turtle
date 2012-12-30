@@ -80,6 +80,7 @@ class MessageQueue : NonCopyable
     assert(addr % 64 == 0);
     addr = reinterpret_cast<long>(&write_idx_);
     assert(addr % 64 == 0);
+    (void)addr;
   }
 
   ~MessageQueue()
@@ -123,8 +124,8 @@ class MessageQueue : NonCopyable
     return size_;
   }
 private:
-  alignas(64) Counter  read_idx_;
-  alignas(64) Counter  write_idx_;
+  /*alignas(64)*/ Counter  read_idx_;
+  /*alignas(64)*/ Counter  write_idx_;
   const uint64_t  size_;
   const uint64_t  mask_;
   value_type      *array_;
