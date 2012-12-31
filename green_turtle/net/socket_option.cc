@@ -79,12 +79,14 @@ int SocketOption::Listen(int fd, const struct sockaddr* addr, int len)
   ::setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval));
 
   int ret = ::bind(fd, addr, len);
+  int error_no = errno;
   if(ret == -1)
   {
     ::close(fd);
     return ret;
   }
   ret = ::listen(fd, 511);
+  error_no = errno;
   if(ret == -1)
   {
     ::close(fd);

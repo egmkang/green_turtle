@@ -30,8 +30,10 @@
 // auhor: egmkang (egmkang@gmail.com)
 #ifndef __BUFFER_H__
 #define __BUFFER_H__
+#include <cassert>
 #include <cstddef>
 #include <cstring>
+#include <cstdlib>
 #include <noncopyable.h>
 
 namespace green_turtle{
@@ -46,15 +48,16 @@ class Buffer : NonCopyable
    * @param init_size The Buffer MaxSize, Capacity.
    */
   Buffer(int init_size)
-      : array_(new char[init_size]),
+      : array_(nullptr),
       write_(0),
       read_(0),
       size_(init_size)
   {
+    array_ = static_cast<char*>(std::malloc(init_size));
   }
   ~Buffer()
   {
-    delete[] array_;
+    std::free(array_);
   }
  public:
   /**
@@ -73,10 +76,16 @@ class Buffer : NonCopyable
    */
   size_t Append(const char *data, size_t size)
   {
-    size_t len = (size < WritableLength() ? size : WritableLength());
-    std::memcpy(array_ + write_, data, len);
-    write_ += len;
-    return len;
+    int need = size - WritableLength();
+    if(need > 0)
+    {
+      array_ = static_cast<char*>(std::realloc(array_, this->size_ + need));
+      assert(array_);
+      this->size_ += need;
+    }
+    std::memcpy(array_ + write_, data, size);
+    write_ += size;
+    return size;
   }
   /**
    * the buffer's max size.
