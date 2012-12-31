@@ -68,7 +68,7 @@ class BroadCastTask : public BufferedSocket
  public:
   BroadCastTask(int fd,const AddrInfo& addr):BufferedSocket(fd, addr){}
  protected:
-  virtual void Decoding(CacheLine& data)
+  virtual void Decoding(Buffer& data)
   {
     while(true)
     {

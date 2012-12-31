@@ -1,5 +1,6 @@
 #include <netinet/in.h>
 #include <sys/socket.h>
+#include <sys/uio.h>
 #include <netinet/tcp.h>
 #include <unistd.h>
 #include <assert.h>
@@ -125,6 +126,15 @@ int SocketOption::Write(int fd, const void *data, size_t len)
 int SocketOption::Read(int fd, void *data, const size_t len)
 {
   int nread = ::read(fd, data, len);
+  int error_no = errno;
+  (void)error_no;
+  if(nread == -1 && errno == EAGAIN) nread = 0;
+  return nread;
+}
+
+int SocketOption::Readv(int fd, iovec *iov, int count)
+{
+  int nread = ::read(fd, iov, count);
   int error_no = errno;
   (void)error_no;
   if(nread == -1 && errno == EAGAIN) nread = 0;

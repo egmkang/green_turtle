@@ -46,29 +46,27 @@ namespace net{
 class BufferedSocket : public EventHandler
 {
  public:
-  typedef green_turtle::Buffer  CacheLine;
+  typedef green_turtle::Buffer  Buffer;
  public:
   BufferedSocket(int fd,const AddrInfo& addr, int rcv_window = 0, int snd_window = 0);
   ~BufferedSocket();
   void SendMessage(std::shared_ptr<Message>&& data);
   void SendMessage(std::shared_ptr<Message>& data);
   const AddrInfo& addr() const;
-  CacheLine* GetNewCacheLine();
  protected:
   virtual int OnRead();
   virtual int OnWrite();
   virtual int OnError();
-  virtual void Decoding(CacheLine& data) = 0;
+  virtual void Decoding(Buffer& data) = 0;
   virtual void DeleteSelf() = 0;
  private:
   bool HasData() const;
  private:
   typedef std::shared_ptr<Message>  SharedMessage;
   AddrInfo                    addr_;
-  const size_t                cache_line_size_;
-  std::deque<CacheLine*>      snd_queue_;
   std::deque<SharedMessage>   snd_messages_;
-  CacheLine                   *rcv_buffer_;
+  Buffer                      *rcv_buffer_;
+  Buffer                      *snd_buffer_;
   std::mutex                  write_lock_;
 };
 

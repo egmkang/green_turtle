@@ -46,7 +46,7 @@ class EchoTask : public BufferedSocket
  public:
   EchoTask(int fd,const AddrInfo& addr):BufferedSocket(fd, addr){}
  protected:
-  virtual void Decoding(CacheLine& data)
+  virtual void Decoding(Buffer& data)
   {
     size_t size = data.ReadableLength();
     if(size)

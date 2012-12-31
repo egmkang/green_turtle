@@ -34,6 +34,7 @@
 #define __SOCKET_OPTION__
 #include <cstddef>
 struct sockaddr;
+struct iovec;
 
 namespace green_turtle{
 namespace net{
@@ -52,6 +53,7 @@ class SocketOption{
    static int   Accept(int fd, struct sockaddr_in* info);
    static int   Write(int fd, const void *data, size_t len);
    static int   Read(int fd, void *data, const size_t len);
+   static int   Readv(int fd, iovec *iov, int count);
    static int   Connect(int fd, const struct sockaddr* addr, int len);
 };
 }

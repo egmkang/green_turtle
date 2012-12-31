@@ -1,3 +1,4 @@
+#include <sys/uio.h>
 #include "buffered_socket.h"
 #include "addr_info.h"
 #include "socket_option.h"
@@ -5,45 +6,31 @@
 
 using namespace green_turtle;
 using namespace green_turtle::net;
-  
-static inline unsigned int nextpow2(unsigned int x)
-{
-  --x;
-  x |= x >> 1;
-  x |= x >> 2;
-  x |= x >> 4;
-  x |= x >> 8;
-  x |= x >> 16;
-  return x+1;
-}
+
+const size_t kDefaultBufferSize = 8*1024;
+const size_t kMinLeftBufferSize = 128;
 
 BufferedSocket::BufferedSocket(int fd,const AddrInfo& addr, int rcv_window, int snd_window)
   : EventHandler(fd)
     , addr_(addr)
-    , cache_line_size_(nextpow2(SocketOption::GetSendBuffer(fd)))
-    , rcv_buffer_(nullptr)
+    , rcv_buffer_(new Buffer(kDefaultBufferSize))
+    , snd_buffer_(new Buffer(kDefaultBufferSize))
     , write_lock_()
 {
   if(rcv_window)
   {
     SocketOption::SetRecvBuffer(fd, rcv_window);
   }
-  rcv_buffer_ = new CacheLine(nextpow2(SocketOption::GetRecvBuffer(fd)));
   if(snd_window)
   {
     SocketOption::SetSendBuffer(fd, snd_window);
-    const_cast<size_t&>(cache_line_size_) = snd_window;
   }
 }
 
 BufferedSocket::~BufferedSocket()
 {
-  for(auto p : snd_queue_)
-  {
-    delete p;
-  }
-  snd_queue_.clear();
   delete rcv_buffer_;
+  delete snd_buffer_;
 }
 const AddrInfo& BufferedSocket::addr() const
 {
@@ -52,36 +39,36 @@ const AddrInfo& BufferedSocket::addr() const
 
 int BufferedSocket::OnRead()
 {
-  int nread = SocketOption::Read(fd(), rcv_buffer_->BeginWrite(), rcv_buffer_->WritableLength());
+  char extrabuff[64*1024];
+  iovec iov[2];
+  iov[0].iov_base = rcv_buffer_->BeginWrite();
+  iov[0].iov_len = rcv_buffer_->WritableLength();
+  iov[1].iov_base = extrabuff;
+  iov[1].iov_len = sizeof(extrabuff);
+
+  int nread = SocketOption::Readv(fd(), iov, 2);
   if(nread < 0)
     return kErr;
   if(nread)
   {
-    rcv_buffer_->HasWritten(nread);
+    if(rcv_buffer_->WritableLength() <= (size_t)nread)
+    {
+      nread -= rcv_buffer_->WritableLength();
+      rcv_buffer_->HasWritten(rcv_buffer_->WritableLength());
+    }
+    if(nread)
+    {
+      rcv_buffer_->Append(extrabuff, nread);
+    }
     Decoding(*rcv_buffer_);
     rcv_buffer_->Retrieve();
   }
   return kOK;
 }
 
-BufferedSocket::CacheLine* BufferedSocket::GetNewCacheLine()
-{
-  CacheLine *cache = nullptr;
-  if(!snd_queue_.empty()) cache = snd_queue_.back();
-  if(!cache || !cache->WritableLength())
-  {
-    cache = new CacheLine(cache_line_size_);
-    snd_queue_.push_back(cache);
-  }
-  return cache;
-}
-
 bool BufferedSocket::HasData() const
 {
-  if(snd_messages_.size() ||
-     snd_queue_.size() > 1) return true;
-  if(snd_queue_.size() == 1 &&
-     snd_queue_.front()->ReadableLength())
+  if(snd_messages_.size() || snd_buffer_->ReadableLength())
     return true;
   return false;
 }
@@ -99,35 +86,18 @@ int BufferedSocket::OnWrite()
   {
     const char   *data = (char*)message->data();
     unsigned int  len = message->length();
-    size_t sent = 0;
-    while(len - sent)
-    {
-      CacheLine *cache = GetNewCacheLine();
-      sent += cache->Append(data + sent, std::min(len - sent, cache->WritableLength()));
-    }
+
+    snd_buffer_->Append(data, len);
   }
 
-  while(!snd_queue_.empty())
+  int send_size = SocketOption::Write(fd(), snd_buffer_->BeginRead(), snd_buffer_->ReadableLength());
+  if(send_size < 0)   return kErr;
+  else if(!send_size) return kOK;
+  snd_buffer_->HasRead(send_size);
+
+  if(snd_buffer_->ReadableLength() < kMinLeftBufferSize)
   {
-    CacheLine *cache = snd_queue_.front();
-    int send_size = SocketOption::Write(fd(), cache->BeginRead(), cache->ReadableLength());
-    if(send_size < 0)   return kErr;
-    else if(!send_size) return kOK;
-    cache->HasRead(send_size);
-    if(!cache->ReadableLength())
-    {
-      if(snd_queue_.size() == 1)
-      {
-        cache->Retrieve();
-        break;
-      }
-      delete cache;
-      snd_queue_.pop_front();
-    }
-    else
-    {
-      break;
-    }
+    snd_buffer_->Retrieve();
   }
   return kOK;
 }

@@ -31,7 +31,7 @@ class BroadCastClient : public TcpClient, public Timer
  public:
   BroadCastClient(const std::string& ip, unsigned short port) : TcpClient(ip, port, 16*1024, 16*1024){}
  protected:
-  virtual void Decoding(CacheLine& data)
+  virtual void Decoding(Buffer& data)
   {
     while(true)
     {

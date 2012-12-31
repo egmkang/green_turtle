@@ -44,7 +44,7 @@ class EchoClient : public TcpClient
  public:
   EchoClient(const std::string& ip, unsigned short port) : TcpClient(ip, port, 16*1024, 16*1024), send_times_(0){}
  protected:
-  virtual void Decoding(CacheLine& data)
+  virtual void Decoding(Buffer& data)
   {
     size_t size = data.ReadableLength();
     std::string str(data.BeginRead(), data.BeginWrite());
