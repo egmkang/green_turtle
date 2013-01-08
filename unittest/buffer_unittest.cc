@@ -25,9 +25,9 @@ TEST(Buffer, Full)
 
   buffer.Append(&c, sizeof(c));
   auto size = buffer.Append(&c, sizeof(c));
-  EXPECT_EQ(0ul, size);
+  EXPECT_EQ(1ul, size);
   EXPECT_EQ(0ul, buffer.WritableLength());
-  EXPECT_EQ(1024ul, buffer.ReadableLength());
+  EXPECT_EQ(1025ul, buffer.ReadableLength());
 }
 
 TEST(Buffer, ReadWrite)
