@@ -81,6 +81,7 @@ int SocketOption::Listen(int fd, const struct sockaddr* addr, int len)
 
   int ret = ::bind(fd, addr, len);
   int error_no = errno;
+  (void)error_no;
   if(ret == -1)
   {
     ::close(fd);
