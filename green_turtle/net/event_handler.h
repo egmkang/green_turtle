@@ -72,6 +72,7 @@ class EventHandler : green_turtle::NonCopyable
   EventLoop* event_loop() const { return event_loop_; }
   void set_event_loop(EventLoop *loop) { event_loop_ = loop; }
  public:
+  void SetWindowSize(int size);
   virtual void loop_balance(const std::vector<EventLoop*>& loops) { (void)loops;}
   virtual int OnError()           = 0;
  protected:

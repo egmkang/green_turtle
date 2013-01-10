@@ -42,7 +42,7 @@ static char * NewEchoString(int& send_times_)
 class EchoClient : public TcpClient
 {
  public:
-  EchoClient(const std::string& ip, unsigned short port) : TcpClient(ip, port, 16*1024, 16*1024), send_times_(0){}
+  EchoClient(const std::string& ip, unsigned short port) : TcpClient(ip, port), send_times_(0){}
  protected:
   virtual void Decoding(Buffer& data)
   {

@@ -10,21 +10,13 @@ using namespace green_turtle::net;
 const size_t kDefaultBufferSize = 8*1024;
 const size_t kMinLeftBufferSize = 128;
 
-BufferedSocket::BufferedSocket(int fd,const AddrInfo& addr, int rcv_window, int snd_window)
+BufferedSocket::BufferedSocket(int fd,const AddrInfo& addr)
   : EventHandler(fd)
     , addr_(addr)
     , rcv_buffer_(new Buffer(kDefaultBufferSize))
     , snd_buffer_(new Buffer(kDefaultBufferSize))
     , write_lock_()
 {
-  if(rcv_window)
-  {
-    SocketOption::SetRecvBuffer(fd, rcv_window);
-  }
-  if(snd_window)
-  {
-    SocketOption::SetSendBuffer(fd, snd_window);
-  }
 }
 
 BufferedSocket::~BufferedSocket()

@@ -77,7 +77,8 @@ int main()
   ::last_update_time_ = System::GetMilliSeconds();
   signal(SIGPIPE, SIG_IGN);
 
-  TcpAcceptor acceptor("192.168.89.56", 10001, 16*1024, 16*1024);
+  TcpAcceptor acceptor("192.168.89.56", 10001);
+  acceptor.SetWindowSize(16*1024);
   bool result = acceptor.Listen();
   assert(result);
   (void)result;

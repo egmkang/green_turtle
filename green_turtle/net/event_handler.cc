@@ -41,3 +41,9 @@ void EventHandler::HandleEvent()
   }
   this->revents_ = kEventNone;
 }
+
+void EventHandler::SetWindowSize(int size)
+{
+  SocketOption::SetRecvBuffer(this->fd(), size);
+  SocketOption::SetSendBuffer(this->fd(), size);
+}

@@ -29,7 +29,7 @@ static void RandMessage(TcpClient *pClient);
 class BroadCastClient : public TcpClient, public Timer
 {
  public:
-  BroadCastClient(const std::string& ip, unsigned short port) : TcpClient(ip, port, 16*1024, 16*1024){}
+  BroadCastClient(const std::string& ip, unsigned short port) : TcpClient(ip, port){}
  protected:
   virtual void Decoding(Buffer& data)
   {

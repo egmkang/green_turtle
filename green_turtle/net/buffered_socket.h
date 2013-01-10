@@ -48,7 +48,7 @@ class BufferedSocket : public EventHandler
  public:
   typedef green_turtle::Buffer  Buffer;
  public:
-  BufferedSocket(int fd,const AddrInfo& addr, int rcv_window = 0, int snd_window = 0);
+  BufferedSocket(int fd,const AddrInfo& addr);
   ~BufferedSocket();
   void SendMessage(std::shared_ptr<Message>&& data);
   void SendMessage(std::shared_ptr<Message>& data);

@@ -40,7 +40,7 @@ namespace net{
 class TcpClient : public BufferedSocket
 {
  public:
-  TcpClient(const std::string& ip, unsigned short port, int recv_buff = kBigRecvWindow, int send_buff = kBigSendWindow);
+  TcpClient(const std::string& ip, unsigned short port);
   ~TcpClient();
   int Connect();
  protected:
