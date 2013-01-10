@@ -33,15 +33,68 @@
 #define __NET_MESSAGE__
 #include <noncopyable.h>
 #include <cstddef>
+#include <string>
 namespace green_turtle{
 namespace net{
+
 class Message : green_turtle::NonCopyable {
  public:
   virtual ~Message() {}
   virtual void*   data()    const = 0;
   virtual size_t  length()  const = 0;
 };
-}
-}
+
+//default implation using std::string
+class DefaultMessageBuffer : public Message
+{
+  enum{ kDefaultInitSize = 64 };
+ public:
+  DefaultMessageBuffer() : current_pos_(0)
+  {
+    buffer_.reserve(kDefaultInitSize);
+  }
+
+  template<typename T>
+  T* CurrentPtr()
+  {
+    return ConvertToPtr<T>(current_pos_);
+  }
+
+  template<typename T>
+  T* ConvertToPtr(int offset)
+  {
+    char *p = const_cast<char*>(buffer_.data() + offset);
+    return static_cast<T*>(p);
+  }
+
+  template<typename T>
+  T* Append()
+  {
+    MakeSpace(sizeof(T));
+    T *ptr = ConvertToPtr<T>();
+    current_pos_ += sizeof(T);
+    return ptr;
+  }
+
+  size_t CurrentPos() const { return current_pos_; }
+ public:
+  virtual void* data() const
+  {
+    return static_cast<void*>(const_cast<char*>(buffer_.data()));
+  }
+
+  virtual size_t length() const
+  {
+    return buffer_.size();
+  }
+ private:
+  void MakeSpace(int s) { buffer_.resize(buffer_.size() + s); }
+ private:
+  std::string buffer_;
+  int current_pos_;
+};
+
+} //namespace net
+} //namespace green_turtle
 
 #endif

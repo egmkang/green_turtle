@@ -29,6 +29,8 @@
 //
 // author: egmkang (egmkang@gmail.com)
 
+#include <endian.h>
+
 #ifndef __UTILS_H__
 #define __UTILS_H__
 
@@ -47,5 +49,30 @@
 #ifndef UNLIKELY
 #define UNLIKELY(x) __builtin_expect(!!(x), 0)
 #endif
+
+template<class T>
+T HostToNet(T v);
+
+template<class T>
+T NetToHost(T v);
+
+#define CONVERT_BETWEEN_NET_HOST(T,TO_HOST,TO_NET)  \
+    template<>                                      \
+    T HostToNet<T>(T v)                             \
+    {                                               \
+      return TO_NET(v);                             \
+    }                                               \
+    template<>                                      \
+    T NetToHost(T v)                                \
+    {                                               \
+      return TO_HOST(v);                            \
+    }
+
+CONVERT_BETWEEN_NET_HOST(short, be16toh, htobe16)
+CONVERT_BETWEEN_NET_HOST(unsigned short, be16toh, htobe16)
+CONVERT_BETWEEN_NET_HOST(int, be32toh, htobe32)
+CONVERT_BETWEEN_NET_HOST(unsigned int, be32toh, htobe32)
+CONVERT_BETWEEN_NET_HOST(long long, be64toh, htobe64)
+CONVERT_BETWEEN_NET_HOST(unsigned long long, be64toh, htobe64)
 
 #endif
