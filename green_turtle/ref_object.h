@@ -196,7 +196,7 @@ class RefPtr
   {
     return Get();
   }
-  operator bool() const
+  explicit operator bool() const
   {
     return Get();
   }
