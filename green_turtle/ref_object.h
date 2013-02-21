@@ -176,6 +176,12 @@ class RefPtr
     }
     return *this;
   }
+
+  void Swap(RefPtr& other)
+  {
+    std::swap(this->impl_ptr_, other.impl_ptr_);
+  }
+
   /**
    * return the object's ptr
    * @return referece object ptr
