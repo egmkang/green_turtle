@@ -70,6 +70,7 @@ TEST(RefPtr, Move)
   {
     RefPtr<ObjectA> ptr;
     ObjectA *p = new ObjectA;
+    ptr = p;
 
     RefPtr<ObjectA> pMove(std::move(ptr));
     EXPECT_EQ(ptr.Get(), nullptr);
@@ -78,6 +79,7 @@ TEST(RefPtr, Move)
   {
     RefPtr<ObjectA> ptr;
     ObjectA *p = new ObjectA;
+    ptr = p;
 
     RefPtr<ObjectA> pMove;
     pMove = std::move(ptr);
