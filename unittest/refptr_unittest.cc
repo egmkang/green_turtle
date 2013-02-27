@@ -65,3 +65,23 @@ TEST(RefPtr, Delete)
   EXPECT_EQ(p, ptr);
   delete p;
 }
+TEST(RefPtr, Move)
+{
+  {
+    RefPtr<ObjectA> ptr;
+    ObjectA *p = new ObjectA;
+
+    RefPtr<ObjectA> pMove(std::move(ptr));
+    EXPECT_EQ(ptr.Get(), nullptr);
+    EXPECT_EQ(pMove.Get(), p);
+  }
+  {
+    RefPtr<ObjectA> ptr;
+    ObjectA *p = new ObjectA;
+
+    RefPtr<ObjectA> pMove;
+    pMove = std::move(ptr);
+    EXPECT_EQ(ptr.Get(), nullptr);
+    EXPECT_EQ(pMove.Get(), p);
+  }
+}

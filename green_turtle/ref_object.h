@@ -33,6 +33,7 @@
 #define __REF_OBJECT_H__
 #include <cstddef>
 #include <type_traits>
+#include <iostream>
 
 namespace green_turtle{
 
@@ -142,6 +143,11 @@ class RefPtr
     impl_ptr_ = ref_obj ? ref_obj->GetRefCountImpl() : nullptr;
     if(impl_ptr_) impl_ptr_->AddRefCount();
   }
+  RefPtr(RefPtr&& ptr)
+  {
+      impl_ptr_ = ptr.impl_ptr_;
+      ptr.impl_ptr_ = nullptr;
+  }
   /**
    * @param ref_ptr reference to which object
    */
@@ -157,6 +163,16 @@ class RefPtr
   {
     RefPtr<T> p(ref_obj);
     return *this = p;
+  }
+  RefPtr<T>& operator = (RefPtr&& ptr)
+  {
+      if(impl_ptr_ != ptr.impl_ptr_)
+      {
+          RefPtr p(std::move(*this));
+          impl_ptr_ = ptr.impl_ptr_;
+          ptr.impl_ptr_ = nullptr;
+      }
+      return *this;
   }
   /**
    * @param ref_ptr reference to which object, mybey replace this's ptr to another.
