@@ -109,7 +109,7 @@ class MessageQueue : NonCopyable
     if(UNLIKELY(current_read_ == current_write_))
       return false;
 
-    v = array_[current_read_ & mask_];
+    v = std::move(array_[current_read_ & mask_]);
     read_idx_.store(current_read_ + 1, std::memory_order_release);
     return true;
   }
