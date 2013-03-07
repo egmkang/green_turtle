@@ -41,8 +41,8 @@ class NonCopyable
   NonCopyable(){}
   ~NonCopyable(){}
  private:
-  NonCopyable(const NonCopyable&);
-  const NonCopyable& operator = (const NonCopyable&);
+  NonCopyable(const NonCopyable&) = delete;
+  const NonCopyable& operator = (const NonCopyable&) = delete;
 };
 
 }

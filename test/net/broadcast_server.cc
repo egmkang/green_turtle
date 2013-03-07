@@ -95,9 +95,16 @@ class BroadCastTask : public BufferedSocket
   }
 };
 
-static void _MessageProc(TcpServer *pServer)
+class BroadCastServer : public TcpServer
 {
-  (void)pServer;
+  public:
+      BroadCastServer() : TcpServer(1024){}
+  protected:
+      virtual void LoopOnce();
+};
+
+void BroadCastServer::LoopOnce()
+{
   for(int idx = 0; idx < THRD_COUNT; ++idx)
   {
     std::pair<int, Command*> pair(0, nullptr);
@@ -241,11 +248,10 @@ int main()
   PrintMessageCount timer;
 
   EventHandlerFactory::Instance().RegisterDefault(&NewEventHanlder);
-  TcpServer server(1024);
+  BroadCastServer server;
   server.AddAcceptor(&acceptor);
   server.SetThreadCount(2);
   server.ScheduleTimer(&timer, 2000);
-  server.SetMessageProc(_MessageProc);
   server.Run();
   return 0;
 }

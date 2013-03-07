@@ -49,11 +49,6 @@ enum {
   kEventWriteable   = 0x2,
 };
 
-enum {
-  kBigRecvWindow          = 256*1024,
-  kBigSendWindow          = 256*1024
-};
-
 class EventLoop;
 
 class EventHandler : green_turtle::NonCopyable

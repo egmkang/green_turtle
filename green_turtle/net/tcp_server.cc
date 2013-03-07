@@ -12,7 +12,6 @@ using namespace green_turtle::net;
 
 TcpServer::TcpServer(int expected_size) :
     timer_queue_(new TimerQueue(2048,16))
-    ,message_proc_(nullptr)
     ,is_terminal_(false)
     ,thread_count_(1)
     ,expected_size_(expected_size)
@@ -31,10 +30,6 @@ TcpServer::~TcpServer()
   {
     delete loop;
   }
-}
-void TcpServer::SetMessageProc(MessageProc proc)
-{
-  message_proc_ = proc;
 }
 
 void TcpServer::AddAcceptor(TcpAcceptor *acceptor)
@@ -122,11 +117,7 @@ void TcpServer::Run()
     System::UpdateTime();
     size_t message_begin = System::GetMilliSeconds();
 
-    //process message
-    if(message_proc_)
-    {
-      message_proc_(this);
-    }
+    LoopOnce();
 
     System::UpdateTime();
     size_t timer_begin = System::GetMilliSeconds();

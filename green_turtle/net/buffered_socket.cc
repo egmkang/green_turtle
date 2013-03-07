@@ -7,7 +7,7 @@
 using namespace green_turtle;
 using namespace green_turtle::net;
 
-const size_t kDefaultBufferSize = 8*1024;
+const size_t kDefaultBufferSize = 1024;
 const size_t kMinLeftBufferSize = 128;
 
 BufferedSocket::BufferedSocket(int fd,const AddrInfo& addr)
