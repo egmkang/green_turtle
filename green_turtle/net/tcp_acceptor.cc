@@ -4,15 +4,15 @@
 #include "tcp_acceptor.h"
 #include "event_loop.h"
 #include "buffered_socket.h"
-#include "event_handler_factory.h"
 
 using namespace green_turtle;
 using namespace green_turtle::net;
 
-TcpAcceptor::TcpAcceptor(const char *ip, unsigned short port)
+TcpAcceptor::TcpAcceptor(const char *ip, unsigned short port, std::function<EventHandler*(int, const AddrInfo&)> creator)
   :EventHandler(SocketOption::NewFD())
     ,addr_( new AddrInfo )
     ,idx_(0)
+    ,creator(creator)
 {
   *this->addr_ = AddrInfo(ip, port);
   SocketOption::SetNoBlock(this->fd());
@@ -53,20 +53,18 @@ int TcpAcceptor::Accept(AddrInfo& info)
 
 int TcpAcceptor::OnRead()
 {
-  //int count = 0;
   AddrInfo info;
   while(true)
   {
     int new_fd = Accept(info);
     if(new_fd <= 0)
       return new_fd;
-    EventHandler *new_handler = CreateNewHandler(new_fd, info);
-    new_handler->set_events(kEventReadable | kEventWriteable);
 
+    EventHandler *new_handler = creator(new_fd, std::cref(info));
+
+    new_handler->set_events(kEventReadable | kEventWriteable);
     this->loops_[idx_++]->AddHandlerLater(new_handler);
     if(idx_ >= loops_.size()) idx_ = 0;
-
-    //if(++count >= 10) break;
   }
 
   return kOK;
@@ -90,7 +88,3 @@ void TcpAcceptor::loop_balance(const std::vector<EventLoop *> &loops)
   this->loops_ = loops;
 }
 
-EventHandler* TcpAcceptor::CreateNewHandler(int fd, const AddrInfo& info)
-{
-  return EventHandlerFactory::Instance().NewEventHandler(this, fd, info);
-}

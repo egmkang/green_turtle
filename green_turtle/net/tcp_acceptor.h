@@ -33,6 +33,7 @@
 #define __TCP_ACCEPTOR__
 #include <vector>
 #include <cstddef>
+#include <functional>
 #include "event_handler.h"
 
 namespace green_turtle{
@@ -43,7 +44,8 @@ struct AddrInfo;
 class TcpAcceptor : public EventHandler
 {
   public:
-    TcpAcceptor(const char *ip, unsigned short port);
+    TcpAcceptor(const char *ip, unsigned short port,
+            std::function<EventHandler*(int, const AddrInfo&)> creator);
     virtual ~TcpAcceptor();
   public:
     bool Listen();
@@ -52,12 +54,12 @@ class TcpAcceptor : public EventHandler
     virtual int OnRead();
     virtual int OnWrite();
     virtual int OnError();
-    EventHandler* CreateNewHandler(int fd, const AddrInfo& info);
   private:
     int Accept(AddrInfo& info);
     AddrInfo                *addr_;
     std::vector<EventLoop*> loops_;
     size_t                  idx_; //load balance
+    std::function<EventHandler*(int, const AddrInfo&)> creator;
 };
 
 }

@@ -1,7 +1,6 @@
 #include <net/tcp_acceptor.h>
 #include <net/tcp_server.h>
 #include <net/buffered_socket.h>
-#include <net/event_handler_factory.h>
 #include <net/event_loop.h>
 #include <message_queue.h>
 #include <assert.h>
@@ -239,7 +238,8 @@ int main()
   ::last_update_time_ = System::GetMilliSeconds();
   signal(SIGPIPE, SIG_IGN);
 
-  TcpAcceptor acceptor("192.168.89.56", 10001);
+  TcpAcceptor acceptor("192.168.89.56", 10001,
+          std::bind(&NewEventHanlder, std::placeholders::_1, std::placeholders::_2));
   acceptor.SetWindowSize(32*1024);
   bool result = acceptor.Listen();
   assert(result);
@@ -247,7 +247,6 @@ int main()
 
   PrintMessageCount timer;
 
-  EventHandlerFactory::Instance().RegisterDefault(&NewEventHanlder);
   BroadCastServer server;
   server.AddAcceptor(&acceptor);
   server.SetThreadCount(2);
