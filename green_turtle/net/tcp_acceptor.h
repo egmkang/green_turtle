@@ -45,7 +45,7 @@ class TcpAcceptor : public EventHandler
 {
   public:
     TcpAcceptor(const char *ip, unsigned short port,
-            std::function<EventHandler*(int, const AddrInfo&)> creator);
+            std::function<std::shared_ptr<EventHandler> (int, const AddrInfo&)> creator);
     virtual ~TcpAcceptor();
   public:
     bool Listen();
@@ -59,7 +59,7 @@ class TcpAcceptor : public EventHandler
     AddrInfo                *addr_;
     std::vector<EventLoop*> loops_;
     size_t                  idx_; //load balance
-    std::function<EventHandler*(int, const AddrInfo&)> creator;
+    std::function<std::shared_ptr<EventHandler> (int, const AddrInfo&)> creator;
 };
 
 }

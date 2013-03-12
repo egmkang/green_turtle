@@ -18,7 +18,7 @@ SET(CXX_FLAGS
     -Wall
     -Wextra
     -Werror
-    -std=c++11
+    -std=c++0x
     #-stdlib=libc++
     -fomit-frame-pointer
     -fstack-protector-all
@@ -32,7 +32,7 @@ SET(CXX_FLAGS
 STRING(REPLACE ";" " " CMAKE_CXX_FLAGS "${CXX_FLAGS}")
 MESSAGE(STATUS "CXX flags : " "${CMAKE_CXX_FLAGS}")
 
-SET(CMAKE_CXX_COMPILER "g++-4.7")
+SET(CMAKE_CXX_COMPILER "g++")
 SET(CMAKE_CXX_FLAGS_DEBUG   "-DDEBUG -D_DEBUG -D_LIBCPP_DEBUG2=1 -O0 -pthread")
 SET(CMAKE_CXX_FLAGS_RELEASE "-DNDEBUG -O2 -pthread")
 

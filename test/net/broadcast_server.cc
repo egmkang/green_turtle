@@ -94,16 +94,9 @@ class BroadCastTask : public BufferedSocket
   }
 };
 
-class BroadCastServer : public TcpServer
+void LoopOnce(TcpServer& server)
 {
-  public:
-      BroadCastServer() : TcpServer(1024){}
-  protected:
-      virtual void LoopOnce();
-};
-
-void BroadCastServer::LoopOnce()
-{
+  (void)server;
   for(int idx = 0; idx < THRD_COUNT; ++idx)
   {
     std::pair<int, Command*> pair(0, nullptr);
@@ -224,11 +217,11 @@ static int SendMesageByPercent(int percent, const char *data, int len)
   return count;
 }
 
-EventHandler* NewEventHanlder(int fd, const AddrInfo& addr)
+std::shared_ptr<EventHandler> NewEventHanlder(int fd, const AddrInfo& addr)
 {
-  BroadCastTask *pTask = new BroadCastTask(fd, addr);
-  AddNewTask(pTask);
-  return pTask;
+  std::shared_ptr<BroadCastTask> pTask = std::make_shared<BroadCastTask>(fd, addr);
+  AddNewTask(pTask.get());
+  return std::static_pointer_cast<EventHandler>(pTask);
 }
 
 int main()
@@ -238,19 +231,21 @@ int main()
   ::last_update_time_ = System::GetMilliSeconds();
   signal(SIGPIPE, SIG_IGN);
 
-  TcpAcceptor acceptor("192.168.89.56", 10001,
+  std::shared_ptr<TcpAcceptor> acceptor =
+      std::make_shared<TcpAcceptor>("192.168.89.56", 10001,
           std::bind(&NewEventHanlder, std::placeholders::_1, std::placeholders::_2));
-  acceptor.SetWindowSize(32*1024);
-  bool result = acceptor.Listen();
+  acceptor->SetWindowSize(32*1024);
+  bool result = acceptor->Listen();
   assert(result);
   (void)result;
 
   PrintMessageCount timer;
 
-  BroadCastServer server;
-  server.AddAcceptor(&acceptor);
+  TcpServer server(1024);
+  server.AddAcceptor(acceptor.get());
   server.SetThreadCount(2);
   server.ScheduleTimer(&timer, 2000);
+  server.SetLoopCallBack(std::bind(&LoopOnce, std::ref(server)));
   server.Run();
   return 0;
 }

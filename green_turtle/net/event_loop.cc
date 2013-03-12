@@ -67,13 +67,13 @@ void EventLoop::SetFrameTime(int milliSeconds)
 
 void EventLoop::AddHandlerLater(EventHandler *pEventHandler)
 {
-  std::lock_guard<std::mutex> guard(this->add_mutex_);
-  this->add_handler_.push_back(pEventHandler);
+  std::lock_guard<std::mutex> guard(this->mutex_);
+  this->changed_handler_.push_back(std::make_pair(true, pEventHandler->shared_from_this()));
 }
 void EventLoop::RemoveHandlerLater(EventHandler *pEventHandler)
 {
-  std::lock_guard<std::mutex> guard(this->remove_mutex_);
-  this->remove_handler_.push_back(pEventHandler);
+  std::lock_guard<std::mutex> guard(this->mutex_);
+  this->changed_handler_.push_back(std::make_pair(false, pEventHandler->shared_from_this()));
 }
 
 void EventLoop::Loop()
@@ -101,24 +101,21 @@ void EventLoop::Loop()
       System::Yield(FrameTime - cost_time);
     }
 
-    std::deque<EventHandler*> temp_add_queue;
+    std::deque<HandlerPair> temp_queue;
     {
-      std::lock_guard<std::mutex> guard(this->remove_mutex_);
-      this->add_handler_.swap(temp_add_queue);
+      std::lock_guard<std::mutex> guard(this->mutex_);
+      this->changed_handler_.swap(temp_queue);
     }
-    for(auto handler : temp_add_queue)
+    for(auto& pair : temp_queue)
     {
-      this->AddEventHandler(handler);
-    }
-
-    std::deque<EventHandler*> temp_remove_queue;
-    {
-      std::lock_guard<std::mutex> guard(this->remove_mutex_);
-      this->remove_handler_.swap(temp_remove_queue);
-    }
-    for(auto handler : temp_remove_queue)
-    {
-      handler->OnError();
+      if(pair.first)
+      {
+        this->AddEventHandler(pair.second.get());
+      }
+      else
+      {
+        pair.second->OnError();
+      }
     }
   }
 }

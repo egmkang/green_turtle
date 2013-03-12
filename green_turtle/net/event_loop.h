@@ -74,10 +74,11 @@ class EventLoop : NonCopyable
   std::vector<EventHandler*>  fired_handler_;
   TimerQueue  *timer_queue_;
 
-  std::mutex                  add_mutex_;
-  std::deque<EventHandler*>   add_handler_;
-  std::mutex                  remove_mutex_;
-  std::deque<EventHandler*>   remove_handler_;
+  typedef std::shared_ptr<EventHandler> SharedHandler;
+  typedef std::pair<bool, SharedHandler> HandlerPair;
+
+  std::mutex                  mutex_;
+  std::deque<HandlerPair>     changed_handler_;
 };
 
 }

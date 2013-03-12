@@ -33,6 +33,7 @@
 #define __POLLER__
 #include <assert.h>
 #include <vector>
+#include <memory>
 #include <noncopyable.h>
 
 #ifdef __linux__
@@ -61,12 +62,12 @@ class Poller : green_turtle::NonCopyable
   inline EventHandler* GetEventHandler(int fd)
   {
     assert(fd <= (int)event_handlers_.size());
-    return event_handlers_[fd];
+    return event_handlers_[fd].get();
   }
  public:
   static Poller* CreatePoller(int expected_size);
  private:
-  std::vector<EventHandler*> event_handlers_;
+  std::vector<std::shared_ptr<EventHandler>> event_handlers_;
 };
 
 }

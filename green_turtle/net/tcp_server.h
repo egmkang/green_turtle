@@ -33,6 +33,7 @@
 #define __tcp__server__
 #include <vector>
 #include <thread>
+#include <functional>
 #include <noncopyable.h>
 #include "timer.h"
 
@@ -48,7 +49,9 @@ class TcpServer;
 
 class TcpServer : green_turtle::NonCopyable {
  public:
-  TcpServer(int expected_size);
+  //default using epoll or kequeue
+  //if your want to use poll, please set this number small than 128
+  TcpServer(int expected_size = 1024);
   ~TcpServer();
  public:
   void AddAcceptor(TcpAcceptor *acceptor);
@@ -62,19 +65,20 @@ class TcpServer : green_turtle::NonCopyable {
   void ScheduleTimer(Timer *timer_ptr,uint64_t timer_interval,int64_t time_delay = 0);
   //unregister a timer
   void CancelTimer(Timer *timer_ptr);
- protected:
-  virtual void LoopOnce() {}
+  void SetLoopCallBack(std::function<void(void)> loop) { loop_once_ = loop; }
  private:
   void InitEventLoop();
   void InitThreads();
  private:
+  typedef std::shared_ptr<EventHandler> SharedHandler;
   std::vector<EventLoop*>     loops_;
   std::vector<std::thread*>   threads_;
-  std::vector<EventHandler*>  handlers_;
+  std::vector<SharedHandler>  handlers_;
   TimerQueue    *timer_queue_;
   bool  is_terminal_;
   int   thread_count_;
   int   expected_size_;
+  std::function<void(void)> loop_once_;
 };
 
 }

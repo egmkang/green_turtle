@@ -85,7 +85,7 @@ int main()
 
   for(int i = 0; i < CLIENT_NUM; ++i)
   {
-    EchoClient *client = new EchoClient("192.168.89.56", 10001);
+    std::shared_ptr<EchoClient> client = std::make_shared<EchoClient>("192.168.89.56", 10001);
     int errorCode = client->Connect();
     assert(!errorCode);
     (void)errorCode;
@@ -97,7 +97,7 @@ int main()
     client->SendMessage(std::move(message));
     free(str);
 
-    loop.AddEventHandler(client);
+    loop.AddEventHandler(client.get());
   }
 
 

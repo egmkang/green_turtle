@@ -8,7 +8,8 @@
 using namespace green_turtle;
 using namespace green_turtle::net;
 
-TcpAcceptor::TcpAcceptor(const char *ip, unsigned short port, std::function<EventHandler*(int, const AddrInfo&)> creator)
+TcpAcceptor::TcpAcceptor(const char *ip, unsigned short port,
+                         std::function<std::shared_ptr<EventHandler>(int, const AddrInfo&)> creator)
   :EventHandler(SocketOption::NewFD())
     ,addr_( new AddrInfo )
     ,idx_(0)
@@ -60,10 +61,10 @@ int TcpAcceptor::OnRead()
     if(new_fd <= 0)
       return new_fd;
 
-    EventHandler *new_handler = creator(new_fd, std::cref(info));
+    std::shared_ptr<EventHandler> new_handler = creator(new_fd, std::cref(info));
 
     new_handler->set_events(kEventReadable | kEventWriteable);
-    this->loops_[idx_++]->AddHandlerLater(new_handler);
+    this->loops_[idx_++]->AddHandlerLater(new_handler.get());
     if(idx_ >= loops_.size()) idx_ = 0;
   }
 

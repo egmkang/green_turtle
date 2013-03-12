@@ -64,9 +64,9 @@ class EchoTask : public BufferedSocket
   }
 };
 
-EventHandler* NewEventHanlder(int fd, const AddrInfo& addr)
+std::shared_ptr<EventHandler> NewEventHanlder(int fd, const AddrInfo& addr)
 {
-  return new EchoTask(fd, addr);
+  return std::static_pointer_cast<EventHandler>(std::make_shared<EchoTask>(fd, addr));
 }
 
 int main()
@@ -76,17 +76,18 @@ int main()
   ::last_update_time_ = System::GetMilliSeconds();
   signal(SIGPIPE, SIG_IGN);
 
-  TcpAcceptor acceptor("192.168.89.56", 10001,
+  std::shared_ptr<TcpAcceptor> acceptor =
+      std::make_shared<TcpAcceptor>("192.168.89.56", 10001,
           std::bind(&NewEventHanlder, std::placeholders::_1, std::placeholders::_2));
-  acceptor.SetWindowSize(16*1024);
-  bool result = acceptor.Listen();
+  acceptor->SetWindowSize(16*1024);
+  bool result = acceptor->Listen();
   assert(result);
   (void)result;
 
   PrintMessageCount timer;
 
   TcpServer server(1024);
-  server.AddAcceptor(&acceptor);
+  server.AddAcceptor(acceptor.get());
   server.SetThreadCount(2);
   server.ScheduleTimer(&timer, 2000);
   server.Run();

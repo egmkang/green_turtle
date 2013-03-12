@@ -101,14 +101,14 @@ int main()
 
   for(int i = 0; i < CLIENT_NUM; ++i)
   {
-    BroadCastClient *client = new BroadCastClient("192.168.89.56", 10001);
+    std::shared_ptr<BroadCastClient> client = std::make_shared<BroadCastClient>("192.168.89.56", 10001);
     int errorCode = client->Connect();
     assert(!errorCode);
     (void)errorCode;
     client->set_events(kEventReadable | kEventWriteable);
 
-    loop.AddEventHandler(client);
-    loop.ScheduleTimer(client, next_timer(gen));
+    loop.AddEventHandler(client.get());
+    loop.ScheduleTimer(client.get(), next_timer(gen));
   }
   loop.Loop();
   return 0;

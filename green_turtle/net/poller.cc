@@ -20,10 +20,7 @@ Poller::Poller(int init_size):
 
 Poller::~Poller()
 {
-  for(auto handler : this->event_handlers_)
-  {
-    delete handler;
-  }
+  this->event_handlers_.clear();
 }
 
 void Poller::SetEventHandler(int fd, EventHandler *handler)
@@ -34,7 +31,7 @@ void Poller::SetEventHandler(int fd, EventHandler *handler)
     event_handlers_.resize(event_handlers_.size() * 2);
   }
   assert(fd < (int)event_handlers_.size());
-  event_handlers_[fd] = handler;
+  event_handlers_[fd] = handler->shared_from_this();
 }
 
 Poller* Poller::CreatePoller(int expected_size)

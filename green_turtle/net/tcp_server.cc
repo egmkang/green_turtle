@@ -34,13 +34,13 @@ TcpServer::~TcpServer()
 
 void TcpServer::AddAcceptor(TcpAcceptor *acceptor)
 {
-  this->handlers_.push_back(acceptor);
+  this->handlers_.push_back(acceptor->shared_from_this());
   acceptor->set_events(kEventReadable);
 }
 
 void TcpServer::AddClient(TcpClient *client)
 {
-  this->handlers_.push_back(client);
+  this->handlers_.push_back(client->shared_from_this());
   client->set_events(kEventReadable | kEventWriteable);
 }
 
@@ -84,7 +84,7 @@ void TcpServer::InitEventLoop()
   for(auto handler : this->handlers_)
   {
     EventLoop *loop = *loop_begin;
-    loop->AddEventHandler(handler);
+    loop->AddEventHandler(handler.get());
     handler->loop_balance(this->loops_);
 
     loop_begin++;
@@ -117,7 +117,8 @@ void TcpServer::Run()
     System::UpdateTime();
     size_t message_begin = System::GetMilliSeconds();
 
-    LoopOnce();
+    if(loop_once_)
+      loop_once_();
 
     System::UpdateTime();
     size_t timer_begin = System::GetMilliSeconds();
