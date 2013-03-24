@@ -51,7 +51,7 @@ class BufferedSocket : public EventHandler
   BufferedSocket(int fd,const AddrInfo& addr);
   ~BufferedSocket();
   void SendMessage(std::shared_ptr<Message>&& data);
-  void SendMessage(std::shared_ptr<Message>& data);
+  void SendMessage(const std::shared_ptr<Message>& data);
   const AddrInfo& addr() const;
  protected:
   virtual int OnRead();

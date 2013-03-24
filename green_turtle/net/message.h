@@ -34,64 +34,84 @@
 #include <noncopyable.h>
 #include <cstddef>
 #include <string>
+#include <memory>
 namespace green_turtle{
 namespace net{
 
-class Message : green_turtle::NonCopyable {
+class Message : green_turtle::NonCopyable, public std::enable_shared_from_this<Message> {
  public:
   virtual ~Message() {}
   virtual void*   data()    const = 0;
   virtual size_t  length()  const = 0;
+  template<typename Y>
+  std::shared_ptr<Y> cast()
+  {
+    return std::static_pointer_cast<Y>(this->shared_from_this());
+  }
 };
 
-//default implation using std::string
-class DefaultMessageBuffer : public Message
+template<class T>
+class MemberPtr
 {
+ public:
+  MemberPtr(Message *message, int offset) : offset_(offset)
+  {
+    message_ = message->shared_from_this();
+  }
+  T* get() const { return static_cast<T*>(message_->data()); }
+  T* operator->() const { return get(); }
+  T& operator*() const { return *get(); }
+ private:
+  std::shared_ptr<Message> message_;
+  const int offset_;
+};
+
+//default Message impl using std::string
+class MessageBuffer : public Message
+{
+ public:
   enum{ kDefaultInitSize = 64 };
- public:
-  DefaultMessageBuffer() : current_pos_(0)
+
+  MessageBuffer(int init_size = kDefaultInitSize)
   {
-    buffer_.reserve(kDefaultInitSize);
+    buffer_.reserve(init_size);
   }
 
   template<typename T>
-  T* CurrentPtr()
+  MemberPtr<T> Append()
   {
-    return ConvertToPtr<T>(current_pos_);
+    return MemberPtr<T>(this, MakeSpace(sizeof(T)));
   }
-
   template<typename T>
-  T* ConvertToPtr(int offset)
+  void Append(const T& v)
   {
-    char *p = const_cast<char*>(buffer_.data() + offset);
-    return static_cast<T*>(p);
+    int offset = MakeSpace(sizeof(v));
+    T* ptr = static_cast<T*>(const_cast<char*>(this->buffer_.c_str() + offset));
+    *ptr = v;
   }
 
-  template<typename T>
-  T* Append()
+  void Append(const char *str)
   {
-    MakeSpace(sizeof(T));
-    T *ptr = ConvertToPtr<T>();
-    current_pos_ += sizeof(T);
-    return ptr;
+    buffer_.append(str);
   }
-
-  size_t CurrentPos() const { return current_pos_; }
- public:
+  void Append(const void *data, int size)
+  {
+    buffer_.append(static_cast<const char*>(data), size);
+  }
   virtual void* data() const
   {
-    return static_cast<void*>(const_cast<char*>(buffer_.data()));
+    return static_cast<void*>(const_cast<char*>(this->buffer_.c_str()));
   }
-
-  virtual size_t length() const
-  {
-    return buffer_.size();
-  }
+  virtual size_t length() const { return this->buffer_.size(); }
  private:
-  void MakeSpace(int s) { buffer_.resize(buffer_.size() + s); }
+  int MakeSpace(int size)
+  {
+    int offset = buffer_.size();
+    buffer_.resize(buffer_.size() + size);
+    return offset;
+  }
  private:
   std::string buffer_;
-  int current_pos_;
 };
 
 } //namespace net

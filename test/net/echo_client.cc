@@ -7,7 +7,6 @@
 #include <atomic>
 #include <memory>
 #include <iostream>
-#include "simple_message.h"
 
 using namespace green_turtle;
 using namespace green_turtle::net;
@@ -58,8 +57,7 @@ class EchoClient : public TcpClient
     {
       data.HasRead(size);
       char *str = NewEchoString(this->send_times_);
-      std::shared_ptr<Message> message(new EchoMessage(str));
-      this->SendMessage(message);
+      this->SendMessage(std::make_shared<EchoMessage>(str));
       free(str);
 
       recv_message_count_.store(count + 1, std::memory_order_release);
@@ -93,8 +91,7 @@ int main()
 
     int num = 0;
     char *str = NewEchoString(num);
-    std::shared_ptr<Message> message(new EchoMessage(str));
-    client->SendMessage(std::move(message));
+    client->SendMessage(std::make_shared<EchoMessage>(str));
     free(str);
 
     loop.AddEventHandler(client.get());

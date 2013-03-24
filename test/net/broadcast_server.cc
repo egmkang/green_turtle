@@ -13,7 +13,6 @@
 #include <random>
 #include <unordered_map>
 #include <mutex>
-#include "simple_message.h"
 #include "broadcast_message.h"
 
 using namespace green_turtle;
@@ -113,7 +112,8 @@ void LoopOnce(TcpServer& server)
         else
         {
           BroadCastTask *pTask = GetTask(pair.first);
-          std::shared_ptr<Message> message(new SimpleMessage((const char*)pCmd, pCmd->len));
+          std::shared_ptr<MessageBuffer>  message = std::make_shared<MessageBuffer>();
+          message->Append(pCmd, pCmd->len);
           if(pTask) pTask->SendMessage(std::move(message));
           ++send_count;
         }
@@ -195,8 +195,8 @@ static int SendMesageByPercent(int percent, const char *data, int len)
   assert(pCmd->type < 3);
   (void)pCmd;
   int count = 0;
-  Message *pMessage = new SimpleMessage(data, len);
-  std::shared_ptr<Message> p(pMessage);
+  std::shared_ptr<MessageBuffer> p = std::make_shared<MessageBuffer>();
+  p->Append(data, len);
   for(auto task_pair : task_manager_)
   {
     bool is_send = false;

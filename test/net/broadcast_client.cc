@@ -11,7 +11,6 @@
 #include <iostream>
 #include <random>
 #include <system.h>
-#include "simple_message.h"
 #include "broadcast_message.h"
 
 using namespace green_turtle;
@@ -65,7 +64,7 @@ class BroadCastClient : public TcpClient, public Timer
 
 static void RandMessage(TcpClient *pClient)
 {
-  std::shared_ptr<Message> message;
+  std::shared_ptr<MessageBuffer> message;
   char raw_data[1024];
   int rand = dis(gen);
   if(rand < 50)
@@ -77,7 +76,8 @@ static void RandMessage(TcpClient *pClient)
     pEchoCmd->len = pEchoCmd->Length();
     assert(pEchoCmd->len < 2000);
     assert(pEchoCmd->type < 3);
-    message = std::make_shared<SimpleMessage>(raw_data, pEchoCmd->Length());
+    message = std::make_shared<MessageBuffer>();
+    message->Append(raw_data, pEchoCmd->Length());
   }
   else
   {
@@ -88,7 +88,8 @@ static void RandMessage(TcpClient *pClient)
     pBroadCast->len = pBroadCast->Length();
     assert(pBroadCast->len < 2000);
     assert(pBroadCast->type < 3);
-    message = std::make_shared<SimpleMessage>(raw_data, pBroadCast->Length());
+    message = std::make_shared<MessageBuffer>();
+    message->Append(raw_data, pBroadCast->Length());
   }
   pClient->SendMessage(std::move(message));
 }

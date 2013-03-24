@@ -7,7 +7,6 @@
 #include <atomic>
 #include <system.h>
 #include <iostream>
-#include "simple_message.h"
 
 using namespace green_turtle;
 using namespace green_turtle::net;
@@ -52,7 +51,8 @@ class EchoTask : public BufferedSocket
     {
       ++message_count;
       message_size += data.ReadableLength();
-      std::shared_ptr<Message> message(new SimpleMessage(data.BeginRead(), data.ReadableLength()));
+      std::shared_ptr<MessageBuffer> message = std::make_shared<MessageBuffer>();
+      message->Append(data.BeginRead(), data.ReadableLength());
       data.HasRead(size);
       this->SendMessage(std::move(message));
     }

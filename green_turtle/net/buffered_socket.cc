@@ -104,10 +104,10 @@ int BufferedSocket::OnError()
 void BufferedSocket::SendMessage(std::shared_ptr<Message> &&data)
 {
   std::lock_guard<std::mutex> lock(this->write_lock_);
-  this->snd_messages_.emplace_back(data);
+  this->snd_messages_.emplace_back(std::move(data));
 }
 
-void BufferedSocket::SendMessage(std::shared_ptr<Message>& data)
+void BufferedSocket::SendMessage(const std::shared_ptr<Message>& data)
 {
   std::lock_guard<std::mutex> lock(this->write_lock_);
   this->snd_messages_.push_back(data);
