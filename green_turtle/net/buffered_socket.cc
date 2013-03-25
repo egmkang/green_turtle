@@ -97,7 +97,6 @@ int BufferedSocket::OnWrite()
 int BufferedSocket::OnError()
 {
   this->event_loop()->RemoveEventHandler(this);
-  this->DeleteSelf();
   return -1;
 }
 

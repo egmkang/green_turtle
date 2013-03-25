@@ -58,7 +58,6 @@ class BufferedSocket : public EventHandler
   virtual int OnWrite();
   virtual int OnError();
   virtual void Decoding(Buffer& data) = 0;
-  virtual void DeleteSelf() = 0;
  private:
   bool HasData() const;
  private:

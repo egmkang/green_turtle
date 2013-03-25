@@ -2,6 +2,7 @@
 #include <net/tcp_server.h>
 #include <net/buffered_socket.h>
 #include <net/event_loop.h>
+#include <net/conn_manager.h>
 #include <message_queue.h>
 #include <assert.h>
 #include <stdlib.h>
@@ -29,16 +30,11 @@ size_t              last_update_message_count = 0;
 static std::random_device rd;
 static std::mt19937 gen(rd());
 static std::uniform_int_distribution<int> dis(1, 100);
-static std::mutex mutex_;
-static std::deque<BroadCastTask*> delete_task_;
-static std::deque<BroadCastTask*> add_task_;
 static std::unordered_map<int, BroadCastTask*> task_manager_;
 static MessageQueue<std::pair<int, Command*>>  queue_[THRD_COUNT];
 
 static int  SendMesageByPercent(int percent, const char *data, int size);
-static void DeleteTask(BroadCastTask *pTask);
-static void AddNewTask(BroadCastTask *pTask);
-static void RemoveTask(BroadCastTask *pTask);
+
 static BroadCastTask* GetTask(int fd);
 
 static void PushMessage(int fd, Command *pCmd, int index)
@@ -86,12 +82,23 @@ class BroadCastTask : public BufferedSocket
       }
     }
   }
-  virtual void DeleteSelf()
-  {
-    printf("BroadCastTask will be disposed, %p\n", this);
-    DeleteTask(this);
-  }
 };
+
+void RemoveTask(const std::vector<std::shared_ptr<EventHandler>>& set)
+{
+  for(const std::shared_ptr<EventHandler>& ptr : set)
+  {
+    task_manager_[ptr->fd()] = static_cast<BroadCastTask*>(ptr.get());
+  }
+}
+
+void AddTask(const std::vector<std::shared_ptr<EventHandler>>& set)
+{
+  for(const std::shared_ptr<EventHandler>& ptr : set)
+  {
+    task_manager_.erase(ptr->fd());
+  }
+}
 
 void LoopOnce(TcpServer& server)
 {
@@ -127,24 +134,7 @@ void LoopOnce(TcpServer& server)
       pair.second = nullptr;
     }
   }
-  std::deque<BroadCastTask*> t;
-  {
-    std::lock_guard<std::mutex> guard(mutex_);
-    std::swap(t, delete_task_);
-  }
-  for(auto pTask : t)
-  {
-    RemoveTask(pTask);
-    delete pTask;
-  }
-  t.clear();
-  {
-    t.swap(add_task_);
-  }
-  for(auto pTask : t)
-  {
-    task_manager_[pTask->fd()] = pTask;
-  }
+  ConnManager::Instance().Update();
 }
 
 class PrintMessageCount : public Timer
@@ -164,22 +154,6 @@ class PrintMessageCount : public Timer
   }
 };
 
-static void DeleteTask(BroadCastTask *pTask)
-{
-  std::lock_guard<std::mutex> guard(mutex_);
-  delete_task_.push_back(pTask);
-}
-
-static void AddNewTask(BroadCastTask *pTask)
-{
-  std::lock_guard<std::mutex> guard(mutex_);
-  add_task_.push_back(pTask);
-}
-
-static void RemoveTask(BroadCastTask *pTask)
-{
-  task_manager_.erase(pTask->fd());
-}
 static BroadCastTask* GetTask(int fd)
 {
   std::unordered_map<int, BroadCastTask*>::const_iterator iter = task_manager_.find(fd);
@@ -220,13 +194,15 @@ static int SendMesageByPercent(int percent, const char *data, int len)
 std::shared_ptr<EventHandler> NewEventHanlder(int fd, const AddrInfo& addr)
 {
   std::shared_ptr<BroadCastTask> pTask = std::make_shared<BroadCastTask>(fd, addr);
-  AddNewTask(pTask.get());
   return std::static_pointer_cast<EventHandler>(pTask);
 }
 
 int main()
 {
   System::UpdateTime();
+  ConnManager::Instance();
+  ConnManager::Instance().SetRemoveCallbacl(&RemoveTask);
+  ConnManager::Instance().SetAddCallback(&AddTask);
 
   ::last_update_time_ = System::GetMilliSeconds();
   signal(SIGPIPE, SIG_IGN);

@@ -1,4 +1,4 @@
-//Copyright 2012, egmkang wang.
+//Copyright 2013, egmkang wang.
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -28,35 +28,58 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 // author: egmkang (egmkang@gmail.com)
-// author: yywei
-
-#ifndef __SOCKET_OPTION__
-#define __SOCKET_OPTION__
-#include <cstddef>
-struct sockaddr;
-struct iovec;
+#ifndef __CONN_MANAGER_H__
+#define __CONN_MANAGER_H__
+#include "event_handler.h"
+#include <singleton.h>
+#include <mutex>
+#include <vector>
+#include <functional>
 
 namespace green_turtle{
 namespace net{
 
-class SocketOption{
-  public:
-   static int   NewFD();
-   static int   DestoryFD(int fd);
-   static int   SetNoDelay(int fd);
-   static int   SetNoBlock(int fd);
-   static int   GetSendBuffer(int fd);
-   static int   GetRecvBuffer(int fd);
-   static int   SetSendBuffer(int fd, int size);
-   static int   SetRecvBuffer(int fd, int size);
-   static int   Listen(int fd, const struct sockaddr* addr, int len);
-   static int   Accept(int fd, struct sockaddr_in* info);
-   static int   Write(int fd, const void *data, size_t len);
-   static int   Read(int fd, void *data, const size_t len);
-   static int   Readv(int fd, iovec *iov, int count);
-   static int   Connect(int fd, const struct sockaddr* addr, int len);
-   static void  ShutDown(int fd);
+class ConnManager : public green_turtle::Singleton<ConnManager> 
+{
+ public:
+  typedef std::shared_ptr<EventHandler> HandlerPtr;
+  typedef std::vector<HandlerPtr>       HandlerSet;
+  typedef std::function<void (HandlerSet&)> CallBack;
+
+  ConnManager(int init_size = 2048)
+  {
+    this->handlers_.reserve(init_size);
+  }
+
+  void AddConn(EventHandler *ptr)
+  {
+    AddConn(ptr->shared_from_this());
+  }
+  void AddConn(const HandlerPtr& ptr);
+
+  void RemoveConn(EventHandler *ptr)
+  {
+    RemoveConn(ptr->shared_from_this());
+  }
+  void RemoveConn(const HandlerPtr& ptr);
+
+  void Update();
+
+  void SetAddCallback(CallBack call_back) { this->add_callback_ = call_back; }
+  void SetRemoveCallbacl(CallBack call_back) { this->remove_callback_ = call_back; }
+ private:
+  void AddHandler(const HandlerPtr& ptr);
+  void ResetHandler(int fd);
+ private:
+  std::mutex  mutex_;
+  HandlerSet  handlers_;
+  HandlerSet  add_handler_;
+  HandlerSet  remove_handler_;
+  CallBack    add_callback_;
+  CallBack    remove_callback_;
 };
+
 }
 }
+
 #endif

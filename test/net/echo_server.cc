@@ -66,7 +66,7 @@ class EchoTask : public BufferedSocket
 
 std::shared_ptr<EventHandler> NewEventHanlder(int fd, const AddrInfo& addr)
 {
-  return std::static_pointer_cast<EventHandler>(std::make_shared<EchoTask>(fd, addr));
+  return std::make_shared<EchoTask>(fd, addr);
 }
 
 int main()

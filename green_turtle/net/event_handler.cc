@@ -1,5 +1,6 @@
 #include "event_handler.h"
 #include "socket_option.h"
+#include "conn_manager.h"
 
 using namespace green_turtle;
 using namespace green_turtle::net;
@@ -11,6 +12,7 @@ EventHandler::EventHandler(int fd) :
     ,poll_idx_(-1)
     ,event_loop_(nullptr)
 {
+  ConnManager::Instance().AddConn(this);
 }
 
 EventHandler::~EventHandler()
@@ -36,6 +38,7 @@ void EventHandler::HandleEvent()
   }
   if(ret == kErr)
   {
+    ConnManager::Instance().RemoveConn(this);
     OnError();
     return;
   }
@@ -46,4 +49,10 @@ void EventHandler::SetWindowSize(int size)
 {
   SocketOption::SetRecvBuffer(this->fd(), size);
   SocketOption::SetSendBuffer(this->fd(), size);
+}
+
+void EventHandler::Shutdown()
+{
+  OnWrite();
+  SocketOption::ShutDown(this->fd());
 }

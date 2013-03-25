@@ -71,6 +71,7 @@ class EventHandler : green_turtle::NonCopyable, public std::enable_shared_from_t
   void SetWindowSize(int size);
   virtual void loop_balance(const std::vector<EventLoop*>& loops) { (void)loops;}
   virtual int OnError()           = 0;
+  void Shutdown();
  protected:
   virtual int OnRead()            = 0;
   virtual int OnWrite()           = 0;

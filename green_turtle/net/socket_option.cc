@@ -148,3 +148,7 @@ int SocketOption::Connect(int fd, const sockaddr *addr, int len)
   if(ret == EINPROGRESS) ret = 0;
   return ret;
 }
+void  SocketOption::ShutDown(int fd)
+{
+  ::shutdown(fd, SHUT_RDWR);
+}
