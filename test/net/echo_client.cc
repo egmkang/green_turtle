@@ -77,13 +77,13 @@ class EchoClient : public TcpClient
 };
 
 #define CLIENT_NUM    400
-int main()
+int main(int argc, char** argv)
 {
   EventLoop loop(CLIENT_NUM);
 
   for(int i = 0; i < CLIENT_NUM; ++i)
   {
-    std::shared_ptr<EchoClient> client = std::make_shared<EchoClient>("192.168.89.56", 10001);
+    std::shared_ptr<EchoClient> client = std::make_shared<EchoClient>("192.168.2.27", 10001);
     int errorCode = client->Connect();
     assert(!errorCode);
     (void)errorCode;

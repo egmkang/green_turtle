@@ -62,6 +62,7 @@ int TcpAcceptor::OnRead()
       return new_fd;
 
     std::shared_ptr<EventHandler> new_handler = creator(new_fd, std::cref(info));
+    new_handler->AddToConnManager();
 
     new_handler->set_events(kEventReadable | kEventWriteable);
     this->loops_[idx_++]->AddHandlerLater(new_handler.get());

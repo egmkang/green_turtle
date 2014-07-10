@@ -98,7 +98,6 @@ static void RandMessage(TcpClient *pClient)
 int main()
 {
   EventLoop loop(CLIENT_NUM);
-  System::UpdateTime();
 
   for(int i = 0; i < CLIENT_NUM; ++i)
   {

@@ -37,11 +37,14 @@
 
 namespace green_turtle{
 
+//support multi thread read and write
 template<class T>
 class BlockingQueue : NonCopyable
 {
  public:
   typedef T value_type;
+  typedef std::deque<value_type> container_type;
+
  public:
   bool Push(value_type&& v)
   {
@@ -49,6 +52,7 @@ class BlockingQueue : NonCopyable
     queue_.push_back(v);
     return true;
   }
+
   bool Push(const value_type& v)
   {
     std::lock_guard<std::mutex> guard(mutex_);
@@ -67,6 +71,18 @@ class BlockingQueue : NonCopyable
     }
     return false;
   }
+
+  bool Pop(container_type& v)
+  {
+    std::lock_guard<std::mutex> guard(mutex_);
+    if(!queue_.empty())
+    {
+      std::swap(queue_, v);
+      return true;
+    }
+    return false;
+  }
+
   uint64_t Size() const
   {
     return queue_.size();

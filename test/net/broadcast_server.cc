@@ -199,7 +199,6 @@ std::shared_ptr<EventHandler> NewEventHanlder(int fd, const AddrInfo& addr)
 
 int main()
 {
-  System::UpdateTime();
   ConnManager::Instance();
   ConnManager::Instance().SetRemoveCallbacl(&RemoveTask);
   ConnManager::Instance().SetAddCallback(&AddTask);

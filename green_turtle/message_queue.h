@@ -36,6 +36,7 @@
 #include <atomic>
 #include <noncopyable.h>
 #include <utils.h>
+#include <algorithm>
 
 namespace green_turtle{
 

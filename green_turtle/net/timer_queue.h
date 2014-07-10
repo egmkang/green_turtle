@@ -33,7 +33,7 @@
 #define __TIMER_QUEUE_H__
 #include <stdint.h>
 #include <vector>
-#include <unordered_list.h>
+#include <ordered_list.h>
 #include <noncopyable.h>
 
 namespace green_turtle{
@@ -56,7 +56,7 @@ class TimerQueue : green_turtle::NonCopyable
   void Update(uint64_t current_time);
   inline uint64_t GetLastUpdateTime() const { return last_update_time_; }
  private:
-  typedef green_turtle::unordered_list<Timer*> list_type;
+  typedef green_turtle::ordered_list<Timer*> list_type;
 
   list_type     *queues_;
   const size_t  slot_size;

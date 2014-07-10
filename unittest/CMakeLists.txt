@@ -8,5 +8,5 @@ SOURCE_GROUP("unittest"      FILES ${UNIT_TEST})
 ADD_EXECUTABLE(unittest
     ${UNIT_TEST}
     )
-TARGET_LINK_LIBRARIES(unittest gtest)
+TARGET_LINK_LIBRARIES(unittest green_turtle gtest)
 

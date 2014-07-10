@@ -2,7 +2,7 @@
 #include "timer_queue.h"
 #include <assert.h>
 
-using green_turtle::unordered_list;
+using green_turtle::ordered_list;
 using namespace green_turtle::net;
 
 TimerQueue::TimerQueue(size_t slot_size,size_t interval):

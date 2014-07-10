@@ -1,10 +1,10 @@
 ToDoList:
 
 [ ]basic optimize
-[ ]tcp client reconnect
-[ ]CPU binding(pthread_setaffinity_np)
+[ ]tcp client reconnect(think about using a queue)
 [ ]Add Move Constructor to MessageQueue and RefPtr
 [ ]modify the echo sample
+[D]command flags
 [D]samples
 [D]Delete/Add queue
 [D]FreeBSD Support

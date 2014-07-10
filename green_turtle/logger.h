@@ -34,8 +34,13 @@
 #include <stdarg.h>
 #include <string>
 #include <mutex>
+#include <memory>
 
 #define __SHORT_FILE__  strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__
+
+namespace green_turtle{
+
+class LogFile;
 
 class Logger
 {
@@ -59,18 +64,22 @@ class Logger
   void VInfo (const char *prefix, const char *pattern, va_list ap) __attribute__ ((__format__ (__printf__, 3, 0)));
   void VTrace(const char *prefix, const char *pattern, va_list ap) __attribute__ ((__format__ (__printf__, 3, 0)));
 
+  void Flush();
   size_t GetWrittenSize() const { return size_; }
  private:
   void FormatMessage(int level, const char *pattern, va_list ap, const char *prefix = NULL);
   void LogMessage(char *str, size_t len);
   void CreateLink();
  private:
-  int fd_;
+  std::mutex  lock_;
+  std::unique_ptr<LogFile> file_;
+  std::unique_ptr<LogFile> backup_file_;
   long long size_;
+
   std::string file_name_;
   std::string link_name_;
-  std::mutex  lock_;
-  int fd_backup_;
 };
+
+}
 
 #endif

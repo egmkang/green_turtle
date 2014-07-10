@@ -51,16 +51,8 @@ class ConnManager : public green_turtle::Singleton<ConnManager>
     this->handlers_.reserve(init_size);
   }
 
-  void AddConn(EventHandler *ptr)
-  {
-    AddConn(ptr->shared_from_this());
-  }
   void AddConn(const HandlerPtr& ptr);
 
-  void RemoveConn(EventHandler *ptr)
-  {
-    RemoveConn(ptr->shared_from_this());
-  }
   void RemoveConn(const HandlerPtr& ptr);
 
   void Update();

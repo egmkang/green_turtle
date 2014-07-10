@@ -42,7 +42,6 @@ void EventLoop::LazyInitTimerQueue()
   if(!timer_queue_)
   {
     timer_queue_ = new TimerQueue(2048, 16);
-    System::UpdateTime();
     timer_queue_->Update(System::GetMilliSeconds());
   }
 }
@@ -81,7 +80,6 @@ void EventLoop::Loop()
   assert(poller_);
   while(!this->terminal_)
   {
-    System::UpdateTime();
     size_t begin_time = System::GetMilliSeconds();
 
     if(timer_queue_)
@@ -94,7 +92,6 @@ void EventLoop::Loop()
       handler->HandleEvent();
     }
 
-    System::UpdateTime();
     size_t cost_time = System::GetMilliSeconds() - begin_time;
     if(cost_time < FrameTime)
     {

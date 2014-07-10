@@ -32,7 +32,6 @@ class TestTimer:public Timer
 
 int main()
 {
-  System::UpdateTime();
   uint64_t current_time = System::GetMilliSeconds();
 
   TimerQueue queue(16,8);
@@ -48,7 +47,6 @@ int main()
 
   for(size_t idx = 0; idx < 100; ++idx)
   {
-    System::UpdateTime();
     uint64_t current_time = System::GetMilliSeconds();
     queue.Update(current_time);
     ::usleep(4000);

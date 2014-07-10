@@ -5,26 +5,25 @@
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
-#include <time.h>
+#include <log_file.h>
+#include <system.h>
+
+using namespace green_turtle;
 
 Logger::Logger(const char* filename, const char* link_name) :
-    fd_(0),
-    size_(0),
-    file_name_(filename),
-    fd_backup_(0)
+    file_(new LogFile(filename))
+    , size_(0)
+    , file_name_(filename)
 {
   if(link_name) link_name_ = link_name;
-  fd_ = ::open(file_name_.c_str(), O_RDWR | O_CREAT | O_APPEND, 0644);
-  assert(fd_ && "open file error");
-  off_t off = ::lseek(fd_, 0L, SEEK_END);
-  size_ = off;
+  assert(file_ && "open file error");
+  size_ = file_->offset();
   CreateLink();
 }
 
 Logger::~Logger()
 {
-  //std::lock_guard<std::mutex> guard(lock_);
-  //::close(fd_);
+  file_->Flush();
 }
 
 void Logger::CreateLink()
@@ -46,25 +45,27 @@ void Logger::CreateLink()
 void Logger::ChangeLoggerFile(const char *new_file)
 {
   if(file_name_ == new_file) return;
-  std::lock_guard<std::mutex> guard(lock_);
-  if(fd_backup_) close(fd_backup_);
-  fd_backup_ = fd_;
-  fd_ = ::open(new_file, O_RDWR | O_CREAT | O_APPEND, 0644);
-  assert(fd_ && "open file error");
-  file_name_ = new_file;
-  off_t off = ::lseek(fd_, 0L, SEEK_END);
-  size_ = off;
-  CreateLink();
+  std::unique_ptr<LogFile> file(new LogFile(new_file));
+  if(file)
+  {
+    std::lock_guard<std::mutex> guard(lock_);
+    this->file_->Flush();
+    this->backup_file_ = std::move(this->file_);
+    this->file_ = std::move(file);
+    file_name_ = new_file;
+    size_ = this->file_->offset();
+    CreateLink();
+  }
 }
 
-static const char* LOGGER_LEVEL[] =
+static char LOGGER_LEVEL[][9] =
 {
-  "[INFO ]",
-  "[DEBUG]",
-  "[TRACE]",
-  "[WARN ]",
-  "[ERROR]",
-  "[FATAL]"
+  "[INFO ] ",
+  "[DEBUG] ",
+  "[TRACE] ",
+  "[WARN ] ",
+  "[ERROR] ",
+  "[FATAL] "
 };
 enum
 {
@@ -85,25 +86,37 @@ enum
     FormatMessage(level, pattern, ap);  \
     va_end(ap);
 
+
+__thread time_t t_time = 0;
+__thread char t_time_str[8] = {0};
+
 inline void Logger::FormatMessage(int level, const char *pattern, va_list ap, const char *prefix /*= NULL*/)
 {
   int size = 0;
   char msg[kLoggerMessage_MaxSize + 1];
   int msglen = kLoggerMessage_MaxSize;
 
-  time_t now = time(NULL);
-  struct tm tm_now;
-  localtime_r( &now, &tm_now );
-  size += snprintf(msg + size, msglen - size,
-                   "%02d:%02d:%02d %s ",
-                   tm_now.tm_hour,
-                   tm_now.tm_min,
-                   tm_now.tm_sec,
-                   LOGGER_LEVEL[level]);
+  time_t now = System::GetSeconds();
+  if (now > t_time)
+  {
+    struct tm tm_now;
+    localtime_r( &now, &tm_now );
+    sprintf(t_time_str, "%02d:%02d:%02d",
+        tm_now.tm_hour,
+        tm_now.tm_min,
+        tm_now.tm_sec);
+    t_time = now;
+  }
+  *reinterpret_cast<uint64_t*>(msg) = *reinterpret_cast<uint64_t*>(t_time_str);
+  msg[sizeof(t_time_str)] = ' ';
+  size += sizeof(t_time_str) + 1;
+  *reinterpret_cast<uint64_t*>(msg+size) = *reinterpret_cast<uint64_t*>(LOGGER_LEVEL[level]);
+  size += sizeof(LOGGER_LEVEL[0]) - 1;
+
   if(prefix)
   {
-    size += snprintf(msg + size, msglen - size, 
-                     "%s ", prefix);
+    char *from = msg+size;
+    size += (strncat(msg+size, prefix, msglen - size) - from);
   }
   size += vsnprintf(msg + size, msglen-size-1, pattern, ap);
   LogMessage(msg, size);
@@ -172,6 +185,12 @@ void Logger::VTrace(const char *prefix, const char *pattern, va_list ap)
 void Logger::LogMessage(char *str, size_t len)
 {
   str[len] = '\n';
-  int write_size = write(fd_, str, len+1);
+  int write_size = file_->Write(str, len+1);
   size_ += write_size;
+  assert(write_size == int(len)+1);
+}
+
+void Logger::Flush()
+{
+  if(file_) file_->Flush();
 }

@@ -32,6 +32,7 @@
 #ifndef __SINGLETON__
 #define __SINGLETON__
 #include <noncopyable.h>
+#include <mutex>
 
 namespace green_turtle{
 
@@ -47,14 +48,21 @@ class Singleton : NonCopyable
   }
   static T& Instance()
   {
-    if(!value_)
-      value_ = new T();
+    std::call_once(flag_, [&](){
+        value_ = new T();
+        });
+
     return *value_;
   }
  private:
-  static T  *value_;
+  static std::once_flag flag_;
+  static T* value_;
 
 };
+
+template<class T>
+std::once_flag Singleton<T>::flag_;
+
 template<class T>
 T* Singleton<T>::value_ = nullptr;
 

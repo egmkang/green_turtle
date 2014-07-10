@@ -48,6 +48,11 @@ int BufferedSocket::OnRead()
       nread -= rcv_buffer_->WritableLength();
       rcv_buffer_->HasWritten(rcv_buffer_->WritableLength());
     }
+    else
+    {
+        rcv_buffer_->HasWritten(nread);
+        nread = 0;
+    }
     if(nread)
     {
       rcv_buffer_->Append(extrabuff, nread);

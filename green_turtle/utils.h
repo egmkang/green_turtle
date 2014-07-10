@@ -58,12 +58,12 @@ T NetToHost(T v);
 
 #define CONVERT_BETWEEN_NET_HOST(T,TO_HOST,TO_NET)  \
     template<>                                      \
-    T HostToNet<T>(T v)                             \
+    inline T HostToNet<T>(T v)                      \
     {                                               \
       return TO_NET(v);                             \
     }                                               \
     template<>                                      \
-    T NetToHost(T v)                                \
+    inline T NetToHost(T v)                         \
     {                                               \
       return TO_HOST(v);                            \
     }

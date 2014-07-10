@@ -69,15 +69,13 @@ std::shared_ptr<EventHandler> NewEventHanlder(int fd, const AddrInfo& addr)
   return std::make_shared<EchoTask>(fd, addr);
 }
 
-int main()
+int main(int argc, char** argv)
 {
-  System::UpdateTime();
-
   ::last_update_time_ = System::GetMilliSeconds();
   signal(SIGPIPE, SIG_IGN);
 
   std::shared_ptr<TcpAcceptor> acceptor =
-      std::make_shared<TcpAcceptor>("192.168.89.56", 10001,
+      std::make_shared<TcpAcceptor>("192.168.2.27", 10001,
           std::bind(&NewEventHanlder, std::placeholders::_1, std::placeholders::_2));
   acceptor->SetWindowSize(16*1024);
   bool result = acceptor->Listen();

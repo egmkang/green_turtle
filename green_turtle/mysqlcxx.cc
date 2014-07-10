@@ -113,7 +113,7 @@ ResultSet* MySqlConnection::ExecSelect(const char *sql)
 
 int MySqlConnection::EscapeString(char *to,const char *from, unsigned long length)
 {
-    assert(to && from && length);
+    assert(to && from && length && to != from);
     return mysql_real_escape_string(&conn_, to, from, length);
 }
 

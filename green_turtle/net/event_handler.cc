@@ -12,12 +12,16 @@ EventHandler::EventHandler(int fd) :
     ,poll_idx_(-1)
     ,event_loop_(nullptr)
 {
-  ConnManager::Instance().AddConn(this);
 }
 
 EventHandler::~EventHandler()
 {
   SocketOption::DestoryFD(fd());
+}
+
+void EventHandler::AddToConnManager()
+{
+  ConnManager::Instance().AddConn(this->shared_from_this());
 }
 
 void EventHandler::HandleEvent()
@@ -38,7 +42,7 @@ void EventHandler::HandleEvent()
   }
   if(ret == kErr)
   {
-    ConnManager::Instance().RemoveConn(this);
+    ConnManager::Instance().RemoveConn(this->shared_from_this());
     OnError();
     return;
   }

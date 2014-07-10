@@ -16,7 +16,6 @@ TcpServer::TcpServer(int expected_size) :
     ,thread_count_(1)
     ,expected_size_(expected_size)
 {
-  System::UpdateTime();
   timer_queue_->Update(System::GetMilliSeconds());
 }
 
@@ -114,17 +113,14 @@ void TcpServer::Run()
   InitThreads();
   while(!is_terminal_)
   {
-    System::UpdateTime();
     size_t message_begin = System::GetMilliSeconds();
 
     if(loop_once_)
       loop_once_();
 
-    System::UpdateTime();
     size_t timer_begin = System::GetMilliSeconds();
     this->timer_queue_->Update(timer_begin);
 
-    System::UpdateTime();
     size_t process_end = System::GetMilliSeconds();
     //time cost
     size_t cost = process_end - message_begin;
