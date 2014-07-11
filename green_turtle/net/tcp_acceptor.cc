@@ -11,11 +11,11 @@ using namespace green_turtle::net;
 TcpAcceptor::TcpAcceptor(const char *ip, unsigned short port,
                          std::function<std::shared_ptr<EventHandler>(int, const AddrInfo&)> creator)
   :EventHandler(SocketOption::NewFD())
-    ,addr_( new AddrInfo )
-    ,idx_(0)
-    ,creator(creator)
+    , addr_( new AddrInfo )
+    , idx_(0)
+    , creator(creator)
 {
-  *this->addr_ = AddrInfo(ip, port);
+  this->addr_.reset(new AddrInfo(ip, port));
   SocketOption::SetNoBlock(this->fd());
   SocketOption::SetNoDelay(this->fd());
 
@@ -24,8 +24,6 @@ TcpAcceptor::TcpAcceptor(const char *ip, unsigned short port,
 
 TcpAcceptor::~TcpAcceptor()
 {
-  delete addr_;
-  addr_ = nullptr;
   SocketOption::DestoryFD(this->fd());
 }
 

@@ -58,7 +58,7 @@ class TimerQueue : green_turtle::NonCopyable
  private:
   typedef green_turtle::ordered_list<Timer*> list_type;
 
-  list_type     *queues_;
+  std::unique_ptr<list_type[]> queues_;
   const size_t  slot_size;
   uint64_t      last_update_time_;
   const size_t  interval_;  //must be 2^n ms

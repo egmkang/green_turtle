@@ -12,9 +12,9 @@ using namespace green_turtle::net;
 
 TcpServer::TcpServer(int expected_size) :
     timer_queue_(new TimerQueue(2048,16))
-    ,is_terminal_(false)
-    ,thread_count_(1)
-    ,expected_size_(expected_size)
+    , is_terminal_(false)
+    , thread_count_(1)
+    , expected_size_(expected_size)
 {
   timer_queue_->Update(System::GetMilliSeconds());
 }

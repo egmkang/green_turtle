@@ -56,9 +56,9 @@ class TcpAcceptor : public EventHandler
     virtual int OnError();
   private:
     int Accept(AddrInfo& info);
-    AddrInfo                *addr_;
-    std::vector<EventLoop*> loops_;
-    size_t                  idx_; //load balance
+    std::unique_ptr<AddrInfo> addr_;
+    std::vector<EventLoop*>   loops_;
+    size_t                    idx_; //load balance
     std::function<std::shared_ptr<EventHandler> (int, const AddrInfo&)> creator;
 };
 

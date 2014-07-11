@@ -21,8 +21,6 @@ BufferedSocket::BufferedSocket(int fd,const AddrInfo& addr)
 
 BufferedSocket::~BufferedSocket()
 {
-  delete rcv_buffer_;
-  delete snd_buffer_;
 }
 const AddrInfo& BufferedSocket::addr() const
 {

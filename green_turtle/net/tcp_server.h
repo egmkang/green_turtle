@@ -74,7 +74,7 @@ class TcpServer : green_turtle::NonCopyable {
   std::vector<EventLoop*>     loops_;
   std::vector<std::thread*>   threads_;
   std::vector<SharedHandler>  handlers_;
-  TimerQueue    *timer_queue_;
+  std::unique_ptr<TimerQueue> timer_queue_;
   bool  is_terminal_;
   int   thread_count_;
   int   expected_size_;

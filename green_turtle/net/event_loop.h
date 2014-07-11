@@ -68,11 +68,11 @@ class EventLoop : NonCopyable
  private:
   void LazyInitTimerQueue();
  private:
-  Poller  *poller_;
   bool    terminal_;
   int     loop_index_;
+  std::unique_ptr<Poller>     poller_;
+  std::unique_ptr<TimerQueue> timer_queue_;
   std::vector<EventHandler*>  fired_handler_;
-  TimerQueue  *timer_queue_;
 
   typedef std::shared_ptr<EventHandler> SharedHandler;
   typedef std::pair<bool, SharedHandler> HandlerPair;

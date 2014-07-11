@@ -15,7 +15,7 @@ TimerQueue::TimerQueue(size_t slot_size,size_t interval):
 {
   assert( ~(slot_size & (slot_size - 1)) && "Slot Size must be 2^n" );
   assert( ~(interval_ & (interval_ - 1)) && "Interval must be 2^n" );
-  queues_ = new list_type[slot_size]();
+  queues_.reset(new list_type[slot_size]());
   for(size_t idx = 0; idx < slot_size; ++idx)
     queues_[idx].set_deleted((Timer*)(void*)(-1l));
   for(uint64_t i = interval_; i != 1; i /= 2)
@@ -27,14 +27,13 @@ TimerQueue::TimerQueue(size_t slot_size,size_t interval):
 
 TimerQueue::~TimerQueue()
 {
-  delete[] queues_;
 }
 
 void TimerQueue::CancelTimer(Timer *timer_ptr)
 {
   if(!timer_ptr || !timer_ptr->queue_)
     return;
-  list_type   *queue = timer_ptr->queue_->queues_;
+  list_type   *queue = &timer_ptr->queue_->queues_[0];
   size_t      slot = timer_ptr->iter_slot_;
   size_t      pos = timer_ptr->iter_pos_;
 

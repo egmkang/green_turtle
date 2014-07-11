@@ -2,8 +2,8 @@ ToDoList:
 
 [ ]basic optimize
 [ ]tcp client reconnect(think about using a queue)
-[ ]Add Move Constructor to MessageQueue and RefPtr
 [ ]modify the echo sample
+[D]remove RefPtr and using shared_ptr/weak_ptr
 [D]command flags
 [D]samples
 [D]Delete/Add queue

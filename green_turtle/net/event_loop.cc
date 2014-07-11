@@ -12,18 +12,16 @@ using namespace green_turtle::net;
 static size_t FrameTime = 20;
 
 EventLoop::EventLoop(int expected_size) :
-    poller_(nullptr)
-    ,terminal_(false)
-    ,loop_index_(0)
-    ,timer_queue_(nullptr)
+    terminal_(false)
+    , loop_index_(0)
+    , timer_queue_(nullptr)
 {
-  poller_ = Poller::CreatePoller(expected_size);
+  poller_.reset(Poller::CreatePoller(expected_size));
   assert(poller_);
 }
 
 EventLoop::~EventLoop()
 {
-  delete poller_;
 }
 
 void EventLoop::AddEventHandler(EventHandler *pEventHandler)
@@ -41,7 +39,7 @@ void EventLoop::LazyInitTimerQueue()
 {
   if(!timer_queue_)
   {
-    timer_queue_ = new TimerQueue(2048, 16);
+    timer_queue_.reset(new TimerQueue(2048, 16));
     timer_queue_->Update(System::GetMilliSeconds());
   }
 }

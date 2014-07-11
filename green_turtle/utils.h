@@ -34,14 +34,6 @@
 #ifndef __UTILS_H__
 #define __UTILS_H__
 
-#ifndef SAFE_DELETE
-#define SAFE_DELETE(x) if(x) { delete x; x = NULL; }
-#endif
-
-#ifndef SAFE_DELETE_ARRAY
-#define SAFE_DELETE_ARRAY(x) if(x) { delete[] x; x = NULL; }
-#endif
-
 #ifndef LIKELY
 #define LIKELY(x) __builtin_expect(!!(x), 1)
 #endif
