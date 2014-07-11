@@ -34,6 +34,7 @@
 #include <assert.h>
 #include <stdint.h>
 #include <atomic>
+#include <memory>
 #include <noncopyable.h>
 #include <utils.h>
 #include <algorithm>
@@ -76,17 +77,11 @@ class MessageQueue : NonCopyable
   {
     assert(size >= 2);
     assert(!(size_ & (size_ -1)) && "size must be 2^n!");
-    assert(array_);
     long addr = reinterpret_cast<long>(&read_idx_);
     assert(addr % 64 == 0);
     addr = reinterpret_cast<long>(&write_idx_);
     assert(addr % 64 == 0);
     (void)addr;
-  }
-
-  ~MessageQueue()
-  {
-    delete[] array_;
   }
 
   bool Push(const value_type& v)
@@ -129,7 +124,7 @@ private:
   alignas(64) Counter  write_idx_;
   const uint64_t  size_;
   const uint64_t  mask_;
-  value_type      *array_;
+  std::unique_ptr<value_type[]> array_;
 };
 
 }
