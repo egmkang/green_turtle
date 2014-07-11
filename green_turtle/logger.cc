@@ -80,17 +80,18 @@ enum
 {
   kLoggerMessage_MaxSize  =   4096,
 };
-#define __FORMAT_MESSAGE__(level)       \
-    va_list ap;                         \
-    va_start(ap, pattern);              \
-    FormatMessage(level, pattern, ap);  \
+
+#define __FORMAT_MESSAGE__(level)                     \
+    va_list ap;                                       \
+    va_start(ap, pattern);                            \
+    FormatMessage(level, pattern, ap, kEmptyString);  \
     va_end(ap);
 
-
+const std::string kEmptyString = "";
 __thread time_t t_time = 0;
 __thread char t_time_str[8] = {0};
 
-inline void Logger::FormatMessage(int level, const char *pattern, va_list ap, const char *prefix /*= NULL*/)
+inline void Logger::FormatMessage(int level, const char *pattern, va_list ap, const std::string& prefix)
 {
   int size = 0;
   char msg[kLoggerMessage_MaxSize + 1];
@@ -113,10 +114,10 @@ inline void Logger::FormatMessage(int level, const char *pattern, va_list ap, co
   *reinterpret_cast<uint64_t*>(msg+size) = *reinterpret_cast<uint64_t*>(LOGGER_LEVEL[level]);
   size += sizeof(LOGGER_LEVEL[0]) - 1;
 
-  if(prefix)
+  if(!prefix.empty())
   {
-    char *from = msg+size;
-    size += (strncat(msg+size, prefix, msglen - size) - from);
+    memcpy(msg + size, prefix.c_str(), prefix.size());
+    size += prefix.size();
   }
   size += vsnprintf(msg + size, msglen-size-1, pattern, ap);
   LogMessage(msg, size);
@@ -152,32 +153,32 @@ void Logger::Trace(const char *pattern, ...)
   __FORMAT_MESSAGE__(kLoggerLevel_Trace);
 }
 
-void Logger::VDebug(const char *prefix, const char *pattern, va_list ap)
+void Logger::VDebug(const std::string& prefix, const char *pattern, va_list ap)
 {
   FormatMessage(kLoggerLevel_Debug, pattern, ap, prefix);
 }
 
-void Logger::VFatal(const char *prefix, const char *pattern, va_list ap)
+void Logger::VFatal(const std::string& prefix, const char *pattern, va_list ap)
 {
   FormatMessage(kLoggerLevel_Fatal, pattern, ap, prefix);
 }
 
-void Logger::VError(const char *prefix, const char *pattern, va_list ap)
+void Logger::VError(const std::string& prefix, const char *pattern, va_list ap)
 {
   FormatMessage(kLoggerLevel_Error, pattern, ap, prefix);
 }
 
-void Logger::VWarn (const char *prefix, const char *pattern, va_list ap)
+void Logger::VWarn (const std::string& prefix, const char *pattern, va_list ap)
 {
   FormatMessage(kLoggerLevel_Warn, pattern, ap, prefix);
 }
 
-void Logger::VInfo (const char *prefix, const char *pattern, va_list ap)
+void Logger::VInfo (const std::string& prefix, const char *pattern, va_list ap)
 {
   FormatMessage(kLoggerLevel_Info, pattern, ap, prefix);
 }
 
-void Logger::VTrace(const char *prefix, const char *pattern, va_list ap)
+void Logger::VTrace(const std::string& prefix, const char *pattern, va_list ap)
 {
   FormatMessage(kLoggerLevel_Trace, pattern, ap, prefix);
 }

@@ -35,6 +35,7 @@
 #include <string>
 #include <mutex>
 #include <memory>
+#include <string>
 
 #define __SHORT_FILE__  strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__
 
@@ -57,17 +58,17 @@ class Logger
   void Info (const char *pattern, ...) __attribute__ ((__format__ (__printf__, 2, 3)));
   void Trace(const char *pattern, ...) __attribute__ ((__format__ (__printf__, 2, 3)));
 
-  void VDebug(const char *prefix, const char *pattern, va_list ap) __attribute__ ((__format__ (__printf__, 3, 0)));
-  void VFatal(const char *prefix, const char *pattern, va_list ap) __attribute__ ((__format__ (__printf__, 3, 0)));
-  void VError(const char *prefix, const char *pattern, va_list ap) __attribute__ ((__format__ (__printf__, 3, 0)));
-  void VWarn (const char *prefix, const char *pattern, va_list ap) __attribute__ ((__format__ (__printf__, 3, 0)));
-  void VInfo (const char *prefix, const char *pattern, va_list ap) __attribute__ ((__format__ (__printf__, 3, 0)));
-  void VTrace(const char *prefix, const char *pattern, va_list ap) __attribute__ ((__format__ (__printf__, 3, 0)));
+  void VDebug(const std::string& prefix, const char *pattern, va_list ap) __attribute__ ((__format__ (__printf__, 3, 0)));
+  void VFatal(const std::string& prefix, const char *pattern, va_list ap) __attribute__ ((__format__ (__printf__, 3, 0)));
+  void VError(const std::string& prefix, const char *pattern, va_list ap) __attribute__ ((__format__ (__printf__, 3, 0)));
+  void VWarn (const std::string& prefix, const char *pattern, va_list ap) __attribute__ ((__format__ (__printf__, 3, 0)));
+  void VInfo (const std::string& prefix, const char *pattern, va_list ap) __attribute__ ((__format__ (__printf__, 3, 0)));
+  void VTrace(const std::string& prefix, const char *pattern, va_list ap) __attribute__ ((__format__ (__printf__, 3, 0)));
 
   void Flush();
   size_t GetWrittenSize() const { return size_; }
  private:
-  void FormatMessage(int level, const char *pattern, va_list ap, const char *prefix = NULL);
+  void FormatMessage(int level, const char *pattern, va_list ap, const std::string& prefix);
   void LogMessage(char *str, size_t len);
   void CreateLink();
  private:
