@@ -7,34 +7,36 @@
 #include <string.h>
 #include <log_file.h>
 #include <system.h>
+#include <stdio.h>
 
 using namespace green_turtle;
 
-Logger::Logger(const char* filename, const char* link_name) :
-    file_(new LogFile(filename))
-    , size_(0)
-    , file_name_(filename)
-{
-  if(link_name) link_name_ = link_name;
+static char kMilliSecondsString[1024][4] = {};
+
+static inline void LazyInitMilliSecondsString() {
+  if (kMilliSecondsString[0][0]) return;
+  for (int32_t i = 0; i < 1024; ++i) {
+    sprintf(&kMilliSecondsString[i][0], ".%03d", i % 1000);
+  }
+}
+
+Logger::Logger(const char *filename, const char *link_name)
+    : file_(new LogFile(filename)), size_(0), file_name_(filename) {
+  if (link_name) link_name_ = link_name;
   assert(file_ && "open file error");
   size_ = file_->offset();
   CreateLink();
+  LazyInitMilliSecondsString();
 }
 
-Logger::~Logger()
-{
-  file_->Flush();
-}
+Logger::~Logger() { file_->Flush(); }
 
-void Logger::CreateLink()
-{
-  if(file_name_ != link_name_ && link_name_.size())
-  {
+void Logger::CreateLink() {
+  if (file_name_ != link_name_ && link_name_.size()) {
     remove(link_name_.c_str());
     std::string link = file_name_;
     std::string::size_type pos = link.find_last_of('/');
-    if(pos != std::string::npos)
-    {
+    if (pos != std::string::npos) {
       link = link.substr(pos + 1, link.size() - pos - 1);
     }
     int result = symlink(link.c_str(), link_name_.c_str());
@@ -42,12 +44,10 @@ void Logger::CreateLink()
   }
 }
 
-void Logger::ChangeLoggerFile(const char *new_file)
-{
-  if(file_name_ == new_file) return;
+void Logger::ChangeLoggerFile(const char *new_file) {
+  if (file_name_ == new_file) return;
   std::unique_ptr<LogFile> file(new LogFile(new_file));
-  if(file)
-  {
+  if (file) {
     std::lock_guard<std::mutex> guard(lock_);
     this->file_->Flush();
     this->backup_file_ = std::move(this->file_);
@@ -58,140 +58,129 @@ void Logger::ChangeLoggerFile(const char *new_file)
   }
 }
 
-static char LOGGER_LEVEL[][9] =
-{
-  "[INFO ] ",
-  "[DEBUG] ",
-  "[TRACE] ",
-  "[WARN ] ",
-  "[ERROR] ",
-  "[FATAL] "
-};
-enum
-{
-  kLoggerLevel_Info   =   0,
-  kLoggerLevel_Debug  =   1,
-  kLoggerLevel_Trace  =   2,
-  kLoggerLevel_Warn   =   3,
-  kLoggerLevel_Error  =   4,
-  kLoggerLevel_Fatal  =   5,
-};
-enum
-{
-  kLoggerMessage_MaxSize  =   4096,
+static char LOGGER_LEVEL[][9] = {"[INFO ] ", "[DEBUG] ", "[TRACE] ",
+                                 "[WARN ] ", "[ERROR] ", "[FATAL] "};
+enum {
+  kLoggerLevel_Info = 0,
+  kLoggerLevel_Debug = 1,
+  kLoggerLevel_Trace = 2,
+  kLoggerLevel_Warn = 3,
+  kLoggerLevel_Error = 4,
+  kLoggerLevel_Fatal = 5,
 };
 
-#define __FORMAT_MESSAGE__(level)                     \
-    va_list ap;                                       \
-    va_start(ap, pattern);                            \
-    FormatMessage(level, pattern, ap, kEmptyString);  \
-    va_end(ap);
+enum {
+  kLoggerMessage_MaxSize = 4096,
+};
+
+#define __FORMAT_MESSAGE__(level)                  \
+  va_list ap;                                      \
+  va_start(ap, pattern);                           \
+  FormatMessage(level, pattern, ap, kEmptyString); \
+  va_end(ap);
 
 const std::string kEmptyString = "";
 __thread time_t t_time = 0;
 __thread char t_time_str[8] = {0};
 
-inline void Logger::FormatMessage(int level, const char *pattern, va_list ap, const std::string& prefix)
-{
+inline void Logger::FormatMessage(int level, const char *pattern, va_list ap,
+                                  const std::string &prefix) {
   int size = 0;
   char msg[kLoggerMessage_MaxSize + 1];
   int msglen = kLoggerMessage_MaxSize;
 
-  time_t now = System::GetSeconds();
-  if (now > t_time)
-  {
+  std::pair<time_t, time_t> current_time = System::GetCurrentTime();
+  if (current_time.first > t_time) {
     struct tm tm_now;
-    localtime_r( &now, &tm_now );
-    sprintf(t_time_str, "%02d:%02d:%02d",
-        tm_now.tm_hour,
-        tm_now.tm_min,
-        tm_now.tm_sec);
-    t_time = now;
+    localtime_r(&current_time.first, &tm_now);
+    sprintf(t_time_str, "%02d:%02d:%02d", tm_now.tm_hour, tm_now.tm_min,
+            tm_now.tm_sec);
+    t_time = current_time.first;
   }
-  *reinterpret_cast<uint64_t*>(msg) = *reinterpret_cast<uint64_t*>(t_time_str);
-  msg[sizeof(t_time_str)] = ' ';
-  size += sizeof(t_time_str) + 1;
-  *reinterpret_cast<uint64_t*>(msg+size) = *reinterpret_cast<uint64_t*>(LOGGER_LEVEL[level]);
+
+  *reinterpret_cast<uint64_t *>(msg) =
+      *reinterpret_cast<uint64_t *>(t_time_str);
+  size += sizeof(t_time_str);
+
+  *reinterpret_cast<uint32_t *>(msg + size) =
+      *reinterpret_cast<uint32_t *>(
+           kMilliSecondsString[current_time.second % 1024]);
+  size += sizeof(uint32_t);
+
+  msg[size] = ' ';
+  size += 1;
+
+  *reinterpret_cast<uint64_t *>(msg + size) =
+      *reinterpret_cast<uint64_t *>(LOGGER_LEVEL[level]);
   size += sizeof(LOGGER_LEVEL[0]) - 1;
 
-  if(!prefix.empty())
-  {
+  if (!prefix.empty()) {
     memcpy(msg + size, prefix.c_str(), prefix.size());
     size += prefix.size();
   }
-  size += vsnprintf(msg + size, msglen-size-1, pattern, ap);
+  size += vsnprintf(msg + size, msglen - size - 1, pattern, ap);
   LogMessage(msg, size);
 }
 
-void Logger::Debug(const char *pattern, ...)
-{
+void Logger::Debug(const char *pattern, ...) {
   __FORMAT_MESSAGE__(kLoggerLevel_Debug);
 }
 
-void Logger::Fatal(const char *pattern, ...)
-{
+void Logger::Fatal(const char *pattern, ...) {
   __FORMAT_MESSAGE__(kLoggerLevel_Fatal);
 }
 
-void Logger::Error(const char *pattern, ...)
-{
+void Logger::Error(const char *pattern, ...) {
   __FORMAT_MESSAGE__(kLoggerLevel_Error);
 }
 
-void Logger::Warn (const char *pattern, ...)
-{
+void Logger::Warn(const char *pattern, ...) {
   __FORMAT_MESSAGE__(kLoggerLevel_Warn);
 }
 
-void Logger::Info (const char *pattern, ...)
-{
+void Logger::Info(const char *pattern, ...) {
   __FORMAT_MESSAGE__(kLoggerLevel_Info);
 }
 
-void Logger::Trace(const char *pattern, ...)
-{
+void Logger::Trace(const char *pattern, ...) {
   __FORMAT_MESSAGE__(kLoggerLevel_Trace);
 }
 
-void Logger::VDebug(const std::string& prefix, const char *pattern, va_list ap)
-{
+void Logger::VDebug(const std::string &prefix, const char *pattern,
+                    va_list ap) {
   FormatMessage(kLoggerLevel_Debug, pattern, ap, prefix);
 }
 
-void Logger::VFatal(const std::string& prefix, const char *pattern, va_list ap)
-{
+void Logger::VFatal(const std::string &prefix, const char *pattern,
+                    va_list ap) {
   FormatMessage(kLoggerLevel_Fatal, pattern, ap, prefix);
 }
 
-void Logger::VError(const std::string& prefix, const char *pattern, va_list ap)
-{
+void Logger::VError(const std::string &prefix, const char *pattern,
+                    va_list ap) {
   FormatMessage(kLoggerLevel_Error, pattern, ap, prefix);
 }
 
-void Logger::VWarn (const std::string& prefix, const char *pattern, va_list ap)
-{
+void Logger::VWarn(const std::string &prefix, const char *pattern, va_list ap) {
   FormatMessage(kLoggerLevel_Warn, pattern, ap, prefix);
 }
 
-void Logger::VInfo (const std::string& prefix, const char *pattern, va_list ap)
-{
+void Logger::VInfo(const std::string &prefix, const char *pattern, va_list ap) {
   FormatMessage(kLoggerLevel_Info, pattern, ap, prefix);
 }
 
-void Logger::VTrace(const std::string& prefix, const char *pattern, va_list ap)
-{
+void Logger::VTrace(const std::string &prefix, const char *pattern,
+                    va_list ap) {
   FormatMessage(kLoggerLevel_Trace, pattern, ap, prefix);
 }
 
-void Logger::LogMessage(char *str, size_t len)
-{
+void Logger::LogMessage(char *str, size_t len) {
   str[len] = '\n';
-  int write_size = file_->Write(str, len+1);
+  int write_size = file_->Write(str, len + 1);
   size_ += write_size;
-  assert(write_size == int(len)+1);
+  assert(write_size == int(len) + 1);
 }
 
-void Logger::Flush()
-{
-  if(file_) file_->Flush();
+void Logger::Flush() {
+  if (file_) file_->Flush();
 }

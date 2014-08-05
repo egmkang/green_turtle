@@ -35,35 +35,32 @@
 #include <time.h>
 #include <cstddef>
 #include <stdint.h>
+#include <algorithm>
 
-namespace green_turtle{
+namespace green_turtle {
 
-//not thread safe, for inexact usage
-class System{
+// not thread safe, for inexact usage
+class System {
  public:
-  static time_t     GetSeconds()
-  {
-    return time(NULL);
-  }
+  static uint64_t GetMilliSeconds();
+  //first is seconds
+  //second is milliseconds
+  static std::pair<time_t, time_t> GetCurrentTime();
 
-  static uint64_t   GetMilliSeconds();
+  // local time
+  static tm GetTime();
 
-  //local time
-  static tm         GetTime();
+  // if s1 and s2 is the same day,than return 0
+  // else return s2.days - s1.days
+  // days are defined in local time
+  static int GetSecondsDiffDays(time_t s1, time_t s2);
 
-  //if s1 and s2 is the same day,than return 0
-  //else return s2.days - s1.days
-  //days are defined in local time
-  static int        GetSecondsDiffDays(time_t s1,time_t s2);
+  // sleep for a while
+  static void Yield(uint64_t milliSeconds);
 
-  //sleep for a while
-  static void     Yield(uint64_t milliSeconds);
-
-  //get thread id
+  // get thread id
   static int32_t GetThreadID();
 };
-
 };
-
 
 #endif
