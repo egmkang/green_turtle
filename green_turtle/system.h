@@ -31,35 +31,66 @@
 
 #ifndef __SYSTEM_TIME_H__
 #define __SYSTEM_TIME_H__
-
+#include <sys/time.h>
+#include <sys/syscall.h>
+#include <sys/types.h>
+#include <unistd.h>
 #include <time.h>
 #include <cstddef>
 #include <stdint.h>
 #include <algorithm>
 
 namespace green_turtle {
-
-// not thread safe, for inexact usage
 class System {
  public:
-  static uint64_t GetMilliSeconds();
-  //first is seconds
-  //second is milliseconds
-  static std::pair<time_t, time_t> GetCurrentTime();
+  static time_t GetSeconds() {
+    return time(NULL);
+  }
+
+  static uint64_t GetMilliSeconds() {
+    uint64_t time_millisecond;
+    timeval time_val;
+    gettimeofday(&time_val, NULL);
+    time_millisecond = time_val.tv_sec * 1000 + time_val.tv_usec / 1000;
+    return time_millisecond;
+  }
+
+  // first is seconds
+  // second is milliseconds
+  static std::pair<time_t, time_t> GetCurrentTime() {
+    timeval time_val;
+    gettimeofday(&time_val, NULL);
+    return std::make_pair(time_val.tv_sec, time_val.tv_usec / 1000);
+  }
 
   // local time
-  static tm GetTime();
+  static tm GetTime() {
+    tm time_tm;
+    time_t time_sec = GetCurrentTime().first;
+    localtime_r(&time_sec, &time_tm);
+    return time_tm;
+  }
 
   // if s1 and s2 is the same day,than return 0
   // else return s2.days - s1.days
   // days are defined in local time
-  static int GetSecondsDiffDays(time_t s1, time_t s2);
+  static int GetSecondsDiffDays(time_t s1, time_t s2) {
+    tm tm_1;
+    tm tm_2;
+    localtime_r(&s1, &tm_1);
+    localtime_r(&s2, &tm_2);
+    tm_1.tm_sec = tm_1.tm_min = tm_1.tm_hour = 0;
+    tm_2.tm_sec = tm_2.tm_min = tm_2.tm_hour = 0;
+    s1 = mktime(&tm_1);
+    s2 = mktime(&tm_2);
+    return (s2 - s1) / (3600 * 24);
+  }
 
   // sleep for a while
-  static void Yield(uint64_t milliSeconds);
+  static void Yield(uint64_t milliSeconds) { ::usleep(milliSeconds * 1000); }
 
   // get thread id
-  static int32_t GetThreadID();
+  static int32_t GetThreadID() { return syscall(SYS_gettid); }
 };
 };
 

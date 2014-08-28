@@ -33,5 +33,10 @@ ADD_EXECUTABLE(mysql_test
     )
 TARGET_LINK_LIBRARIES(mysql_test green_turtle mysqlclient)
 
+ADD_EXECUTABLE(format_test
+  format_test.cc
+  )
+TARGET_LINK_LIBRARIES(format_test green_turtle)
+
 
 ADD_SUBDIRECTORY(net)

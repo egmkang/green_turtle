@@ -60,14 +60,6 @@ void Logger::ChangeLoggerFile(const char *new_file) {
 
 static char LOGGER_LEVEL[][9] = {"[INFO ] ", "[DEBUG] ", "[TRACE] ",
                                  "[WARN ] ", "[ERROR] ", "[FATAL] "};
-enum {
-  kLoggerLevel_Info = 0,
-  kLoggerLevel_Debug = 1,
-  kLoggerLevel_Trace = 2,
-  kLoggerLevel_Warn = 3,
-  kLoggerLevel_Error = 4,
-  kLoggerLevel_Fatal = 5,
-};
 
 enum {
   kLoggerMessage_MaxSize = 4096,
@@ -87,38 +79,13 @@ inline void Logger::FormatMessage(int level, const char *pattern, va_list ap,
                                   const std::string &prefix) {
   int size = 0;
   char msg[kLoggerMessage_MaxSize + 1];
-  int msglen = kLoggerMessage_MaxSize;
-
-  std::pair<time_t, time_t> current_time = System::GetCurrentTime();
-  if (current_time.first > t_time) {
-    struct tm tm_now;
-    localtime_r(&current_time.first, &tm_now);
-    sprintf(t_time_str, "%02d:%02d:%02d", tm_now.tm_hour, tm_now.tm_min,
-            tm_now.tm_sec);
-    t_time = current_time.first;
-  }
-
-  *reinterpret_cast<uint64_t *>(msg) =
-      *reinterpret_cast<uint64_t *>(t_time_str);
-  size += sizeof(t_time_str);
-
-  *reinterpret_cast<uint32_t *>(msg + size) =
-      *reinterpret_cast<uint32_t *>(
-           kMilliSecondsString[current_time.second % 1024]);
-  size += sizeof(uint32_t);
-
-  msg[size] = ' ';
-  size += 1;
-
-  *reinterpret_cast<uint64_t *>(msg + size) =
-      *reinterpret_cast<uint64_t *>(LOGGER_LEVEL[level]);
-  size += sizeof(LOGGER_LEVEL[0]) - 1;
+  size = GenerateLogHeader(msg, level);
 
   if (!prefix.empty()) {
     memcpy(msg + size, prefix.c_str(), prefix.size());
     size += prefix.size();
   }
-  size += vsnprintf(msg + size, msglen - size - 1, pattern, ap);
+  size += vsnprintf(msg + size, sizeof(msg) - size - 2, pattern, ap);
   LogMessage(msg, size);
 }
 
@@ -183,4 +150,34 @@ void Logger::LogMessage(char *str, size_t len) {
 
 void Logger::Flush() {
   if (file_) file_->Flush();
+}
+
+int32_t Logger::GenerateLogHeader(char *array, int8_t level) {
+  int size = 0;
+  std::pair<time_t, time_t> current_time = System::GetCurrentTime();
+  current_time.first = System::GetSeconds();
+  if (current_time.first > t_time) {
+    struct tm tm_now;
+    localtime_r(&current_time.first, &tm_now);
+    sprintf(t_time_str, "%02d:%02d:%02d", tm_now.tm_hour, tm_now.tm_min,
+            tm_now.tm_sec);
+    t_time = current_time.first;
+  }
+
+  *reinterpret_cast<uint64_t *>(array) =
+      *reinterpret_cast<uint64_t *>(t_time_str);
+  size += sizeof(t_time_str);
+
+  *reinterpret_cast<uint32_t *>(array + size) =
+      *reinterpret_cast<uint32_t *>(
+           kMilliSecondsString[current_time.second % 1024]);
+  size += sizeof(uint32_t);
+
+  array[size] = ' ';
+  size += 1;
+
+  *reinterpret_cast<uint64_t *>(array + size) =
+      *reinterpret_cast<uint64_t *>(LOGGER_LEVEL[level]);
+  size += sizeof(LOGGER_LEVEL[0]) - 1;
+  return size;
 }

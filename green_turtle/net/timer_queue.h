@@ -33,6 +33,7 @@
 #define __TIMER_QUEUE_H__
 #include <stdint.h>
 #include <vector>
+#include <memory>
 #include <ordered_list.h>
 #include <noncopyable.h>
 

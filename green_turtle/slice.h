@@ -29,40 +29,27 @@
 //
 // author: egmkang (egmkang@gmail.com)
 
-#ifndef __LOG_FILE_H__
-#define __LOG_FILE_H__
-#include <stdio.h>
-#include <memory>
+#ifndef __SLICE_H__
+#define __SLICE_H__
 #include <string>
 #include <cstddef>
-#include <noncopyable.h>
 
 namespace green_turtle {
-
-const auto kFileDeleter = [](FILE *ptr) {
-  if (ptr) fclose(ptr);
-};
-
-class LogFile : public NonCopyable {
-  enum {
-    kLogFileCache = 32 * 1024,
-  };
-
+class StringSlice {
  public:
-  LogFile(const std::string &file_name, int buffer_size = kLogFileCache);
+  StringSlice(const char* data, size_t length) : data_(data), length_(length) {}
+  StringSlice(const std::string& str) : StringSlice(str.data(), str.size()) {}
+  template <typename Iter>
+  StringSlice(Iter begin, Iter end)
+      : StringSlice(&*begin, end - begin) {}
 
-  int Write(const char *str, int len);
-  void Flush();
-
-  explicit operator bool() const { return file_.get(); }
-  size_t offset() const { return offset_; }
+  const char* data() const { return data_; }
+  size_t length() const { return length_; }
+  size_t size() const { return length(); }
 
  private:
-  std::unique_ptr<FILE, decltype(kFileDeleter)> file_;
-  std::unique_ptr<char[]> buffer_;
-  std::string file_name_;
-  size_t offset_;
+  const char* data_;
+  size_t length_;
 };
 }
-
 #endif

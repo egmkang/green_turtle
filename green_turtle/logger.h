@@ -36,6 +36,7 @@
 #include <mutex>
 #include <memory>
 #include <string>
+#include <format.h>
 
 #define __SHORT_FILE__  strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__
 
@@ -45,6 +46,19 @@ class LogFile;
 
 class Logger
 {
+  enum {
+    kLogEntryMaxLength = 4 * 1024,
+  };
+
+  enum {
+    kLoggerLevel_Info = 0,
+    kLoggerLevel_Debug = 1,
+    kLoggerLevel_Trace = 2,
+    kLoggerLevel_Warn = 3,
+    kLoggerLevel_Error = 4,
+    kLoggerLevel_Fatal = 5,
+  };
+
  public:
   Logger(const char* file_name, const char *link_name);
   ~Logger();
@@ -65,12 +79,23 @@ class Logger
   void VInfo (const std::string& prefix, const char *pattern, va_list ap) __attribute__ ((__format__ (__printf__, 3, 0)));
   void VTrace(const std::string& prefix, const char *pattern, va_list ap) __attribute__ ((__format__ (__printf__, 3, 0)));
 
+  template <typename... Tn>
+  void Log(Tn &&... vn)
+  {
+    char array[kLogEntryMaxLength];
+    int32_t header = GenerateLogHeader(array, kLoggerLevel_Debug);
+    int32_t length = format(array + header, sizeof(array) - header, std::forward<Tn>(vn)...);
+    assert(length > 0);
+    if (length > 0) this->LogMessage(array, header + length);
+  }
+
   void Flush();
   size_t GetWrittenSize() const { return size_; }
  private:
   void FormatMessage(int level, const char *pattern, va_list ap, const std::string& prefix);
   void LogMessage(char *str, size_t len);
   void CreateLink();
+  int32_t GenerateLogHeader(char *array, int8_t level);
  private:
   std::mutex  lock_;
   std::unique_ptr<LogFile> file_;

@@ -23,7 +23,7 @@ int main()
                 int32_t tid = green_turtle::System::GetThreadID();
                 while(true)
                 {
-                    logger.Debug("thread %d write log, random_num %d", tid, rand());
+                    logger.Log("thread ", tid, " write log, random_num ", rand());
                     if(++count > kMaxLogCount)
                     {
                         break;
