@@ -56,7 +56,9 @@ class MemberPtr {
   MemberPtr(Message* message, int offset) : offset_(offset) {
     message_ = message->shared_from_this();
   }
-  T* get() const { return static_cast<T*>(message_->data()); }
+  T* get() const {
+    return static_cast<T*>(static_cast<char*>(message_->data()) + offset_);
+  }
   T* operator->() const { return get(); }
   T& operator*() const { return *get(); }
 
