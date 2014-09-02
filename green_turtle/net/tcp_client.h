@@ -34,19 +34,18 @@
 #include <string>
 #include "buffered_socket.h"
 
-namespace green_turtle{
-namespace net{
+namespace green_turtle {
+namespace net {
 
-class TcpClient : public BufferedSocket
-{
+class TcpClient : public BufferedSocket {
  public:
   TcpClient(const std::string& ip, unsigned short port);
   ~TcpClient();
   int Connect();
+
  protected:
   int OnError();
 };
-
 }
 }
 #endif

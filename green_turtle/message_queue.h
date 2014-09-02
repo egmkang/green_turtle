@@ -41,16 +41,13 @@
 
 namespace green_turtle{
 
-struct VolatileCounter
-{
+struct VolatileCounter {
   VolatileCounter(uint64_t init = 0) : value_(init) {}
-  inline uint64_t load(std::memory_order memory_order)
-  {
+  inline uint64_t load(std::memory_order memory_order) {
     (void)memory_order;
     return value_;
   }
-  inline void store(uint64_t value, std::memory_order memory_order)
-  {
+  inline void store(uint64_t value, std::memory_order memory_order) {
     (void)memory_order;
     value_ = value;
   }
@@ -62,21 +59,20 @@ struct VolatileCounter
 //1:1 MessageQueue
 //N:1 equals N*(1:1)
 //you can change VolatileCounter into std::atomic<uint64_t>
-template<class T, class Counter = VolatileCounter >
-class MessageQueue : NonCopyable
-{
+template <class T, class Counter = VolatileCounter>
+class MessageQueue : NonCopyable {
  public:
   typedef T value_type;
+
  public:
-  MessageQueue(uint64_t size = 128*1024)
-    : read_idx_()
-    , write_idx_()
-    , size_(size)
-    , mask_(size - 1)
-    , array_(new T[size]())
-  {
+  MessageQueue(uint64_t size = 128 * 1024)
+      : read_idx_(),
+        write_idx_(),
+        size_(size),
+        mask_(size - 1),
+        array_(new T[size]()) {
     assert(size >= 2);
-    assert(!(size_ & (size_ -1)) && "size must be 2^n!");
+    assert(!(size_ & (size_ - 1)) && "size must be 2^n!");
     long addr = reinterpret_cast<long>(&read_idx_);
     assert(addr % 64 == 0);
     addr = reinterpret_cast<long>(&write_idx_);
@@ -84,13 +80,11 @@ class MessageQueue : NonCopyable
     (void)addr;
   }
 
-  bool Push(const value_type& v)
-  {
+  bool Push(const value_type& v) {
     const auto current_write_ = write_idx_.load(std::memory_order_relaxed);
-    const auto current_read_  = read_idx_.load(std::memory_order_acquire);
+    const auto current_read_ = read_idx_.load(std::memory_order_acquire);
 
-    if(UNLIKELY(current_write_ - current_read_ == mask_))
-      return false;
+    if (UNLIKELY(current_write_ - current_read_ == mask_)) return false;
 
     array_[current_write_ & mask_] = v;
     write_idx_.store(current_write_ + 1, std::memory_order_release);
@@ -98,34 +92,28 @@ class MessageQueue : NonCopyable
     return true;
   }
 
-  bool Pop(value_type& v)
-  {
+  bool Pop(value_type& v) {
     const auto current_write_ = write_idx_.load(std::memory_order_acquire);
-    const auto current_read_  = read_idx_.load(std::memory_order_relaxed);
-    if(UNLIKELY(current_read_ == current_write_))
-      return false;
+    const auto current_read_ = read_idx_.load(std::memory_order_relaxed);
+    if (UNLIKELY(current_read_ == current_write_)) return false;
 
     v = std::move(array_[current_read_ & mask_]);
     read_idx_.store(current_read_ + 1, std::memory_order_release);
     return true;
   }
-  uint64_t Size() const
-  {
-    const auto current_read_  = read_idx_.load(std::memory_order_relaxed);
+  uint64_t Size() const {
+    const auto current_read_ = read_idx_.load(std::memory_order_relaxed);
     const auto current_write_ = write_idx_.load(std::memory_order_relaxed);
     return (current_write_ - current_read_);
   }
-  uint64_t Capacity() const
-  {
-    return size_;
-  }
-private:
-  alignas(64) Counter  read_idx_;
-  alignas(64) Counter  write_idx_;
-  const uint64_t  size_;
-  const uint64_t  mask_;
+  uint64_t Capacity() const { return size_; }
+
+ private:
+  alignas(64) Counter read_idx_;
+  alignas(64) Counter write_idx_;
+  const uint64_t size_;
+  const uint64_t mask_;
   std::unique_ptr<value_type[]> array_;
 };
-
 }
 #endif

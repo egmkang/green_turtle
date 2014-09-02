@@ -5,20 +5,17 @@
 
 using namespace green_turtle;
 
-TEST(Buffer, Empty)
-{
+TEST(Buffer, Empty) {
   Buffer buffer(1024);
   EXPECT_EQ(0ul, buffer.ReadableLength());
   EXPECT_EQ(1024ul, buffer.WritableLength());
   EXPECT_EQ(buffer.BeginRead(), buffer.BeginWrite());
 }
 
-TEST(Buffer, Full)
-{
+TEST(Buffer, Full) {
   Buffer buffer(1024);
   char c = 'c';
-  for(int i = 0; i < 1023; ++i)
-  {
+  for (int i = 0; i < 1023; ++i) {
     buffer.Append(&c, sizeof(c));
   }
   EXPECT_EQ(1ul, buffer.WritableLength());
@@ -30,8 +27,7 @@ TEST(Buffer, Full)
   EXPECT_EQ(1025ul, buffer.ReadableLength());
 }
 
-TEST(Buffer, ReadWrite)
-{
+TEST(Buffer, ReadWrite) {
   Buffer buffer(16);
   auto begin_ptr = buffer.BeginRead();
   auto str = "0123456789";
@@ -50,8 +46,7 @@ TEST(Buffer, ReadWrite)
   EXPECT_EQ(begin_ptr + buffer.Capacity(), buffer.BeginWrite());
 }
 
-TEST(Buffer, Retrieve)
-{
+TEST(Buffer, Retrieve) {
   Buffer buffer(16);
   auto begin_ptr = buffer.BeginRead();
 
@@ -72,6 +67,6 @@ TEST(Buffer, Retrieve)
   buffer.Append(str, strlen(str));
   buffer.Retrieve();
   EXPECT_EQ(strlen(str), buffer.ReadableLength());
-  EXPECT_EQ(str, std::string(buffer.BeginRead(), buffer.BeginRead()+buffer.ReadableLength()));
-
+  EXPECT_EQ(str, std::string(buffer.BeginRead(),
+                             buffer.BeginRead() + buffer.ReadableLength()));
 }

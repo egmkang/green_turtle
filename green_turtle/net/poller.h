@@ -39,37 +39,40 @@
 #ifdef __linux__
 #define HAVE_EPOLL 1
 #endif
-#if (defined(__APPLE__) && defined(MAC_OS_X_VERSION_10_6)) || defined(__FreeBSD__) || defined(__OpenBSD__) || defined (__NetBSD__)
+#if (defined(__APPLE__) && defined(MAC_OS_X_VERSION_10_6)) || \
+    defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__)
 #define HAVE_KQUEUE 1
 #endif
 
-namespace green_turtle{
-namespace net{
+namespace green_turtle {
+namespace net {
 
 class EventHandler;
 
-class Poller : green_turtle::NonCopyable
-{
+class Poller : green_turtle::NonCopyable {
  public:
   Poller(int init_size);
   virtual ~Poller();
+
  public:
-  virtual void AddEventHandler(EventHandler *pEventHandler)       = 0;
-  virtual void RemoveEventHandler(EventHandler *pEventHandler)    = 0;
-  virtual void PollOnce(int timeout,std::vector<EventHandler*>& fired_handlers) = 0;
+  virtual void AddEventHandler(EventHandler* pEventHandler) = 0;
+  virtual void RemoveEventHandler(EventHandler* pEventHandler) = 0;
+  virtual void PollOnce(int timeout,
+                        std::vector<EventHandler*>& fired_handlers) = 0;
+
  protected:
-  void SetEventHandler(int fd,EventHandler *handler);
-  inline EventHandler* GetEventHandler(int fd)
-  {
+  void SetEventHandler(int fd, EventHandler* handler);
+  inline EventHandler* GetEventHandler(int fd) {
     assert(fd <= (int)event_handlers_.size());
     return event_handlers_[fd].get();
   }
+
  public:
   static Poller* CreatePoller(int expected_size);
+
  private:
   std::vector<std::shared_ptr<EventHandler>> event_handlers_;
 };
-
 }
 }
 

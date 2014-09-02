@@ -42,39 +42,36 @@
 namespace green_turtle{
 namespace net{
 
-struct AddrInfo
-{
-  AddrInfo()
-  {
+struct AddrInfo {
+  AddrInfo() {
     memset(&addr_, 0, sizeof(addr_));
     addr_port_ = 0;
   }
-  AddrInfo(const char *ip, const unsigned short port) : addr_str_(ip), addr_port_(port)
-  {
+
+  AddrInfo(const char* ip, const unsigned short port)
+      : addr_str_(ip), addr_port_(port) {
     assert(ip);
-    addr_.sin_family      = AF_INET;
-    addr_.sin_port        = htons(port);
+    addr_.sin_family = AF_INET;
+    addr_.sin_port = htons(port);
     addr_.sin_addr.s_addr = inet_addr(ip);
   }
-  AddrInfo(const sockaddr_in& addr_) : addr_(addr_)
-  {
+
+  AddrInfo(const sockaddr_in& addr_) : addr_(addr_) {
     addr_port_ = ntohs(addr_.sin_port);
     addr_str_ = inet_ntoa(addr_.sin_addr);
   }
-  const struct sockaddr* sockaddr() const
-  {
-    return static_cast<const struct sockaddr*>(static_cast<const void*>(&addr_));
-  }
-  int sockaddr_len() const
-  {
-    return sizeof(addr_);
+
+  const struct sockaddr* sockaddr() const {
+    return static_cast<const struct sockaddr*>(
+        static_cast<const void*>(&addr_));
   }
 
-  std::string     addr_str_;
-  unsigned short  addr_port_;
-  sockaddr_in     addr_;
+  int sockaddr_len() const { return sizeof(addr_); }
+
+  std::string addr_str_;
+  unsigned short addr_port_;
+  sockaddr_in addr_;
 };
-
 }
 }
 #endif

@@ -40,35 +40,37 @@
 #include "event_handler.h"
 #include "message.h"
 
-namespace green_turtle{
-namespace net{
+namespace green_turtle {
+namespace net {
 
-class BufferedSocket : public EventHandler
-{
+class BufferedSocket : public EventHandler {
  public:
-  typedef green_turtle::Buffer  Buffer;
+  typedef green_turtle::Buffer Buffer;
+
  public:
-  BufferedSocket(int fd,const AddrInfo& addr);
+  BufferedSocket(int fd, const AddrInfo& addr);
   ~BufferedSocket();
   void SendMessage(std::shared_ptr<Message>&& data);
   void SendMessage(const std::shared_ptr<Message>& data);
   const AddrInfo& addr() const;
+
  protected:
   virtual int OnRead();
   virtual int OnWrite();
   virtual int OnError();
   virtual void Decoding(Buffer& data) = 0;
+
  private:
   bool HasData() const;
- private:
-  typedef std::shared_ptr<Message>  SharedMessage;
-  AddrInfo                    addr_;
-  std::deque<SharedMessage>   snd_messages_;
-  std::unique_ptr<Buffer>     rcv_buffer_;
-  std::unique_ptr<Buffer>     snd_buffer_;
-  std::mutex                  write_lock_;
-};
 
+ private:
+  typedef std::shared_ptr<Message> SharedMessage;
+  AddrInfo addr_;
+  std::deque<SharedMessage> snd_messages_;
+  std::unique_ptr<Buffer> rcv_buffer_;
+  std::unique_ptr<Buffer> snd_buffer_;
+  std::mutex write_lock_;
+};
 }
 }
 #endif

@@ -36,54 +36,58 @@
 #include <memory>
 #include <noncopyable.h>
 
-namespace green_turtle{
-namespace net{
+namespace green_turtle {
+namespace net {
 
 enum {
-  kOK   = 0,
-  kErr  = -1,
+  kOK = 0,
+  kErr = -1,
 };
 
 enum {
-  kEventNone        = 0x0,
-  kEventReadable    = 0x1,
-  kEventWriteable   = 0x2,
+  kEventNone = 0x0,
+  kEventReadable = 0x1,
+  kEventWriteable = 0x2,
 };
 
 class EventLoop;
 
-class EventHandler : green_turtle::NonCopyable, public std::enable_shared_from_this<EventHandler>
-{
+class EventHandler : green_turtle::NonCopyable,
+                     public std::enable_shared_from_this<EventHandler> {
  public:
   EventHandler(int fd);
   virtual ~EventHandler();
-  int  fd() const { return fd_; }
-  int  revents() const { return revents_; }
-  void set_revents(int revents) { revents_ = revents; } 
-  int  events() const { return events_;}
+  int fd() const { return fd_; }
+  int revents() const { return revents_; }
+  void set_revents(int revents) { revents_ = revents; }
+  int events() const { return events_; }
   void set_events(int events) { events_ = events; }
-  int  index() const { return poll_idx_; } 
+  int index() const { return poll_idx_; }
   void set_index(int idx) { poll_idx_ = idx; }
   void HandleEvent();
   EventLoop* event_loop() const { return event_loop_; }
-  void set_event_loop(EventLoop *loop) { event_loop_ = loop; }
+  void set_event_loop(EventLoop* loop) { event_loop_ = loop; }
+
  public:
   void AddToConnManager();
   void SetWindowSize(int size);
-  virtual void loop_balance(const std::vector<EventLoop*>& loops) { (void)loops;}
-  virtual int OnError()           = 0;
+  virtual void loop_balance(const std::vector<EventLoop*>& loops) {
+    (void)loops;
+  }
+  virtual int OnError() = 0;
   void Shutdown();
+
  protected:
-  virtual int OnRead()            = 0;
-  virtual int OnWrite()           = 0;
+  virtual int OnRead() = 0;
+  virtual int OnWrite() = 0;
+
  private:
   int fd_;
-  int events_;    //request events
-  int revents_;   //returned events
-  int poll_idx_;  //poll index,for fast remove
-  EventLoop *event_loop_;
+  int events_;  // request events
+  int revents_;  // returned events
+  int poll_idx_;  // poll index,for fast remove
+  EventLoop* event_loop_;
 };
-
 }
 }
 #endif

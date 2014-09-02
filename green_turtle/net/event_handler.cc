@@ -5,43 +5,32 @@
 using namespace green_turtle;
 using namespace green_turtle::net;
 
-EventHandler::EventHandler(int fd) :
-    fd_(fd)
-    ,events_(kEventNone)
-    ,revents_(kEventNone)
-    ,poll_idx_(-1)
-    ,event_loop_(nullptr)
-{
-}
+EventHandler::EventHandler(int fd)
+    : fd_(fd),
+      events_(kEventNone),
+      revents_(kEventNone),
+      poll_idx_(-1),
+      event_loop_(nullptr) {}
 
-EventHandler::~EventHandler()
-{
-  SocketOption::DestoryFD(fd());
-}
+EventHandler::~EventHandler() { SocketOption::DestoryFD(fd()); }
 
-void EventHandler::AddToConnManager()
-{
+void EventHandler::AddToConnManager() {
   ConnManager::Instance().AddConn(this->shared_from_this());
 }
 
-void EventHandler::HandleEvent()
-{
+void EventHandler::HandleEvent() {
   int ret = kOK;
-  if(this->events_ & this->revents_ & kEventReadable)
-  {
+  if (this->events_ & this->revents_ & kEventReadable) {
     ret = OnRead();
   }
-  if(ret == kErr)
-  {
+  if (ret == kErr) {
     OnError();
     return;
   }
-  if(this->events_ & this->revents_ & kEventWriteable)
-  {
+  if (this->events_ & this->revents_ & kEventWriteable) {
     ret = OnWrite();
   }
-  if(ret == kErr)
-  {
+  if (ret == kErr) {
     ConnManager::Instance().RemoveConn(this->shared_from_this());
     OnError();
     return;
@@ -49,14 +38,12 @@ void EventHandler::HandleEvent()
   this->revents_ = kEventNone;
 }
 
-void EventHandler::SetWindowSize(int size)
-{
+void EventHandler::SetWindowSize(int size) {
   SocketOption::SetRecvBuffer(this->fd(), size);
   SocketOption::SetSendBuffer(this->fd(), size);
 }
 
-void EventHandler::Shutdown()
-{
+void EventHandler::Shutdown() {
   OnWrite();
   SocketOption::ShutDown(this->fd());
 }

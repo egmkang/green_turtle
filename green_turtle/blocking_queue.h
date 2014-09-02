@@ -32,66 +32,57 @@
 #ifndef __BLOCKING_QUEUE_H__
 #define __BLOCKING_QUEUE_H__
 #include <mutex>
-#include <deque>
+#include <vector>
 #include <noncopyable.h>
 
 namespace green_turtle{
 
-//support multi thread read and write
-template<class T>
-class BlockingQueue : NonCopyable
-{
+// support multi thread read and write
+template <class T>
+class BlockingQueue : NonCopyable {
  public:
   typedef T value_type;
-  typedef std::deque<value_type> container_type;
+  typedef std::vector<value_type> container_type;
 
  public:
-  bool Push(value_type&& v)
-  {
+  bool Push(value_type&& v) {
     std::lock_guard<std::mutex> guard(mutex_);
     queue_.push_back(v);
     return true;
   }
 
-  bool Push(const value_type& v)
-  {
+  bool Push(const value_type& v) {
     std::lock_guard<std::mutex> guard(mutex_);
     queue_.push_back(v);
     return true;
   }
 
-  bool Pop(value_type& v)
-  {
+  bool Pop(value_type& v) {
     std::lock_guard<std::mutex> guard(mutex_);
-    if(!queue_.empty())
-    {
+    if (!queue_.empty()) {
       v = queue_.front();
       queue_.pop_front();
       return true;
     }
+    queue_.clear();
     return false;
   }
 
-  bool Pop(container_type& v)
-  {
+  bool Pop(container_type& v) {
     std::lock_guard<std::mutex> guard(mutex_);
-    if(!queue_.empty())
-    {
+    if (!queue_.empty()) {
       std::swap(queue_, v);
       return true;
     }
     return false;
   }
 
-  uint64_t Size() const
-  {
-    return queue_.size();
-  }
- private:
-  std::deque<value_type>  queue_;
-  std::mutex              mutex_;
-};
+  uint64_t Size() const { return queue_.size(); }
 
+ private:
+  std::deque<value_type> queue_;
+  std::mutex mutex_;
+};
 }
 
 #endif

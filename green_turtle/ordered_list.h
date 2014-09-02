@@ -34,59 +34,57 @@
 #include <cstddef>
 #include <utils.h>
 
-namespace green_turtle{
+namespace green_turtle {
 
-template<typename T>
-class ordered_list
-{
-  public:
-    typedef size_t      iterator;
+template <typename T>
+class ordered_list {
+ public:
+  typedef size_t iterator;
 
-    ordered_list() : deleted_(), set_deleted_(false)
-    {
-        list_.reserve(16);
-        free_list_.reserve(16);
+  ordered_list() : deleted_(), set_deleted_(false) {
+    list_.reserve(16);
+    free_list_.reserve(16);
+  }
+
+  iterator insert(const T& v) {
+    size_t idx = 0;
+    if (!free_list_.empty()) {
+      idx = free_list_.back();
+      free_list_.pop_back();
+      list_[idx] = v;
+    } else {
+      idx = list_.size();
+      list_.push_back(v);
     }
-    iterator insert(const T& v)
-    {
-        size_t idx = 0;
-        if(!free_list_.empty())
-        {
-            idx = free_list_.back();
-            free_list_.pop_back();
-            list_[idx] = v;
-        }
-        else
-        {
-            idx = list_.size();
-            list_.push_back(v);
-        }
-        return idx;
+    return idx;
+  }
+
+  void erase(iterator idx) {
+    list_[idx] = deleted_;
+    free_list_.push_back(idx);
+  }
+
+  template <typename Fn>
+  void for_each(Fn fn) {
+    for (iterator iter = 0; iter < list_.size(); ++iter) {
+      if (list_[iter] == deleted_) continue;
+      if (!fn(list_[iter], iter)) break;
     }
-    void erase(iterator idx)
-    {
-        list_[idx] = deleted_;
-        free_list_.push_back(idx);
-    }
-    template<typename Fn>
-        void for_each(Fn fn)
-        {
-            for(iterator iter = 0; iter < list_.size(); ++iter)
-            {
-                if(list_[iter] == deleted_) continue;
-                if(!fn(list_[iter], iter)) break;
-            }
-        }
-    inline T get(size_t idx) const { return list_[idx] == deleted_ ? T() : list_[idx]; }
-    inline bool is_deleted(size_t idx) const {return list_[idx] == deleted_; }
-    inline void set_deleted(const T& v) { deleted_ = v; }
-  private:
-   std::vector<T>       list_;
-   std::vector<size_t>  free_list_;
-   T                    deleted_;
-   bool                 set_deleted_;
+  }
+
+  inline T get(size_t idx) const {
+    return list_[idx] == deleted_ ? T() : list_[idx];
+  }
+
+  inline bool is_deleted(size_t idx) const { return list_[idx] == deleted_; }
+  inline void set_deleted(const T& v) { deleted_ = v; }
+
+ private:
+  std::vector<T> list_;
+  std::vector<size_t> free_list_;
+  T deleted_;
+  bool set_deleted_;
 };
-
 }
 
 #endif

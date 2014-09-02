@@ -36,32 +36,34 @@
 #include <functional>
 #include "event_handler.h"
 
-namespace green_turtle{
-namespace net{
+namespace green_turtle {
+namespace net {
 
 struct AddrInfo;
 
-class TcpAcceptor : public EventHandler
-{
-  public:
-    TcpAcceptor(const char *ip, unsigned short port,
-            std::function<std::shared_ptr<EventHandler> (int, const AddrInfo&)> creator);
-    virtual ~TcpAcceptor();
-  public:
-    bool Listen();
-    virtual void loop_balance(const std::vector<EventLoop*>& loops);
-  protected:
-    virtual int OnRead();
-    virtual int OnWrite();
-    virtual int OnError();
-  private:
-    int Accept(AddrInfo& info);
-    std::unique_ptr<AddrInfo> addr_;
-    std::vector<EventLoop*>   loops_;
-    size_t                    idx_; //load balance
-    std::function<std::shared_ptr<EventHandler> (int, const AddrInfo&)> creator;
-};
+class TcpAcceptor : public EventHandler {
+ public:
+  TcpAcceptor(const char* ip, unsigned short port,
+              std::function<std::shared_ptr<EventHandler>(int, const AddrInfo&)>
+                  creator);
+  virtual ~TcpAcceptor();
 
+ public:
+  bool Listen();
+  virtual void loop_balance(const std::vector<EventLoop*>& loops);
+
+ protected:
+  virtual int OnRead();
+  virtual int OnWrite();
+  virtual int OnError();
+
+ private:
+  int Accept(AddrInfo& info);
+  std::unique_ptr<AddrInfo> addr_;
+  std::vector<EventLoop*> loops_;
+  size_t idx_;  // load balance
+  std::function<std::shared_ptr<EventHandler>(int, const AddrInfo&)> creator;
+};
 }
 }
 

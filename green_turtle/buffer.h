@@ -37,49 +37,40 @@
 #include <noncopyable.h>
 
 namespace green_turtle{
+
 /**
  * Simple Buffer support only Read/Write/Retrieve.
  * Not RingBuffer.
  */
-class Buffer : NonCopyable
-{
+class Buffer : NonCopyable {
  public:
   /**
    * @param init_size The Buffer MaxSize, Capacity.
    */
   Buffer(int init_size)
-      : array_(nullptr),
-      write_(0),
-      read_(0),
-      size_(init_size)
-  {
-    array_ = static_cast<char*>(std::malloc(init_size));
+      : array_(nullptr), write_(0), read_(0), size_(init_size) {
+    array_ = static_cast<char *>(std::malloc(init_size));
   }
-  ~Buffer()
-  {
-    std::free(array_);
-  }
+  ~Buffer() { std::free(array_); }
+
  public:
   /**
    * @param data Raw data will be appended into the buffer.
    * @param size Raw data's length.
    * @return appended size
    */
-  size_t Append(const void *data, size_t size)
-  {
-    return Append(static_cast<const char*>(data),size);
+  size_t Append(const void *data, size_t size) {
+    return Append(static_cast<const char *>(data), size);
   }
   /**
    * @param data Raw data will be appended into the buffer.
    * @param size Raw data's length.
    * @return appended size
    */
-  size_t Append(const char *data, size_t size)
-  {
+  size_t Append(const char *data, size_t size) {
     int need = size - WritableLength();
-    if(need > 0)
-    {
-      array_ = static_cast<char*>(std::realloc(array_, this->size_ + need));
+    if (need > 0) {
+      array_ = static_cast<char *>(std::realloc(array_, this->size_ + need));
       assert(array_);
       this->size_ += need;
     }
@@ -106,12 +97,12 @@ class Buffer : NonCopyable
    * current writable pointer.
    * @return current writable pointer.
    */
-  char* BeginWrite() const { return array_ + write_; }
+  char *BeginWrite() const { return array_ + write_; }
   /**
    * current reabable pointer.
    * @return current reabable pointer.
    */
-  char* BeginRead() const { return array_ + read_; }
+  char *BeginRead() const { return array_ + read_; }
   /**
    * move the current writable pointer back
    * @param size count in bytes
@@ -128,23 +119,21 @@ class Buffer : NonCopyable
    * using HasRead to clear data.
    * @see HasRead
    */
-  void Retrieve()
-  {
+  void Retrieve() {
     size_t len = ReadableLength();
-    if(read_)
-    {
+    if (read_) {
       std::memmove(array_, BeginRead(), len);
     }
     read_ = 0;
     write_ = len;
   }
- private:
-  char    *array_;
-  size_t  write_;
-  size_t  read_;
-  size_t  size_;
-};
 
+ private:
+  char *array_;
+  size_t write_;
+  size_t read_;
+  size_t size_;
+};
 }
 
 #endif

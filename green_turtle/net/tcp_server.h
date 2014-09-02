@@ -37,8 +37,8 @@
 #include <noncopyable.h>
 #include "timer.h"
 
-namespace green_turtle{
-namespace net{
+namespace green_turtle {
+namespace net {
 
 class EventHandler;
 class EventLoop;
@@ -49,10 +49,11 @@ class TcpServer;
 
 class TcpServer : green_turtle::NonCopyable {
  public:
-  //default using epoll or kequeue
-  //if your want to use poll, please set this number small than 128
+  // default using epoll or kequeue
+  // if your want to use poll, please set this number small than 128
   TcpServer(int expected_size = 1024);
   ~TcpServer();
+
  public:
   void AddAcceptor(TcpAcceptor *acceptor);
   void AddClient(TcpClient *client);
@@ -61,26 +62,28 @@ class TcpServer : green_turtle::NonCopyable {
   void Terminal();
 
  public:
-  //register a timer,unit ms
-  void ScheduleTimer(Timer *timer_ptr,uint64_t timer_interval,int64_t time_delay = 0);
-  //unregister a timer
+  // register a timer,unit ms
+  void ScheduleTimer(Timer *timer_ptr, uint64_t timer_interval,
+                     int64_t time_delay = 0);
+  // unregister a timer
   void CancelTimer(Timer *timer_ptr);
   void SetLoopCallBack(std::function<void(void)> loop) { loop_once_ = loop; }
+
  private:
   void InitEventLoop();
   void InitThreads();
+
  private:
   typedef std::shared_ptr<EventHandler> SharedHandler;
-  std::vector<EventLoop*>     loops_;
-  std::vector<std::thread*>   threads_;
-  std::vector<SharedHandler>  handlers_;
+  std::vector<EventLoop *> loops_;
+  std::vector<std::thread *> threads_;
+  std::vector<SharedHandler> handlers_;
   std::unique_ptr<TimerQueue> timer_queue_;
-  bool  is_terminal_;
-  int   thread_count_;
-  int   expected_size_;
+  bool is_terminal_;
+  int thread_count_;
+  int expected_size_;
   std::function<void(void)> loop_once_;
 };
-
 }
 }
 #endif

@@ -34,19 +34,18 @@
 #include <string>
 #include <vector>
 
-namespace green_turtle{
+namespace green_turtle {
 
-class CommandFlags
-{
-  public:
-    CommandFlags(int argc, const char *argv[]);
+class CommandFlags {
+ public:
+  CommandFlags(int argc, const char* argv[]);
 
-    bool CheckFlag(const std::string& flag);
-    std::string GetFlags(const std::string& flag);
-  private:
-    std::vector<std::string> argv_;
+  bool CheckFlag(const std::string& flag);
+  std::string GetFlags(const std::string& flag);
+
+ private:
+  std::vector<std::string> argv_;
 };
-
 };
 
 #endif

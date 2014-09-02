@@ -36,20 +36,16 @@
 #include <vector>
 #include <functional>
 
-namespace green_turtle{
-namespace net{
+namespace green_turtle {
+namespace net {
 
-class ConnManager : public green_turtle::Singleton<ConnManager> 
-{
+class ConnManager : public green_turtle::Singleton<ConnManager> {
  public:
   typedef std::shared_ptr<EventHandler> HandlerPtr;
-  typedef std::vector<HandlerPtr>       HandlerSet;
-  typedef std::function<void (HandlerSet&)> CallBack;
+  typedef std::vector<HandlerPtr> HandlerSet;
+  typedef std::function<void(HandlerSet&)> CallBack;
 
-  ConnManager(int init_size = 2048)
-  {
-    this->handlers_.reserve(init_size);
-  }
+  ConnManager(int init_size = 2048) { this->handlers_.reserve(init_size); }
 
   void AddConn(const HandlerPtr& ptr);
 
@@ -58,19 +54,22 @@ class ConnManager : public green_turtle::Singleton<ConnManager>
   void Update();
 
   void SetAddCallback(CallBack call_back) { this->add_callback_ = call_back; }
-  void SetRemoveCallbacl(CallBack call_back) { this->remove_callback_ = call_back; }
+  void SetRemoveCallbacl(CallBack call_back) {
+    this->remove_callback_ = call_back;
+  }
+
  private:
   void AddHandler(const HandlerPtr& ptr);
   void ResetHandler(int fd);
- private:
-  std::mutex  mutex_;
-  HandlerSet  handlers_;
-  HandlerSet  add_handler_;
-  HandlerSet  remove_handler_;
-  CallBack    add_callback_;
-  CallBack    remove_callback_;
-};
 
+ private:
+  std::mutex mutex_;
+  HandlerSet handlers_;
+  HandlerSet add_handler_;
+  HandlerSet remove_handler_;
+  CallBack add_callback_;
+  CallBack remove_callback_;
+};
 }
 }
 

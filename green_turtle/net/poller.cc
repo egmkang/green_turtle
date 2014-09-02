@@ -13,32 +13,22 @@
 using namespace green_turtle;
 using namespace green_turtle::net;
 
-Poller::Poller(int init_size):
-    event_handlers_(init_size)
-{
-}
+Poller::Poller(int init_size) : event_handlers_(init_size) {}
 
-Poller::~Poller()
-{
-  this->event_handlers_.clear();
-}
+Poller::~Poller() { this->event_handlers_.clear(); }
 
-void Poller::SetEventHandler(int fd, EventHandler *handler)
-{
+void Poller::SetEventHandler(int fd, EventHandler *handler) {
   assert(fd > 0);
-  if(fd >= (int)event_handlers_.size())
-  {
+  if (fd >= (int)event_handlers_.size()) {
     event_handlers_.resize(event_handlers_.size() * 2);
   }
   assert(fd < (int)event_handlers_.size());
   event_handlers_[fd] = handler->shared_from_this();
 }
 
-Poller* Poller::CreatePoller(int expected_size)
-{
+Poller *Poller::CreatePoller(int expected_size) {
   Poller *poller = nullptr;
-  if(expected_size > 128)
-  {
+  if (expected_size > 128) {
 #ifdef HAVE_EPOLL
     poller = new EpollPoller();
 #endif
@@ -46,8 +36,7 @@ Poller* Poller::CreatePoller(int expected_size)
     poller = new KqueuePoller();
 #endif
   }
-  if(!poller)
-  {
+  if (!poller) {
     poller = new PollPoller();
   }
   return poller;

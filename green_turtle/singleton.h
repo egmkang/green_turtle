@@ -34,38 +34,31 @@
 #include <noncopyable.h>
 #include <mutex>
 
-namespace green_turtle{
+namespace green_turtle {
 
-//not thread safe
-template<class T>
-class Singleton : NonCopyable
-{
+template <class T>
+class Singleton : NonCopyable {
  public:
-  ~Singleton()
-  {
+  ~Singleton() {
     delete value_;
     value_ = nullptr;
   }
-  static T& Instance()
-  {
-    std::call_once(flag_, [&](){
-        value_ = new T();
-        });
+  static T& Instance() {
+    std::call_once(flag_, [&]() { value_ = new T(); });
 
     return *value_;
   }
+
  private:
   static std::once_flag flag_;
   static T* value_;
-
 };
 
-template<class T>
+template <class T>
 std::once_flag Singleton<T>::flag_;
 
-template<class T>
+template <class T>
 T* Singleton<T>::value_ = nullptr;
-
 }
 
 #endif

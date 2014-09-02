@@ -38,14 +38,14 @@
 #include <string>
 #include <format.h>
 
-#define __SHORT_FILE__  strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__
+#define __SHORT_FILE__ \
+  strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__
 
-namespace green_turtle{
+namespace green_turtle {
 
 class LogFile;
 
-class Logger
-{
+class Logger {
   enum {
     kLogEntryMaxLength = 4 * 1024,
   };
@@ -60,44 +60,59 @@ class Logger
   };
 
  public:
-  Logger(const char* file_name, const char *link_name);
+  Logger(const char *file_name, const char *link_name);
   ~Logger();
 
-  void ChangeLoggerFile(const char*new_file);
+  void ChangeLoggerFile(const char *new_file);
 
-  void Debug(const char *pattern, ...) __attribute__ ((__format__ (__printf__, 2, 3)));
-  void Fatal(const char *pattern, ...) __attribute__ ((__format__ (__printf__, 2, 3)));
-  void Error(const char *pattern, ...) __attribute__ ((__format__ (__printf__, 2, 3)));
-  void Warn (const char *pattern, ...) __attribute__ ((__format__ (__printf__, 2, 3)));
-  void Info (const char *pattern, ...) __attribute__ ((__format__ (__printf__, 2, 3)));
-  void Trace(const char *pattern, ...) __attribute__ ((__format__ (__printf__, 2, 3)));
+  void Debug(const char *pattern, ...)
+      __attribute__((__format__(__printf__, 2, 3)));
+  void Fatal(const char *pattern, ...)
+      __attribute__((__format__(__printf__, 2, 3)));
+  void Error(const char *pattern, ...)
+      __attribute__((__format__(__printf__, 2, 3)));
+  void Warn(const char *pattern, ...)
+      __attribute__((__format__(__printf__, 2, 3)));
+  void Info(const char *pattern, ...)
+      __attribute__((__format__(__printf__, 2, 3)));
+  void Trace(const char *pattern, ...)
+      __attribute__((__format__(__printf__, 2, 3)));
 
-  void VDebug(const std::string& prefix, const char *pattern, va_list ap) __attribute__ ((__format__ (__printf__, 3, 0)));
-  void VFatal(const std::string& prefix, const char *pattern, va_list ap) __attribute__ ((__format__ (__printf__, 3, 0)));
-  void VError(const std::string& prefix, const char *pattern, va_list ap) __attribute__ ((__format__ (__printf__, 3, 0)));
-  void VWarn (const std::string& prefix, const char *pattern, va_list ap) __attribute__ ((__format__ (__printf__, 3, 0)));
-  void VInfo (const std::string& prefix, const char *pattern, va_list ap) __attribute__ ((__format__ (__printf__, 3, 0)));
-  void VTrace(const std::string& prefix, const char *pattern, va_list ap) __attribute__ ((__format__ (__printf__, 3, 0)));
+  void VDebug(const std::string &prefix, const char *pattern, va_list ap)
+      __attribute__((__format__(__printf__, 3, 0)));
+  void VFatal(const std::string &prefix, const char *pattern, va_list ap)
+      __attribute__((__format__(__printf__, 3, 0)));
+  void VError(const std::string &prefix, const char *pattern, va_list ap)
+      __attribute__((__format__(__printf__, 3, 0)));
+  void VWarn(const std::string &prefix, const char *pattern, va_list ap)
+      __attribute__((__format__(__printf__, 3, 0)));
+  void VInfo(const std::string &prefix, const char *pattern, va_list ap)
+      __attribute__((__format__(__printf__, 3, 0)));
+  void VTrace(const std::string &prefix, const char *pattern, va_list ap)
+      __attribute__((__format__(__printf__, 3, 0)));
 
   template <typename... Tn>
-  void Log(Tn &&... vn)
-  {
+  void Log(Tn &&... vn) {
     char array[kLogEntryMaxLength];
     int32_t header = GenerateLogHeader(array, kLoggerLevel_Debug);
-    int32_t length = format(array + header, sizeof(array) - header, std::forward<Tn>(vn)...);
+    int32_t length =
+        Format(array + header, sizeof(array) - header, std::forward<Tn>(vn)...);
     assert(length > 0);
     if (length > 0) this->LogMessage(array, header + length);
   }
 
   void Flush();
   size_t GetWrittenSize() const { return size_; }
+
  private:
-  void FormatMessage(int level, const char *pattern, va_list ap, const std::string& prefix);
+  void FormatMessage(int level, const char *pattern, va_list ap,
+                     const std::string &prefix);
   void LogMessage(char *str, size_t len);
   void CreateLink();
   int32_t GenerateLogHeader(char *array, int8_t level);
+
  private:
-  std::mutex  lock_;
+  std::mutex lock_;
   std::unique_ptr<LogFile> file_;
   std::unique_ptr<LogFile> backup_file_;
   long long size_;
@@ -105,7 +120,6 @@ class Logger
   std::string file_name_;
   std::string link_name_;
 };
-
 }
 
 #endif

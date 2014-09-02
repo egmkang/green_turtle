@@ -94,22 +94,25 @@ inline int32_t ToString(const char (&str)[N], char *buffer, int32_t left) {
   return ToString(StringSlice(str, N - 1), buffer, left);
 }
 
-inline int32_t __format(char *buffer, int32_t left, int32_t sum) { return sum; }
+inline int32_t __Format(char *buffer, int32_t left, int32_t sum) {
+  buffer[0] = 0;
+  return sum;
+}
 
 template <typename T, typename... Tn>
-inline int32_t __format(char *buffer, int32_t left, int32_t sum, T &&v,
+inline int32_t __Format(char *buffer, int32_t left, int32_t sum, T &&v,
                         Tn &&... vn) {
   int32_t length = ToString(v, buffer, left);
   if (length > left) return -1;
   sum += length;
   left -= length;
   buffer += length;
-  return __format(buffer, left, sum, std::forward<Tn>(vn)...);
+  return __Format(buffer, left, sum, std::forward<Tn>(vn)...);
 }
 
 template <typename... Tn>
-int32_t format(char *input, int32_t max_length, Tn &&... vn) {
-  return __format(input, max_length, 0, std::forward<Tn>(vn)...);
+int32_t Format(char *input, int32_t max_length, Tn &&... vn) {
+  return __Format(input, max_length, 0, std::forward<Tn>(vn)...);
 }
 }
 #endif

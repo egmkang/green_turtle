@@ -9,82 +9,67 @@ using namespace green_turtle::net;
 
 static const int kInitKqueueSize = 16;
 
-KqueuePoller::KqueuePoller():
-    Poller(kInitKqueueSize)
-    ,kqfd_(::kqueue())
-    ,events_(16)
-{
+KqueuePoller::KqueuePoller()
+    : Poller(kInitKqueueSize), kqfd_(::kqueue()), events_(16) {
   assert(kqfd_ != -1);
 }
 
-KqueuePoller::~KqueuePoller()
-{
-  ::close(kqfd_);
-}
+KqueuePoller::~KqueuePoller() { ::close(kqfd_); }
 
-void KqueuePoller::AddEventHandler(EventHandler *event_handler)
-{
+void KqueuePoller::AddEventHandler(EventHandler *event_handler) {
   assert(!polling_);
   this->SetEventHandler(event_handler->fd(), event_handler);
-  if((size_t)event_handler->fd() >= this->events_.size())
-  {
+  if ((size_t)event_handler->fd() >= this->events_.size()) {
     events_.resize(events_.size() * 2);
   }
 
   struct kevent ke;
 
-  if(event_handler->events() & kEventReadable)
-  {
+  if (event_handler->events() & kEventReadable) {
     EV_SET(&ke, event_handler->fd(), EVFILT_READ, EV_ADD, 0, 0, NULL);
-    if(kevent(kqfd_, &ke, 1, NULL, 0, NULL) == -1)
-    {
+    if (kevent(kqfd_, &ke, 1, NULL, 0, NULL) == -1) {
       RemoveEventHandler(event_handler);
     }
   }
-  if(event_handler->events() & kEventWriteable)
-  {
+  if (event_handler->events() & kEventWriteable) {
     EV_SET(&ke, event_handler->fd(), EVFILT_WRITE, EV_ADD, 0, 0, NULL);
-    if(kevent(kqfd_, &ke, 1, NULL, 0, NULL) == -1)
-    {
+    if (kevent(kqfd_, &ke, 1, NULL, 0, NULL) == -1) {
       RemoveEventHandler(event_handler);
     }
   }
 }
 
-void KqueuePoller::RemoveEventHandler(EventHandler *event_handler)
-{
+void KqueuePoller::RemoveEventHandler(EventHandler *event_handler) {
   assert(!polling_);
   this->SetEventHandler(event_handler->fd(), nullptr);
 
 #ifndef LAZY
   struct kevent ke;
-  if(event_handler->events() & kEventReadable)
-  {
+  if (event_handler->events() & kEventReadable) {
     EV_SET(&ke, event_handler->fd(), EVFILT_READ, EV_DELETE, 0, 0, NULL);
     kevent(kqfd_, &ke, 1, NULL, 0, NULL);
   }
-  if(event_handler->events() & kEventWriteable)
-  {
+  if (event_handler->events() & kEventWriteable) {
     EV_SET(&ke, event_handler->fd(), EVFILT_WRITE, EV_DELETE, 0, 0, NULL);
     kevent(kqfd_, &ke, 1, NULL, 0, NULL);
   }
 #endif
 }
 
-void KqueuePoller::PollOnce(int timeout,std::vector<EventHandler*>& fired_handler)
-{
+void KqueuePoller::PollOnce(int timeout,
+                            std::vector<EventHandler *> &fired_handler) {
   polling_ = true;
   timespec timeout_ = {0, timeout * 1000 * 1000};
-  int num = ::kevent(kqfd_, NULL, 0, &events_[0], (int)events_.size(), &timeout_);
-  for(int idx = 0; idx < num; ++idx)
-  {
-    const auto& e = events_[idx];
+  int num =
+      ::kevent(kqfd_, NULL, 0, &events_[0], (int)events_.size(), &timeout_);
+  for (int idx = 0; idx < num; ++idx) {
+    const auto &e = events_[idx];
     EventHandler *handle = this->GetEventHandler(e.ident);
-    if(!handle) continue;
+    if (!handle) continue;
 
     int mask = kEventNone;
-    if(e.filter & EVFILT_READ)  mask |= kEventReadable;
-    if(e.filter & EVFILT_WRITE) mask |= kEventWriteable;
+    if (e.filter & EVFILT_READ) mask |= kEventReadable;
+    if (e.filter & EVFILT_WRITE) mask |= kEventWriteable;
     handle->set_revents(mask);
 
     fired_handler.push_back(handle);

@@ -7,26 +7,20 @@ using namespace green_turtle;
 using namespace green_turtle::net;
 
 TcpClient::TcpClient(const std::string& ip, unsigned short port)
-  : BufferedSocket(SocketOption::NewFD(), AddrInfo(ip.c_str(), port))
-{
-}
+    : BufferedSocket(SocketOption::NewFD(), AddrInfo(ip.c_str(), port)) {}
 
-TcpClient::~TcpClient()
-{
-}
+TcpClient::~TcpClient() {}
 
-int TcpClient::Connect()
-{
-  int ret = SocketOption::Connect(this->fd(), this->addr().sockaddr(), this->addr().sockaddr_len());
-  if(!ret)
-  {
+int TcpClient::Connect() {
+  int ret = SocketOption::Connect(this->fd(), this->addr().sockaddr(),
+                                  this->addr().sockaddr_len());
+  if (!ret) {
     SocketOption::SetNoBlock(this->fd());
   }
   return ret;
 }
 
-int TcpClient::OnError()
-{
+int TcpClient::OnError() {
   this->event_loop()->Ternimal();
   return kOK;
 }

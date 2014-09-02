@@ -35,86 +35,78 @@
 #include <cstddef>
 #include <string>
 #include <memory>
-namespace green_turtle{
-namespace net{
+namespace green_turtle {
+namespace net {
 
-class Message : green_turtle::NonCopyable, public std::enable_shared_from_this<Message> {
+class Message : green_turtle::NonCopyable,
+                public std::enable_shared_from_this<Message> {
  public:
   virtual ~Message() {}
-  virtual void*   data()    const = 0;
-  virtual size_t  length()  const = 0;
-  template<typename Y>
-  std::shared_ptr<Y> cast()
-  {
+  virtual void* data() const = 0;
+  virtual size_t length() const = 0;
+  template <typename Y>
+  std::shared_ptr<Y> cast() {
     return std::static_pointer_cast<Y>(this->shared_from_this());
   }
 };
 
-template<class T>
-class MemberPtr
-{
+template <class T>
+class MemberPtr {
  public:
-  MemberPtr(Message *message, int offset) : offset_(offset)
-  {
+  MemberPtr(Message* message, int offset) : offset_(offset) {
     message_ = message->shared_from_this();
   }
   T* get() const { return static_cast<T*>(message_->data()); }
   T* operator->() const { return get(); }
   T& operator*() const { return *get(); }
+
  private:
   std::shared_ptr<Message> message_;
   const int offset_;
 };
 
-//default Message impl using std::string
-class MessageBuffer : public Message
-{
+// default Message impl using std::string
+class MessageBuffer : public Message {
  public:
-  enum{ kDefaultInitSize = 64 };
+  enum {
+    kDefaultInitSize = 64
+  };
 
-  MessageBuffer(int init_size = kDefaultInitSize)
-  {
+  MessageBuffer(int init_size = kDefaultInitSize) {
     buffer_.reserve(init_size);
   }
 
-  template<typename T>
-  MemberPtr<T> Append()
-  {
+  template <typename T>
+  MemberPtr<T> Append() {
     return MemberPtr<T>(this, MakeSpace(sizeof(T)));
   }
-  template<typename T>
-  void Append(const T& v)
-  {
+  template <typename T>
+  void Append(const T& v) {
     int offset = MakeSpace(sizeof(v));
     T* ptr = static_cast<T*>(const_cast<char*>(this->buffer_.c_str() + offset));
     *ptr = v;
   }
 
-  void Append(const char *str)
-  {
-    buffer_.append(str);
-  }
-  void Append(const void *data, int size)
-  {
+  void Append(const char* str) { buffer_.append(str); }
+  void Append(const void* data, int size) {
     buffer_.append(static_cast<const char*>(data), size);
   }
-  virtual void* data() const
-  {
+  virtual void* data() const {
     return static_cast<void*>(const_cast<char*>(this->buffer_.c_str()));
   }
   virtual size_t length() const { return this->buffer_.size(); }
+
  private:
-  int MakeSpace(int size)
-  {
+  int MakeSpace(int size) {
     int offset = buffer_.size();
     buffer_.resize(buffer_.size() + size);
     return offset;
   }
+
  private:
   std::string buffer_;
 };
-
-} //namespace net
-} //namespace green_turtle
+}
+}
 
 #endif

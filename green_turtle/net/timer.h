@@ -36,35 +36,35 @@
 #include <stdint.h>
 #include <noncopyable.h>
 
-namespace green_turtle{
-namespace net{
+namespace green_turtle {
+namespace net {
 
 class TimerQueue;
 
-class Timer : green_turtle::NonCopyable
-{
+class Timer : green_turtle::NonCopyable {
  public:
   friend class TimerQueue;
   Timer();
   virtual ~Timer();
 
  public:
-  void          HandleTimeOut();
+  void HandleTimeOut();
   inline size_t GetNextHandleTime() const { return next_handle_time_; }
-  inline bool   IsInQueue()         const {return queue_; }
-  inline size_t GetInterval()       const {return timer_interval_; }
- protected:
-  virtual void  OnTimeOut(uint64_t current_time) = 0;
- private:
-  //iter data here
-  TimerQueue  *queue_;
-  size_t      iter_slot_;
-  size_t      iter_pos_;
-  size_t      timer_interval_;
-  //next handle time, milliseconds
-  size_t      next_handle_time_;
-};
+  inline bool IsInQueue() const { return queue_; }
+  inline size_t GetInterval() const { return timer_interval_; }
 
+ protected:
+  virtual void OnTimeOut(uint64_t current_time) = 0;
+
+ private:
+  // iter data here
+  TimerQueue *queue_;
+  size_t iter_slot_;
+  size_t iter_pos_;
+  size_t timer_interval_;
+  // next handle time, milliseconds
+  size_t next_handle_time_;
+};
 }
 }
 #endif

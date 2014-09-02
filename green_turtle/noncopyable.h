@@ -34,16 +34,15 @@
 
 namespace green_turtle{
 
-//copy from boost
-class NonCopyable
-{
+// copy from boost
+class NonCopyable {
  protected:
-  NonCopyable(){}
-  ~NonCopyable(){}
+  NonCopyable() {}
+  ~NonCopyable() {}
+
  private:
   NonCopyable(const NonCopyable&) = delete;
-  const NonCopyable& operator = (const NonCopyable&) = delete;
+  const NonCopyable& operator=(const NonCopyable&) = delete;
 };
-
 }
 #endif
