@@ -1,4 +1,4 @@
-#include <ordered_list.h>
+#include <unordered_list.h>
 #include <gtest/gtest.h>
 #include <vector>
 #include <algorithm>
@@ -16,7 +16,7 @@ struct ForEach {
 };
 
 template <class T>
-std::vector<T> ToVector(ordered_list<T>& list) {
+std::vector<T> ToVector(unordered_list<T>& list) {
   std::vector<T> v;
   ForEach<T> for_each(v);
   list.for_each(for_each);
@@ -25,7 +25,7 @@ std::vector<T> ToVector(ordered_list<T>& list) {
 
 TEST(UnOrderedList, Insert) {
   std::vector<int> v = {1, 23, 2, 4, 5, 6};
-  ordered_list<int> list;
+  unordered_list<int> list;
   EXPECT_EQ(ToVector(list), std::vector<int>());
   for (int i : v) {
     list.insert(i);
@@ -36,7 +36,7 @@ TEST(UnOrderedList, Insert) {
 
 TEST(UnOrderedList, Erase) {
   std::vector<int> v = {1, 23, 2, 4, 5, 6};
-  ordered_list<int> list;
+  unordered_list<int> list;
   list.set_deleted(-1);
   for (int i : v) {
     list.insert(i);

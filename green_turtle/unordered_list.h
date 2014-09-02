@@ -37,11 +37,11 @@
 namespace green_turtle {
 
 template <typename T>
-class ordered_list {
+class unordered_list {
  public:
   typedef size_t iterator;
 
-  ordered_list() : deleted_(), set_deleted_(false) {
+  unordered_list() : deleted_(), set_deleted_(false) {
     list_.reserve(16);
     free_list_.reserve(16);
   }
