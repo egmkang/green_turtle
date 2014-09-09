@@ -38,10 +38,21 @@ namespace green_turtle {
 class StringSlice {
  public:
   StringSlice(const char* data, size_t length) : data_(data), length_(length) {}
+
   StringSlice(const std::string& str) : StringSlice(str.data(), str.size()) {}
+
+  template <int N>
+  StringSlice(const char (&array)[N])
+      : StringSlice(array, N) {}
+
   template <typename Iter>
   StringSlice(Iter begin, Iter end)
       : StringSlice(&*begin, end - begin) {}
+
+  StringSlice(const StringSlice& slice) : StringSlice(slice.data(), slice.length()) {}
+  StringSlice(StringSlice&& slice) : StringSlice(slice.data(), slice.length()) {}
+
+  ~StringSlice() {}
 
   const char* data() const { return data_; }
   size_t length() const { return length_; }

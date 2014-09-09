@@ -4,6 +4,9 @@
 #include <stdlib.h>
 #include <system.h>
 
+using namespace green_turtle;
+using green_turtle::Format;
+
 const int kMaxCount = 1000000;
 
 void benchmark() {
@@ -44,6 +47,36 @@ int main() {
 
   std::cout << green_turtle::Format(buffer, 9, "123456789") << std::endl;
   std::cout << green_turtle::Format(buffer, 8, "123456789") << std::endl;
+
+  const char array[] = {"123456789"};
+  StringSlice slice(array);
+  std::string str(array);
+
+  green_turtle::Format(buffer, 9, Hex(0x1234, 4));
+  std::cout << buffer << std::endl;
+
+  green_turtle::Format(buffer, 9, Hex(0x1234ul, 4));
+  std::cout << buffer << std::endl;
+
+  green_turtle::Format(buffer, 30, Hex(std::string("1234"), 4));
+  std::cout << buffer << std::endl;
+
+  green_turtle::Format(buffer, 30, Hex("5678", 4));
+  std::cout << buffer << std::endl;
+
+  str = "9101";
+  green_turtle::Format(buffer, 30, Hex(str, 4));
+  std::cout << buffer << std::endl;
+
+  green_turtle::Format(buffer, 30, Hex(slice, 4));
+  std::cout << buffer << std::endl;
+
+  green_turtle::Format(buffer, 30, Hex(StringSlice(array), 4));
+  std::cout << buffer << std::endl;
+
+  green_turtle::Format(buffer, 30, green_turtle::Align(kAlignUpper | kAlignCenter, "abCdefgh", 20, '*'));
+  std::cout << buffer << std::endl;
+
 
   benchmark();
 
