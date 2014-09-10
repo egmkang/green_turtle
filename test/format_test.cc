@@ -77,6 +77,9 @@ int main() {
   green_turtle::Format(buffer, 30, green_turtle::Align(kAlignUpper | kAlignCenter, "abCdefgh", 20, '*'));
   std::cout << buffer << std::endl;
 
+  green_turtle::Format(buffer, 30, green_turtle::Align(kAlignUpper | kAlignCenter, char16_t(0x1234), 20, '*'));
+  std::cout << buffer << std::endl;
+
 
   benchmark();
 

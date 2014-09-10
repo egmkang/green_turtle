@@ -69,17 +69,17 @@ inline AlignValue<T> Hex(T &&value, uint8_t width, int8_t pad = '0') {
 
 template <typename T>
 inline AlignValue<T> UpperHex(T &&value, uint8_t width, int8_t pad = '0') {
-  return Align(kAlignRight | kAlignUpper, std::forward<T>(value), width, pad);
+  return Align<T>(kAlignRight | kAlignUpper, std::forward<T>(value), width, pad);
 }
 
 template<typename T>
 inline AlignValue<T> LeftAlign(T &&value, uint8_t width, int8_t pad = '0') {
-  return Align(kAlignLeft, std::forward<T>(value), width, pad);
+  return Align<T>(kAlignLeft, std::forward<T>(value), width, pad);
 }
 
 template<typename T>
 inline AlignValue<T> RightAlign(T &&value, uint8_t width, int8_t pad = '0') {
-  return Align(kAlignRight, std::forward<T>(value), width, pad);
+  return Align<T>(kAlignRight, std::forward<T>(value), width, pad);
 }
 
 template<typename T>
@@ -90,7 +90,7 @@ inline AlignValue<T> CenterAlign(T &&value, uint8_t width, int8_t pad = '0') {
 template <typename T>
 inline int32_t ToString(T value, char *buffer, int32_t left);
 
-#define FORMAT_VALUE(TYPE, FUNC)                                  \
+#define FORMAT_INTEGER(TYPE, FUNC)                                \
 template <>                                                       \
 inline int32_t ToString(TYPE value, char *buffer, int32_t left) { \
   char array[64];                                                 \
@@ -102,16 +102,16 @@ inline int32_t ToString(TYPE value, char *buffer, int32_t left) { \
   return length;                                                  \
 }
 
-FORMAT_VALUE(unsigned char, u32toa_sse2);
-FORMAT_VALUE(signed short, i32toa_sse2);
-FORMAT_VALUE(unsigned short, u32toa_sse2);
-FORMAT_VALUE(signed int, i32toa_sse2);
-FORMAT_VALUE(unsigned int, u32toa_sse2);
-FORMAT_VALUE(signed long, i64toa_sse2);
-FORMAT_VALUE(unsigned long, u64toa_sse2);
-FORMAT_VALUE(signed long long, i64toa_sse2);
-FORMAT_VALUE(float, dtoa_milo);
-FORMAT_VALUE(double, dtoa_milo);
+FORMAT_INTEGER(unsigned char, u32toa_sse2);
+FORMAT_INTEGER(signed short, i32toa_sse2);
+FORMAT_INTEGER(unsigned short, u32toa_sse2);
+FORMAT_INTEGER(signed int, i32toa_sse2);
+FORMAT_INTEGER(unsigned int, u32toa_sse2);
+FORMAT_INTEGER(signed long, i64toa_sse2);
+FORMAT_INTEGER(unsigned long, u64toa_sse2);
+FORMAT_INTEGER(signed long long, i64toa_sse2);
+FORMAT_INTEGER(float, dtoa_milo);
+FORMAT_INTEGER(double, dtoa_milo);
 
 template <>
 inline int32_t ToString(signed char value, char *buffer, int32_t left) {
@@ -142,7 +142,12 @@ inline int32_t ToString(const char (&str)[N], char *buffer, int32_t left) {
 }
 
 template <typename T>
-inline int32_t ToHex(T v, char *buffer, int32_t left) {
+inline int32_t ToHex(const T& v, char *buffer, int32_t left) {
+  return ToString(v, buffer, left);
+}
+
+template <typename T>
+inline int32_t __ToHex(T v, char *buffer, int32_t left) {
   char array[33];
   int8_t length = 0;
   typename std::make_unsigned<T>::type value = v;
@@ -160,22 +165,24 @@ inline int32_t ToHex(T v, char *buffer, int32_t left) {
   return length;
 }
 
-inline int32_t ToHex(const char *value, char *buffer, int32_t left) {
-  return ToString(value, buffer, left);
+#define HEX_INTEGER(TYPE)                                 \
+inline int32_t ToHex(TYPE v, char *buffer, int32_t left) {\
+  return __ToHex(v, buffer, left);                        \
 }
 
-inline int32_t ToHex(const std::string& value, char *buffer, int32_t left) {
-  return ToString(value, buffer, left);
-}
-
-inline int32_t ToHex(StringSlice value, char *buffer, int32_t left) {
-  return ToString(value, buffer, left);
-}
-
-template<int N>
-inline int32_t ToHex(const char (&value)[N], char *buffer, int32_t left) {
-  return ToString(value, buffer, left);
-}
+HEX_INTEGER(signed char)
+HEX_INTEGER(unsigned char)
+HEX_INTEGER(signed short)
+HEX_INTEGER(unsigned short)
+HEX_INTEGER(signed int)
+HEX_INTEGER(unsigned int)
+HEX_INTEGER(signed long)
+HEX_INTEGER(unsigned long)
+HEX_INTEGER(signed long long)
+HEX_INTEGER(unsigned long long)
+HEX_INTEGER(char16_t)
+HEX_INTEGER(char32_t)
+HEX_INTEGER(wchar_t)
 
 inline void ToUpper(char *buffer, int32_t len){
   const int32_t byte_4_len = len / 4;
