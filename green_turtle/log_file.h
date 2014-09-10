@@ -39,10 +39,6 @@
 
 namespace green_turtle {
 
-const auto kFileDeleter = [](FILE *ptr) {
-  if (ptr) fclose(ptr);
-};
-
 class LogFile : public NonCopyable {
   enum {
     kLogFileCache = 32 * 1024,
@@ -56,9 +52,15 @@ class LogFile : public NonCopyable {
 
   explicit operator bool() const { return file_.get(); }
   size_t offset() const { return offset_; }
+ private:
+  struct FileDeleter {
+    void operator()(FILE *ptr) {
+      if (ptr) fclose(ptr);
+    }
+  };
 
  private:
-  std::unique_ptr<FILE, decltype(kFileDeleter)> file_;
+  std::unique_ptr<FILE, FileDeleter> file_;
   std::unique_ptr<char[]> buffer_;
   std::string file_name_;
   size_t offset_;

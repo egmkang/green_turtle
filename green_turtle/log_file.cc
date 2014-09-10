@@ -3,7 +3,7 @@
 using namespace green_turtle;
 
 LogFile::LogFile(const std::string& file_name, int buffer_size)
-    : file_(fopen(file_name.c_str(), "a+"), green_turtle::kFileDeleter),
+    : file_(fopen(file_name.c_str(), "a+"), FileDeleter()),
       buffer_(new char[buffer_size]),
       file_name_(file_name),
       offset_(0) {
