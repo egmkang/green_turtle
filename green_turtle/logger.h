@@ -45,22 +45,23 @@ namespace green_turtle {
 
 class LogFile;
 
+enum {
+  kLoggerLevel_Info = 0,
+  kLoggerLevel_Debug = 1,
+  kLoggerLevel_Trace = 2,
+  kLoggerLevel_Warn = 3,
+  kLoggerLevel_Error = 4,
+  kLoggerLevel_Fatal = 5,
+};
+
 class Logger {
   enum {
     kLogEntryMaxLength = 4 * 1024,
   };
 
-  enum {
-    kLoggerLevel_Info = 0,
-    kLoggerLevel_Debug = 1,
-    kLoggerLevel_Trace = 2,
-    kLoggerLevel_Warn = 3,
-    kLoggerLevel_Error = 4,
-    kLoggerLevel_Fatal = 5,
-  };
-
  public:
-  Logger(const char *file_name, const char *link_name);
+  Logger(const char *file_name, const char *link_name,
+         int8_t log_level = kLoggerLevel_Debug);
   ~Logger();
 
   void ChangeLoggerFile(const char *new_file);
@@ -92,17 +93,52 @@ class Logger {
       __attribute__((__format__(__printf__, 3, 0)));
 
   template <typename... Tn>
-  void Log(Tn &&... vn) {
+  void Log(int8_t log_level, Tn &&... vn) {
     char array[kLogEntryMaxLength];
-    int32_t header = GenerateLogHeader(array, kLoggerLevel_Debug);
+    int32_t header = GenerateLogHeader(array, log_level);
     int32_t length =
         Format(array + header, sizeof(array) - header, std::forward<Tn>(vn)...);
     assert(length > 0);
     if (length > 0) this->LogMessage(array, header + length);
   }
 
+  template <typename... Tn>
+  void DebugLog(Tn &&... vn) {
+    Log(kLoggerLevel_Debug, std::forward<Tn>(vn)...);
+  }
+
+  template <typename... Tn>
+  void InfoLog(Tn &&... vn) {
+    Log(kLoggerLevel_Info, std::forward<Tn>(vn)...);
+  }
+
+  template <typename... Tn>
+  void TraceLog(Tn &&... vn) {
+    Log(kLoggerLevel_Trace, std::forward<Tn>(vn)...);
+  }
+
+  template <typename... Tn>
+  void WarnLog(Tn &&... vn) {
+    Log(kLoggerLevel_Warn, std::forward<Tn>(vn)...);
+  }
+
+  template <typename... Tn>
+  void ErrorLog(Tn &&... vn) {
+    Log(kLoggerLevel_Error, std::forward<Tn>(vn)...);
+  }
+
+  template <typename... Tn>
+  void FatalLog(Tn &&... vn) {
+    Log(kLoggerLevel_Fatal, std::forward<Tn>(vn)...);
+  }
+
   void Flush();
   size_t GetWrittenSize() const { return size_; }
+  int8_t log_level() const { return log_level_; }
+  void log_level(int8_t log_level) {
+    assert(log_level >= kLoggerLevel_Info && log_level <= kLoggerLevel_Fatal);
+    log_level_ = log_level;
+  }
 
  private:
   void FormatMessage(int level, const char *pattern, va_list ap,
@@ -116,10 +152,18 @@ class Logger {
   std::unique_ptr<LogFile> file_;
   std::unique_ptr<LogFile> backup_file_;
   long long size_;
+  int8_t log_level_;
 
   std::string file_name_;
   std::string link_name_;
 };
 }
+
+#define INFO_LOG(LOGGER) if (LOGGER.log_level() <= green_turtle::kLoggerLevel_Info) LOGGER.InfoLog
+#define DEBUG_LOG(LOGGER) if (LOGGER.log_level() <= green_turtle::kLoggerLevel_Debug) LOGGER.DebugLog
+#define TRACE_LOG(LOGGER) if (LOGGER.log_level() <= green_turtle::kLoggerLevel_Trace) LOGGER.TraceLog
+#define WARN_LOG(LOGGER) if (LOGGER.log_level() <= green_turtle::kLoggerLevel_Warn) LOGGER.WarnLog
+#define ERROR_LOG(LOGGER) if (LOGGER.log_level() <= green_turtle::kLoggerLevel_Error) LOGGER.ErrorLog
+#define FATAL_LOG(LOGGER) if (LOGGER.log_level() <= green_turtle::kLoggerLevel_Fatal) LOGGER.FatalLog
 
 #endif

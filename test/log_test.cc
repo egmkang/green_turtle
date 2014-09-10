@@ -20,7 +20,7 @@ int main() {
     threads[i] = new std::thread([&]() {
       int32_t tid = green_turtle::System::GetThreadID();
       while (true) {
-        logger.Log("thread ", tid, " write log, random_num ", rand());
+        DEBUG_LOG(logger)("thread ", tid, " write log, random_num ", rand());
         if (++count > kMaxLogCount) {
           break;
         }

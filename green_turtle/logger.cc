@@ -20,10 +20,14 @@ static inline void LazyInitMilliSecondsString() {
   }
 }
 
-Logger::Logger(const char *filename, const char *link_name)
-    : file_(new LogFile(filename)), size_(0), file_name_(filename) {
+Logger::Logger(const char *filename, const char *link_name, int8_t log_level)
+    : file_(new LogFile(filename)),
+      size_(0),
+      log_level_(log_level),
+      file_name_(filename) {
   if (link_name) link_name_ = link_name;
   assert(file_ && "open file error");
+  assert(log_level >= kLoggerLevel_Info && log_level <= kLoggerLevel_Fatal);
   size_ = file_->offset();
   CreateLink();
   LazyInitMilliSecondsString();
