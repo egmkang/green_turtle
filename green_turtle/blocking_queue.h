@@ -72,6 +72,7 @@ class BlockingQueue : NonCopyable {
     std::lock_guard<std::mutex> guard(mutex_);
     if (!queue_.empty()) {
       std::swap(queue_, v);
+      queue_.clear();
       return true;
     }
     return false;
@@ -80,7 +81,7 @@ class BlockingQueue : NonCopyable {
   uint64_t Size() const { return queue_.size(); }
 
  private:
-  std::deque<value_type> queue_;
+  container_type queue_;
   std::mutex mutex_;
 };
 }
