@@ -65,16 +65,6 @@ void Logger::ChangeLoggerFile(const char *new_file) {
 static char LOGGER_LEVEL[][9] = {"[INFO ] ", "[DEBUG] ", "[TRACE] ",
                                  "[WARN ] ", "[ERROR] ", "[FATAL] "};
 
-enum {
-  kLoggerMessage_MaxSize = 4096,
-};
-
-#define __FORMAT_MESSAGE__(level)                  \
-  va_list ap;                                      \
-  va_start(ap, pattern);                           \
-  FormatMessage(level, pattern, ap, kEmptyString); \
-  va_end(ap);
-
 const std::string kEmptyString = "";
 __thread time_t t_time = 0;
 __thread char t_time_str[8] = {0};
@@ -82,7 +72,7 @@ __thread char t_time_str[8] = {0};
 inline void Logger::FormatMessage(int level, const char *pattern, va_list ap,
                                   const std::string &prefix) {
   int size = 0;
-  char msg[kLoggerMessage_MaxSize + 1];
+  char msg[kLogEntryMaxLength + 1];
   size = GenerateLogHeader(msg, level);
 
   if (!prefix.empty()) {
@@ -93,30 +83,6 @@ inline void Logger::FormatMessage(int level, const char *pattern, va_list ap,
   LogMessage(msg, size);
 }
 
-void Logger::Debug(const char *pattern, ...) {
-  __FORMAT_MESSAGE__(kLoggerLevel_Debug);
-}
-
-void Logger::Fatal(const char *pattern, ...) {
-  __FORMAT_MESSAGE__(kLoggerLevel_Fatal);
-}
-
-void Logger::Error(const char *pattern, ...) {
-  __FORMAT_MESSAGE__(kLoggerLevel_Error);
-}
-
-void Logger::Warn(const char *pattern, ...) {
-  __FORMAT_MESSAGE__(kLoggerLevel_Warn);
-}
-
-void Logger::Info(const char *pattern, ...) {
-  __FORMAT_MESSAGE__(kLoggerLevel_Info);
-}
-
-void Logger::Trace(const char *pattern, ...) {
-  __FORMAT_MESSAGE__(kLoggerLevel_Trace);
-}
-
 void Logger::VDebug(const std::string &prefix, const char *pattern,
                     va_list ap) {
   FormatMessage(kLoggerLevel_Debug, pattern, ap, prefix);
@@ -125,6 +91,8 @@ void Logger::VDebug(const std::string &prefix, const char *pattern,
 void Logger::VFatal(const std::string &prefix, const char *pattern,
                     va_list ap) {
   FormatMessage(kLoggerLevel_Fatal, pattern, ap, prefix);
+  abort();
+  this->Flush();
 }
 
 void Logger::VError(const std::string &prefix, const char *pattern,
@@ -180,8 +148,11 @@ int32_t Logger::GenerateLogHeader(char *array, int8_t level) {
   array[size] = ' ';
   size += 1;
 
-  *reinterpret_cast<uint64_t *>(array + size) =
-      *reinterpret_cast<uint64_t *>(LOGGER_LEVEL[level]);
-  size += sizeof(LOGGER_LEVEL[0]) - 1;
+  if (level >= kLoggerLevel_Info && level <= kLoggerLevel_Fatal) {
+    *reinterpret_cast<uint64_t *>(array + size) =
+        *reinterpret_cast<uint64_t *>(LOGGER_LEVEL[level]);
+    size += sizeof(LOGGER_LEVEL[0]) - 1;
+  }
+
   return size;
 }

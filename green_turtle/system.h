@@ -90,7 +90,10 @@ class System {
   static void Yield(uint64_t milliSeconds) { ::usleep(milliSeconds * 1000); }
 
   // get thread id
-  static int32_t GetThreadID() { return syscall(SYS_gettid); }
+  static int32_t GetThreadID() {
+    static __thread int32_t tid = syscall(SYS_gettid);
+    return tid;
+  }
 };
 };
 

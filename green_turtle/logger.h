@@ -36,6 +36,7 @@
 #include <mutex>
 #include <memory>
 #include <string>
+#include <stdlib.h>
 #include <format.h>
 
 #define __SHORT_FILE__ \
@@ -46,6 +47,7 @@ namespace green_turtle {
 class LogFile;
 
 enum {
+  kLoggerLevel_None = -1,
   kLoggerLevel_Info = 0,
   kLoggerLevel_Debug = 1,
   kLoggerLevel_Trace = 2,
@@ -65,19 +67,6 @@ class Logger {
   ~Logger();
 
   void ChangeLoggerFile(const char *new_file);
-
-  void Debug(const char *pattern, ...)
-      __attribute__((__format__(__printf__, 2, 3)));
-  void Fatal(const char *pattern, ...)
-      __attribute__((__format__(__printf__, 2, 3)));
-  void Error(const char *pattern, ...)
-      __attribute__((__format__(__printf__, 2, 3)));
-  void Warn(const char *pattern, ...)
-      __attribute__((__format__(__printf__, 2, 3)));
-  void Info(const char *pattern, ...)
-      __attribute__((__format__(__printf__, 2, 3)));
-  void Trace(const char *pattern, ...)
-      __attribute__((__format__(__printf__, 2, 3)));
 
   void VDebug(const std::string &prefix, const char *pattern, va_list ap)
       __attribute__((__format__(__printf__, 3, 0)));
@@ -103,33 +92,40 @@ class Logger {
   }
 
   template <typename... Tn>
-  void DebugLog(Tn &&... vn) {
+  void LogDebug(Tn &&... vn) {
     Log(kLoggerLevel_Debug, std::forward<Tn>(vn)...);
   }
 
   template <typename... Tn>
-  void InfoLog(Tn &&... vn) {
+  void LogInfo(Tn &&... vn) {
     Log(kLoggerLevel_Info, std::forward<Tn>(vn)...);
   }
 
   template <typename... Tn>
-  void TraceLog(Tn &&... vn) {
+  void LogTrace(Tn &&... vn) {
     Log(kLoggerLevel_Trace, std::forward<Tn>(vn)...);
   }
 
   template <typename... Tn>
-  void WarnLog(Tn &&... vn) {
+  void LogWarn(Tn &&... vn) {
     Log(kLoggerLevel_Warn, std::forward<Tn>(vn)...);
   }
 
   template <typename... Tn>
-  void ErrorLog(Tn &&... vn) {
+  void LogError(Tn &&... vn) {
     Log(kLoggerLevel_Error, std::forward<Tn>(vn)...);
   }
 
   template <typename... Tn>
-  void FatalLog(Tn &&... vn) {
+  void LogFatal(Tn &&... vn) {
     Log(kLoggerLevel_Fatal, std::forward<Tn>(vn)...);
+    this->Flush();
+    abort();
+  }
+
+  template <typename... Tn>
+  void Write(Tn &&... vn) {
+    Log(kLoggerLevel_None, std::forward<Tn>(vn)...);
   }
 
   void Flush();
@@ -159,11 +155,11 @@ class Logger {
 };
 }
 
-#define INFO_LOG(LOGGER) if (LOGGER.log_level() <= green_turtle::kLoggerLevel_Info) LOGGER.InfoLog
-#define DEBUG_LOG(LOGGER) if (LOGGER.log_level() <= green_turtle::kLoggerLevel_Debug) LOGGER.DebugLog
-#define TRACE_LOG(LOGGER) if (LOGGER.log_level() <= green_turtle::kLoggerLevel_Trace) LOGGER.TraceLog
-#define WARN_LOG(LOGGER) if (LOGGER.log_level() <= green_turtle::kLoggerLevel_Warn) LOGGER.WarnLog
-#define ERROR_LOG(LOGGER) if (LOGGER.log_level() <= green_turtle::kLoggerLevel_Error) LOGGER.ErrorLog
-#define FATAL_LOG(LOGGER) if (LOGGER.log_level() <= green_turtle::kLoggerLevel_Fatal) LOGGER.FatalLog
+#define INFO_LOG(LOGGER) if (LOGGER.log_level() <= green_turtle::kLoggerLevel_Info) LOGGER.LogInfo
+#define DEBUG_LOG(LOGGER) if (LOGGER.log_level() <= green_turtle::kLoggerLevel_Debug) LOGGER.LogDebug
+#define TRACE_LOG(LOGGER) if (LOGGER.log_level() <= green_turtle::kLoggerLevel_Trace) LOGGER.LogTrace
+#define WARN_LOG(LOGGER) if (LOGGER.log_level() <= green_turtle::kLoggerLevel_Warn) LOGGER.LogWarn
+#define ERROR_LOG(LOGGER) if (LOGGER.log_level() <= green_turtle::kLoggerLevel_Error) LOGGER.LogError
+#define FATAL_LOG(LOGGER) if (LOGGER.log_level() <= green_turtle::kLoggerLevel_Fatal) LOGGER.LogFatal
 
 #endif
