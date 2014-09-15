@@ -67,7 +67,6 @@ class EventHandler : green_turtle::NonCopyable,
   void HandleEvent();
   EventLoop* event_loop() const { return event_loop_; }
   void set_event_loop(EventLoop* loop) { event_loop_ = loop; }
-
  public:
   void AddToConnManager();
   void SetWindowSize(int size);
@@ -76,6 +75,7 @@ class EventHandler : green_turtle::NonCopyable,
   }
   virtual int OnError() = 0;
   void Shutdown();
+  void Close();
 
  protected:
   virtual int OnRead() = 0;

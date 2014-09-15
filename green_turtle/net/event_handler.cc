@@ -47,3 +47,5 @@ void EventHandler::Shutdown() {
   OnWrite();
   SocketOption::ShutDown(this->fd());
 }
+
+void EventHandler::Close() { SocketOption::DestoryFD(fd()); }

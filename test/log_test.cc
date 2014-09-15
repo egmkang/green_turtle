@@ -38,6 +38,7 @@ int main() {
     delete threads[i];
   }
 
+  logger.Write("thread ", green_turtle::System::GetThreadID(), " write log, random_num ", rand());
   time_t end = green_turtle::System::GetMilliSeconds();
   std::cout << int(double(kMaxLogCount) / (end - begin) * 1000) << std::endl;
 

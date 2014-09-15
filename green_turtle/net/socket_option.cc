@@ -16,7 +16,10 @@ int SocketOption::NewFD() {
   return ::socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 }
 
-int SocketOption::DestoryFD(int fd) { return ::close(fd); }
+int SocketOption::DestoryFD(int fd) {
+  if (fd) return ::close(fd);
+  return 0;
+}
 
 int SocketOption::SetNoDelay(int fd) {
   int yes = 1, ret = 0;

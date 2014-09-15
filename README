@@ -3,8 +3,8 @@ ToDoList:
 [ ]basic optimize
 [ ]tcp client reconnect(think about using a queue)
 [ ]modify the echo sample
-[D]format
-[D]logger optimize
+[x]format
+[x]logger optimize
 [x]remove RefPtr and using shared_ptr/weak_ptr
 [x]command flags
 [D]samples
