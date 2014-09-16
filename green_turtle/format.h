@@ -110,6 +110,7 @@ FORMAT_INTEGER(unsigned int, u32toa_sse2);
 FORMAT_INTEGER(signed long, i64toa_sse2);
 FORMAT_INTEGER(unsigned long, u64toa_sse2);
 FORMAT_INTEGER(signed long long, i64toa_sse2);
+FORMAT_INTEGER(unsigned long long, u64toa_sse2);
 FORMAT_INTEGER(float, dtoa_milo);
 FORMAT_INTEGER(double, dtoa_milo);
 
