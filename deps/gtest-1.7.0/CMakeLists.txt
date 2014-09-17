@@ -1,6 +1,6 @@
 INCLUDE_DIRECTORIES(include)
 
-FILE(GLOB GTEST src/*.cc src/*.h include/gtest/*.h include/gtest/internal/*.h)
+FILE(GLOB GTEST src/gtest-all.cc src/*.h include/gtest/*.h include/gtest/internal/*.h)
 
 SOURCE_GROUP("gtest"      FILES ${GTEST})
 
