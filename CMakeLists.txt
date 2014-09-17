@@ -22,19 +22,28 @@ SET(CXX_FLAGS
     -Werror
     -std=c++11
     -msse2
-    -stdlib=libc++
     -fomit-frame-pointer
     -fstack-protector-all
     -Wno-unused-parameter
-    -Wno-unused-const-variable
     -Wno-missing-field-initializers
     -fno-rtti
     -fno-exceptions
     -D__STDC_FORMAT_MACROS
     -DGTEST_HAS_RTTI=0
     -DGTEST_HAS_EXCEPTIONS=0
+    )
+
+SET(CLANG_NAME "[Cc]lang")
+
+IF(${CMAKE_CXX_COMPILER_ID} MATCHES ${CLANG_NAME} OR ${CMAKE_CXX_COMPILER} MATCHES ${CLANG_NAME})
+  SET(CXX_FLAGS ${CXX_FLAGS}
+    -stdlib=libc++
+    -Wno-unused-const-variable
     -fdiagnostics-format=vi
     )
+ENDIF(${CMAKE_CXX_COMPILER_ID} MATCHES ${CLANG_NAME} OR ${CMAKE_CXX_COMPILER} MATCHES ${CLANG_NAME})
+
+
 STRING(REPLACE ";" " " CMAKE_CXX_FLAGS "${CXX_FLAGS}")
 MESSAGE(STATUS "CXX flags : " "${CMAKE_CXX_FLAGS}")
 
