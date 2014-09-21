@@ -23,11 +23,10 @@ ADD_EXECUTABLE(timer_test
   )
 TARGET_LINK_LIBRARIES(timer_test green_turtle)
 
-
-ADD_EXECUTABLE(mysql_test
-  mysql.cc
-    )
-TARGET_LINK_LIBRARIES(mysql_test green_turtle mysqlclient)
+IF(HAS_LIBMYSQLCLIENT)
+  ADD_EXECUTABLE(mysql_test mysql.cc)
+  TARGET_LINK_LIBRARIES(mysql_test green_turtle mysqlclient)
+ENDIF(HAS_LIBMYSQLCLIENT)
 
 ADD_EXECUTABLE(format_test
   format_test.cc

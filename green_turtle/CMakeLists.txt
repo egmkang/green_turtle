@@ -9,6 +9,15 @@ LIST(REMOVE_ITEM GREEN_TURTLE_NET
     ${CMAKE_CURRENT_SOURCE_DIR}/net/kqueue_poller.h
     ${CMAKE_CURRENT_SOURCE_DIR}/net/kqueue_poller.cc
     )
+LIST(REMOVE_ITEM GREEN_TURTLE
+    ${CMAKE_CURRENT_SOURCE_DIR}/mysqlcxx.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/mysqlcxx.cc
+  )
+
+IF(HAS_LIBMYSQLCLIENT)
+    MESSAGE(STATUS "Add MySQL Support")
+    SET(GREEN_TURTLE ${GREEN_TURTLE} mysqlcxx.h mysqlcxx.cc)
+  ENDIF(HAS_LIBMYSQLCLIENT)
 
 IF(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
     MESSAGE(STATUS "Linux : Add Epoll Support")
