@@ -8,6 +8,9 @@ INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/deps/gtest-1.7.0/include)
 SET(EXECUTABLE_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/bin)
 
 #LINK_DIRECTORIES(${CMAKE_SOURCE_DIR}/lib)
+INCLUDE(${CMAKE_HOME_DIRECTORY}/cmake/CheckClang.cmake)
+INCLUDE(${CMAKE_HOME_DIRECTORY}/cmake/CheckLibCXX.cmake)
+INCLUDE(${CMAKE_HOME_DIRECTORY}/cmake/CheckCXXCompilerFlag.cmake)
 
 IF(NOT CMAKE_BUILD_TYPE)
   SET(CMAKE_BUILD_TYPE "Debug")
@@ -21,7 +24,7 @@ SET(CXX_FLAGS
     -Wextra
     -Werror
     -std=c++11
-    -msse2
+    -msse4.2
     -fomit-frame-pointer
     -fstack-protector-all
     -Wno-unused-parameter
@@ -33,16 +36,19 @@ SET(CXX_FLAGS
     -DGTEST_HAS_EXCEPTIONS=0
     )
 
-SET(CLANG_NAME "[Cc]lang")
-
-IF(${CMAKE_CXX_COMPILER_ID} MATCHES ${CLANG_NAME} OR ${CMAKE_CXX_COMPILER} MATCHES ${CLANG_NAME})
+IF(HAS_CLANG)
   SET(CXX_FLAGS ${CXX_FLAGS}
-    -stdlib=libc++
     -Wno-unused-const-variable
     -fdiagnostics-format=vi
     )
-ENDIF(${CMAKE_CXX_COMPILER_ID} MATCHES ${CLANG_NAME} OR ${CMAKE_CXX_COMPILER} MATCHES ${CLANG_NAME})
+ENDIF(HAS_CLANG)
 
+IF(HAS_CLANG AND HAS_LIBCXX)
+  MESSAGE(STATUS "using libc++")
+  SET(CXX_FLAGS ${CXX_FLAGS}
+    -stdlib=libc++
+    )
+ENDIF(HAS_CLANG AND HAS_LIBCXX)
 
 STRING(REPLACE ";" " " CMAKE_CXX_FLAGS "${CXX_FLAGS}")
 MESSAGE(STATUS "CXX flags : " "${CMAKE_CXX_FLAGS}")

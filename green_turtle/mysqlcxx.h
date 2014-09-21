@@ -193,7 +193,10 @@ struct SqlResultVarType {
    * @param out dest location
    * @param l dest buffer size
    */
-  void GetRawData(void *out, int l) { memcpy(out, data, len < l ? len : l); }
+  int GetRawData(void *out, int l) {
+    memcpy(out, data, len < l ? len : l);
+    return len < l ? len : l;
+  }
 
   /**
    * raw data, cannot hold it after ResultSet is disposed!!!
