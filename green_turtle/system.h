@@ -91,7 +91,7 @@ class System {
 
   // get thread id
   static int32_t GetThreadID() {
-    static __thread int32_t tid = syscall(SYS_gettid);
+    static thread_local int32_t tid = syscall(SYS_gettid);
     return tid;
   }
 };
