@@ -7,7 +7,7 @@
 * [ ] FreeBSD 10.1 Support
 * [ ] UnitTest
 * [ ] XML Config parse
-* [ ] complete StringSlice
+* [x] complete StringSlice
 * [ ] VectorMap
 * [x] Delete/Add queue
 * [x] format and logger optimize

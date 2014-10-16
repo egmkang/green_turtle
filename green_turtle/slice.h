@@ -35,32 +35,47 @@
 #include <cstddef>
 
 namespace green_turtle {
-class StringSlice {
- public:
-  StringSlice(const char* data, size_t length) : data_(data), length_(length) {}
 
-  StringSlice(const std::string& str) : StringSlice(str.data(), str.size()) {}
+template <typename T = char>
+class Slice {
+ public:
+   typedef T value_type;
+ public:
+  Slice(const value_type* data, size_t length) : data_(data), length_(length) {}
+
+  Slice(const std::basic_string<value_type>& str) : Slice(str.data(), str.size()) {}
 
   template <int N>
-  StringSlice(const char (&array)[N])
-      : StringSlice(array, N) {}
+  Slice(const value_type (&array)[N])
+      : Slice(array, N) {}
 
   template <typename Iter>
-  StringSlice(Iter begin, Iter end)
-      : StringSlice(&*begin, end - begin) {}
+  Slice(Iter begin, Iter end)
+      : Slice(&*begin, end - begin) {}
 
-  StringSlice(const StringSlice& slice) : StringSlice(slice.data(), slice.length()) {}
-  StringSlice(StringSlice&& slice) : StringSlice(slice.data(), slice.length()) {}
+  Slice(const Slice& slice)
+      : Slice(slice.data(), slice.length()) {}
+  Slice(Slice&& slice)
+      : Slice(slice.data(), slice.length()) {}
 
-  ~StringSlice() {}
+  ~Slice() {}
 
-  const char* data() const { return data_; }
+  const value_type& operator[](size_t pos) const {
+    assert(pos < length_);
+    return data_[pos];
+  }
+
+  const value_type* begin() const { return data_; }
+  const value_type* end() const { return data_ + length_; }
+  const value_type* data() const { return data_; }
   size_t length() const { return length_; }
   size_t size() const { return length(); }
 
  private:
-  const char* data_;
+  const value_type* data_;
   size_t length_;
 };
+
+typedef Slice<char> StringSlice;
 }
 #endif
