@@ -40,6 +40,7 @@ template <typename T = char>
 class Slice {
  public:
    typedef T value_type;
+   typedef const value_type* const_iterator;
  public:
   Slice(const value_type* data, size_t length) : data_(data), length_(length) {}
 
@@ -65,9 +66,9 @@ class Slice {
     return data_[pos];
   }
 
-  const value_type* begin() const { return data_; }
-  const value_type* end() const { return data_ + length_; }
-  const value_type* data() const { return data_; }
+  const_iterator begin() const { return data_; }
+  const_iterator end() const { return data_ + length_; }
+  const_iterator data() const { return data_; }
   size_t length() const { return length_; }
   size_t size() const { return length(); }
 

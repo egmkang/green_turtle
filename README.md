@@ -8,7 +8,7 @@
 * [ ] UnitTest
 * [ ] XML Config parse
 * [x] complete StringSlice
-* [ ] VectorMap
+* [x] VectorMap
 * [x] Delete/Add queue
 * [x] format and logger optimize
 * [x] remove RefPtr and using shared_ptr/weak_ptr

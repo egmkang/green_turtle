@@ -38,6 +38,7 @@ ADD_EXECUTABLE(unittest
   unittest_buffer.cc
   unittest_flags.cc
   unittest_unordered_list.cc
+  unittest_vector_map.cc
   )
 TARGET_LINK_LIBRARIES(unittest green_turtle gtest)
 
