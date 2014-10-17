@@ -50,8 +50,6 @@ class BroadCastClient : public TcpClient, public Timer {
     this->event_loop()->ScheduleTimer(this, next_timer(gen));
     RandMessage(this);
   }
-
-  virtual void DeleteSelf() { delete this; }
 };
 
 static void RandMessage(TcpClient *pClient) {

@@ -60,8 +60,6 @@ class EchoClient : public TcpClient {
     }
   }
 
-  virtual void DeleteSelf() { delete this; }
-
  private:
   int send_times_;
 };

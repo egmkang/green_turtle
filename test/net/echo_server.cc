@@ -39,7 +39,9 @@ class PrintMessageCount : public Timer {
 class EchoTask : public BufferedSocket {
  public:
   EchoTask(int fd, const AddrInfo& addr) : BufferedSocket(fd, addr) {}
-
+  ~EchoTask(){
+    printf("EchoTask will be disposed, %p\n", this);
+  }
  protected:
   virtual void Decoding(Buffer& data) {
     size_t size = data.ReadableLength();
@@ -52,10 +54,6 @@ class EchoTask : public BufferedSocket {
       data.HasRead(size);
       this->SendMessage(std::move(message));
     }
-  }
-  virtual void DeleteSelf() {
-    printf("EchoTask will be disposed, %p\n", this);
-    delete this;
   }
 };
 
