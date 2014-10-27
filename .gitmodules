@@ -1,0 +1,6 @@
+[submodule "deps/pugixml"]
+	path = deps/pugixml
+	url = git@github.com:zeux/pugixml.git
+[submodule "deps/lz4"]
+	path = deps/lz4
+	url = git@github.com:Cyan4973/lz4.git

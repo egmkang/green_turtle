@@ -1,3 +1,4 @@
+INCLUDE_DIRECTORIES(.)
 INCLUDE_DIRECTORIES(include)
 
 FILE(GLOB GTEST src/gtest-all.cc src/*.h include/gtest/*.h include/gtest/internal/*.h)

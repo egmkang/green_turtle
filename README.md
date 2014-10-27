@@ -7,6 +7,7 @@
 * [ ] FreeBSD 10.1 Support
 * [ ] UnitTest
 * [ ] XML Config parse
+* [ ] compress
 * [x] complete StringSlice
 * [x] VectorMap
 * [x] Delete/Add queue

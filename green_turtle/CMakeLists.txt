@@ -37,4 +37,4 @@ ADD_LIBRARY(green_turtle STATIC
     ${GREEN_TURTLE}
     ${GREEN_TURTLE_NET}
     )
-TARGET_LINK_LIBRARIES(green_turtle pthread)
+TARGET_LINK_LIBRARIES(green_turtle lz4 pugixml pthread)
