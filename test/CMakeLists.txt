@@ -33,6 +33,11 @@ ADD_EXECUTABLE(format_test
   )
 TARGET_LINK_LIBRARIES(format_test green_turtle)
 
+ADD_EXECUTABLE(xml_doc_test
+  xml_doc_test.cc
+  )
+TARGET_LINK_LIBRARIES(xml_doc_test green_turtle)
+
 ADD_EXECUTABLE(unittest
   test.cc
   unittest_buffer.cc

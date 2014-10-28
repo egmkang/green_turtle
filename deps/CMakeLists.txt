@@ -1,4 +1,16 @@
-ADD_SUBDIRECTORY(gtest-1.7.0)
+#gtest
+INCLUDE_DIRECTORIES(gtest)
+INCLUDE_DIRECTORIES(gtest/include)
+
+FILE(GLOB GTEST gtest/src/gtest-all.cc gtest/src/*.h gtest/include/gtest/*.h gtest/include/gtest/internal/*.h)
+
+SOURCE_GROUP("gtest"      FILES ${GTEST})
+
+ADD_LIBRARY(gtest STATIC
+    ${GTEST}
+    )
+TARGET_LINK_LIBRARIES(gtest pthread)
+
 
 #pugixml
 INCLUDE_DIRECTORIES(./pugixml/src)

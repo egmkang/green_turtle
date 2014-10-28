@@ -47,7 +47,7 @@ class BlockingQueue : NonCopyable {
  public:
   bool Push(value_type&& v) {
     std::lock_guard<std::mutex> guard(mutex_);
-    queue_.push_back(v);
+    queue_.push_back(std::move(v));
     return true;
   }
 
@@ -60,7 +60,7 @@ class BlockingQueue : NonCopyable {
   bool Pop(value_type& v) {
     std::lock_guard<std::mutex> guard(mutex_);
     if (!queue_.empty()) {
-      v = queue_.front();
+      v = std::move(queue_.front());
       queue_.pop_front();
       return true;
     }
