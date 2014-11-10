@@ -67,6 +67,7 @@ class BufferedSocket : public EventHandler {
   typedef std::shared_ptr<Message> SharedMessage;
   AddrInfo addr_;
   std::deque<SharedMessage> snd_messages_;
+  std::deque<SharedMessage> tmp_messages_;
   std::unique_ptr<Buffer> rcv_buffer_;
   std::unique_ptr<Buffer> snd_buffer_;
   std::mutex write_lock_;

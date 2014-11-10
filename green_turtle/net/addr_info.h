@@ -44,33 +44,33 @@ namespace net{
 
 struct AddrInfo {
   AddrInfo() {
-    memset(&addr_, 0, sizeof(addr_));
-    addr_port_ = 0;
+    memset(&addr, 0, sizeof(addr));
+    addr_port = 0;
   }
 
   AddrInfo(const char* ip, const unsigned short port)
-      : addr_str_(ip), addr_port_(port) {
+      : addr_str(ip), addr_port(port) {
     assert(ip);
-    addr_.sin_family = AF_INET;
-    addr_.sin_port = htons(port);
-    addr_.sin_addr.s_addr = inet_addr(ip);
+    addr.sin_family = AF_INET;
+    addr.sin_port = htons(port);
+    addr.sin_addr.s_addr = inet_addr(ip);
   }
 
-  AddrInfo(const sockaddr_in& addr_) : addr_(addr_) {
-    addr_port_ = ntohs(addr_.sin_port);
-    addr_str_ = inet_ntoa(addr_.sin_addr);
+  AddrInfo(const sockaddr_in& addr) : addr(addr) {
+    addr_port = ntohs(addr.sin_port);
+    addr_str = inet_ntoa(addr.sin_addr);
   }
 
   const struct sockaddr* sockaddr() const {
     return static_cast<const struct sockaddr*>(
-        static_cast<const void*>(&addr_));
+        static_cast<const void*>(&addr));
   }
 
-  int sockaddr_len() const { return sizeof(addr_); }
+  int sockaddr_len() const { return sizeof(addr); }
 
-  std::string addr_str_;
-  unsigned short addr_port_;
-  sockaddr_in addr_;
+  std::string addr_str;
+  unsigned short addr_port;
+  sockaddr_in addr;
 };
 }
 }

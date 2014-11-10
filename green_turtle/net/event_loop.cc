@@ -5,6 +5,7 @@
 #include "timer_queue.h"
 #include "poller.h"
 #include <system.h>
+#include <logger.h>
 
 using namespace green_turtle;
 using namespace green_turtle::net;
@@ -92,5 +93,8 @@ void EventLoop::Loop() {
         pair.second->OnError();
       }
     }
+
+    if (!this->loop_index_)
+      Logger::Default().Flush();
   }
 }

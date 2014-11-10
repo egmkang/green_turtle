@@ -88,7 +88,7 @@ int main() {
 
   for (int i = 0; i < CLIENT_NUM; ++i) {
     std::shared_ptr<BroadCastClient> client =
-        std::make_shared<BroadCastClient>("192.168.89.56", 10001);
+        std::make_shared<BroadCastClient>("0.0.0.0", 10001);
     int errorCode = client->Connect();
     assert(!errorCode);
     (void)errorCode;

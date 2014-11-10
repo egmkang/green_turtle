@@ -1,6 +1,7 @@
 #include "event_handler.h"
 #include "socket_option.h"
 #include "conn_manager.h"
+#include <logger.h>
 
 using namespace green_turtle;
 using namespace green_turtle::net;

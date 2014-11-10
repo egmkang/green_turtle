@@ -4,6 +4,7 @@
 #include "tcp_acceptor.h"
 #include "event_loop.h"
 #include "buffered_socket.h"
+#include "logger.h"
 
 using namespace green_turtle;
 using namespace green_turtle::net;
@@ -40,6 +41,7 @@ int TcpAcceptor::Accept(AddrInfo &info) {
   AddrInfo fd_info(addr);
   info = fd_info;
 
+  DEBUG_LOG(Logger::Default())("Accept New fd:", new_fd, ", ip:", fd_info.addr_str, ", port:", fd_info.addr_port);
   return new_fd;
 }
 
@@ -64,6 +66,7 @@ int TcpAcceptor::OnRead() {
 int TcpAcceptor::OnWrite() { return kOK; }
 
 int TcpAcceptor::OnError() {
+  ERROR_LOG(Logger::Default())("TcpAcceptor(", this->addr_->addr_str, ':', this->addr_->addr_port, ") Error:", errno);
   for (auto loop : loops_) {
     loop->Ternimal();
   }

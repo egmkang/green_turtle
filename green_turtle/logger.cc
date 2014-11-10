@@ -71,6 +71,8 @@ __thread char t_time_str[8] = {0};
 
 inline void Logger::FormatMessage(int level, const char *pattern, va_list ap,
                                   const std::string &prefix) {
+  if (level < log_level()) return;
+
   int size = 0;
   char msg[kLogEntryMaxLength + 1];
   size = GenerateLogHeader(msg, level);
@@ -155,4 +157,15 @@ int32_t Logger::GenerateLogHeader(char *array, int8_t level) {
   }
 
   return size;
+}
+
+static std::shared_ptr<Logger> DefaultLogger = std::make_shared<Logger>("./default_logger.log", nullptr, kLoggerLevel_Debug);
+
+Logger &Logger::Default() {
+  return *DefaultLogger;
+}
+
+void Logger::InitDefaultLogger(const char *file_name, const char *link_name,
+                       int8_t log_level/*= kLoggerLevel_Debug*/){
+  DefaultLogger = std::make_shared<Logger>(file_name, link_name, log_level);
 }

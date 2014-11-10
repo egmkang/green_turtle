@@ -102,6 +102,16 @@ inline int32_t ToString(TYPE value, char *buffer, int32_t left) { \
   return length;                                                  \
 }
 
+template <>
+inline int32_t ToString(char value, char *buffer, int32_t left) {
+  int32_t length = 1;
+  if (length <= left)
+    buffer[0] = value;
+  else
+    buffer[0] = 0;
+  return length;
+}
+
 FORMAT_INTEGER(unsigned char, u32toa_sse2);
 FORMAT_INTEGER(signed short, i32toa_sse2);
 FORMAT_INTEGER(unsigned short, u32toa_sse2);

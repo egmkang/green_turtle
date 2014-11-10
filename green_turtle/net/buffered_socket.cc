@@ -3,6 +3,7 @@
 #include "addr_info.h"
 #include "socket_option.h"
 #include "event_loop.h"
+#include <logger.h>
 
 using namespace green_turtle;
 using namespace green_turtle::net;
@@ -54,12 +55,12 @@ bool BufferedSocket::HasData() const {
 
 int BufferedSocket::OnWrite() {
   if (!HasData()) return kOK;
-  std::deque<SharedMessage> tmp_messages;
+  this->tmp_messages_.clear();
   {
     std::lock_guard<std::mutex> lock(this->write_lock_);
-    tmp_messages.swap(this->snd_messages_);
+    this->tmp_messages_.swap(this->snd_messages_);
   }
-  for (const auto& message : tmp_messages) {
+  for (const auto& message : tmp_messages_) {
     const char* data = (char*)message->data();
     unsigned int len = message->length();
 
@@ -81,6 +82,7 @@ int BufferedSocket::OnWrite() {
 }
 
 int BufferedSocket::OnError() {
+  ERROR_LOG(Logger::Default())("BufferedSocket(", this->addr().addr_str, ':', this->addr().addr_port, ") Error:", errno);
   this->event_loop()->RemoveEventHandler(this);
   return -1;
 }

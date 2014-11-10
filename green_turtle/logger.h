@@ -82,9 +82,9 @@ class Logger {
       __attribute__((__format__(__printf__, 3, 0)));
 
   template <typename... Tn>
-  void Log(int8_t log_level, Tn &&... vn) {
+  void Log(int8_t level, Tn &&... vn) {
     char array[kLogEntryMaxLength];
-    int32_t header = GenerateLogHeader(array, log_level);
+    int32_t header = GenerateLogHeader(array, level);
     int32_t length =
         Format(array + header, sizeof(array) - header, std::forward<Tn>(vn)...);
     assert(length > 0);
@@ -136,6 +136,14 @@ class Logger {
     log_level_ = log_level;
   }
 
+ public:
+  static Logger &Default();
+  //!!!
+  //NOT THREAD SAFE
+  //!!!
+  void InitDefaultLogger(const char *file_name, const char *link_name,
+         int8_t log_level = kLoggerLevel_Debug);
+
  private:
   void FormatMessage(int level, const char *pattern, va_list ap,
                      const std::string &prefix);
@@ -153,7 +161,9 @@ class Logger {
   std::string file_name_;
   std::string link_name_;
 };
+
 }
+
 
 #define INFO_LOG(LOGGER) if (LOGGER.log_level() <= green_turtle::kLoggerLevel_Info) LOGGER.LogInfo
 #define DEBUG_LOG(LOGGER) if (LOGGER.log_level() <= green_turtle::kLoggerLevel_Debug) LOGGER.LogDebug

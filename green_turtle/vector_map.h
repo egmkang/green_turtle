@@ -43,7 +43,7 @@ class VectorMap {
   typedef std::pair</*const*/ Key, T> value_type;
   typedef std::vector<value_type> container_type;
   typedef typename container_type::iterator iterator;
-  typedef typename container_type::const_iterator const_iterator ;
+  typedef typename container_type::const_iterator const_iterator;
 
  public:
   template <class... Args>
@@ -97,7 +97,6 @@ class VectorMap {
   void clear() { this->container_.clear(); }
 
   size_t size() const { return this->container_.size(); }
-
 
  private:
   bool equal_to(const value_type& a, const value_type& b) const {
