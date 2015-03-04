@@ -19,7 +19,7 @@ using namespace green_turtle::net;
 static std::random_device rd;
 static std::mt19937 gen(rd());
 static std::uniform_int_distribution<int> dis(1, 100);
-static std::uniform_int_distribution<int> next_timer(100, 400);
+static std::uniform_int_distribution<int> next_timer(10, 20);
 
 static long recv_message_count[3] = {0};
 
@@ -82,7 +82,7 @@ static void RandMessage(TcpClient *pClient) {
   pClient->SendMessage(std::move(message));
 }
 
-#define CLIENT_NUM 1
+#define CLIENT_NUM 300
 int main() {
   EventLoop loop(CLIENT_NUM);
 

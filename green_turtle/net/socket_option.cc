@@ -129,7 +129,7 @@ int SocketOption::Read(int fd, void *data, const size_t len) {
 }
 
 int SocketOption::Readv(int fd, iovec *iov, int count) {
-  int nread = ::read(fd, iov, count);
+  int nread = ::readv(fd, iov, count);
   int error_no = errno;
   (void)error_no;
   if (nread == -1 && errno == EAGAIN) nread = 0;
