@@ -29,7 +29,11 @@
 //
 // author: egmkang (egmkang@gmail.com)
 
+#if defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__)
+#include <sys/endian.h>
+#else
 #include <endian.h>
+#endif
 
 #ifndef __UTILS_H__
 #define __UTILS_H__

@@ -11,12 +11,12 @@
 
 using namespace green_turtle;
 
-static char kMilliSecondsString[1024][4] = {};
+static char kMilliSecondsString[1024][5] = {};
 
 static inline void LazyInitMilliSecondsString() {
   if (kMilliSecondsString[0][0]) return;
   for (int32_t i = 0; i < 1024; ++i) {
-    sprintf(&kMilliSecondsString[i][0], ".%03d", i % 1000);
+    snprintf(&kMilliSecondsString[i][0], sizeof(kMilliSecondsString[i]), ".%03d", i % 1000);
   }
 }
 
@@ -67,7 +67,7 @@ static char LOGGER_LEVEL[][9] = {"[INFO ] ", "[DEBUG] ", "[TRACE] ",
 
 const std::string kEmptyString = "";
 __thread time_t t_time = 0;
-__thread char t_time_str[8] = {0};
+__thread char t_time_str[9] = {0};
 
 inline void Logger::FormatMessage(int level, const char *pattern, va_list ap,
                                   const std::string &prefix) {
@@ -133,13 +133,13 @@ int32_t Logger::GenerateLogHeader(char *array, int8_t level) {
   if (current_time.first > t_time) {
     struct tm tm_now;
     localtime_r(&current_time.first, &tm_now);
-    sprintf(t_time_str, "%02d:%02d:%02d", tm_now.tm_hour, tm_now.tm_min,
+    snprintf(t_time_str, sizeof(t_time_str), "%02d:%02d:%02d", tm_now.tm_hour, tm_now.tm_min,
             tm_now.tm_sec);
     t_time = current_time.first;
   }
 
-  memcpy(array + size, t_time_str, sizeof(t_time_str));
-  size += sizeof(t_time_str);
+  memcpy(array + size, t_time_str, sizeof(t_time_str) - 1);
+  size += sizeof(t_time_str) - 1;
 
   memcpy(array + size, kMilliSecondsString[current_time.second % 1024], sizeof(uint32_t));
   size += sizeof(uint32_t);
