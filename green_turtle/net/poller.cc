@@ -23,7 +23,7 @@ void Poller::SetEventHandler(int fd, EventHandler *handler) {
     event_handlers_.resize(event_handlers_.size() * 2);
   }
   assert(fd < (int)event_handlers_.size());
-  event_handlers_[fd] = handler->shared_from_this();
+  event_handlers_[fd] = handler ? handler->shared_from_this() : std::shared_ptr<EventHandler>();
 }
 
 Poller *Poller::CreatePoller(int expected_size) {
