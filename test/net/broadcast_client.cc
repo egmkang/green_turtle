@@ -82,13 +82,13 @@ static void RandMessage(TcpClient *pClient) {
   pClient->SendMessage(std::move(message));
 }
 
-#define CLIENT_NUM 200
+#define CLIENT_NUM 1
 int main() {
   EventLoop loop(CLIENT_NUM);
 
   for (int i = 0; i < CLIENT_NUM; ++i) {
     std::shared_ptr<BroadCastClient> client =
-        std::make_shared<BroadCastClient>("0.0.0.0", 10001);
+        std::make_shared<BroadCastClient>("127.0.0.1", 10001);
     int errorCode = client->Connect();
     assert(!errorCode);
     (void)errorCode;

@@ -66,7 +66,7 @@ int main(int argc, char** argv) {
   signal(SIGPIPE, SIG_IGN);
 
   std::shared_ptr<TcpAcceptor> acceptor = std::make_shared<TcpAcceptor>(
-      "192.168.2.27", 10001, std::bind(&NewEventHanlder, std::placeholders::_1,
+      "127.0.0.1", 10001, std::bind(&NewEventHanlder, std::placeholders::_1,
                                        std::placeholders::_2));
   acceptor->SetWindowSize(16 * 1024);
   bool result = acceptor->Listen();
@@ -77,7 +77,7 @@ int main(int argc, char** argv) {
 
   TcpServer server(1024);
   server.AddAcceptor(acceptor.get());
-  server.SetThreadCount(2);
+  server.SetThreadCount(3);
   server.ScheduleTimer(&timer, 2000);
   server.Run();
   return 0;

@@ -44,8 +44,8 @@ class EchoClient : public TcpClient {
     long count = recv_message_count_.load(std::memory_order_acquire);
 
     if (count % 1024 == 0) {
-      std::cout << "=============================================" << std::endl
-                << str << std::endl;
+      //std::cout << "=============================================" << std::endl
+      //          << str << std::endl;
     }
     if (size) {
       data.HasRead(size);
@@ -55,9 +55,9 @@ class EchoClient : public TcpClient {
 
       recv_message_count_.store(count + 1, std::memory_order_release);
     }
-    if (this->send_times_ > 10000) {
-      this->event_loop()->RemoveHandlerLater(this);
-    }
+    //if (this->send_times_ > 10000) {
+    //  this->event_loop()->RemoveHandlerLater(this);
+    //}
   }
 
  private:
@@ -70,7 +70,7 @@ int main(int argc, char** argv) {
 
   for (int i = 0; i < CLIENT_NUM; ++i) {
     std::shared_ptr<EchoClient> client =
-        std::make_shared<EchoClient>("192.168.2.27", 10001);
+        std::make_shared<EchoClient>("127.0.0.1", 10001);
     int errorCode = client->Connect();
     assert(!errorCode);
     (void)errorCode;

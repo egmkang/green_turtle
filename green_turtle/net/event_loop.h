@@ -83,7 +83,7 @@ class EventLoop : NonCopyable {
   typedef std::pair<bool, SharedHandler> HandlerPair;
 
   std::mutex mutex_;
-  std::deque<HandlerPair> changed_handler_;
+  std::vector<HandlerPair> changed_handler_;
 };
 }
 }

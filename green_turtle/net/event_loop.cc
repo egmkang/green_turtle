@@ -18,7 +18,12 @@ EventLoop::EventLoop(int expected_size)
   assert(poller_);
 }
 
-EventLoop::~EventLoop() {}
+EventLoop::~EventLoop() {
+  this->fired_handler_.clear();
+  this->changed_handler_.clear();
+  this->poller_.reset(nullptr);
+  this->timer_queue_.reset(nullptr);
+}
 
 void EventLoop::AddEventHandler(EventHandler *pEventHandler) {
   poller_->AddEventHandler(pEventHandler);
@@ -81,7 +86,7 @@ void EventLoop::Loop() {
       System::Yield(FrameTime - cost_time);
     }
 
-    std::deque<HandlerPair> temp_queue;
+    std::vector<HandlerPair> temp_queue;
     {
       std::lock_guard<std::mutex> guard(this->mutex_);
       this->changed_handler_.swap(temp_queue);

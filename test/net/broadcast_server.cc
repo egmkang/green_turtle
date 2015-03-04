@@ -59,9 +59,10 @@ class BroadCastTask : public BufferedSocket {
   virtual void Decoding(Buffer& data) {
     while (true) {
       Command* pCommand = (Command*)(data.BeginRead());
-      if (data.ReadableLength() > 4 && data.ReadableLength() >= pCommand->len) {
+      if (data.ReadableLength() > sizeof(Command) && data.ReadableLength() >= pCommand->len) {
         assert(pCommand->len < 2000);
         assert(pCommand->type < 3);
+        if (pCommand->len <= 0) break;
         char* raw_data = (char*)malloc(pCommand->len);
         memcpy(raw_data, data.BeginRead(), pCommand->len);
         PushMessage(this->fd(), (Command*)raw_data,
@@ -175,7 +176,7 @@ int main() {
   signal(SIGPIPE, SIG_IGN);
 
   std::shared_ptr<TcpAcceptor> acceptor = std::make_shared<TcpAcceptor>(
-      "192.168.89.56", 10001, std::bind(&NewEventHanlder, std::placeholders::_1,
+      "127.0.0.1", 10001, std::bind(&NewEventHanlder, std::placeholders::_1,
                                         std::placeholders::_2));
   acceptor->SetWindowSize(32 * 1024);
   bool result = acceptor->Listen();

@@ -21,6 +21,7 @@ void ConnManager::AddConn(const HandlerPtr& ptr) {
 void ConnManager::RemoveConn(const HandlerPtr& ptr) {
   std::lock_guard<std::mutex> guard(this->mutex_);
   this->remove_handler_.push_back(ptr);
+  this->ResetHandler(ptr->fd());
 }
 
 void ConnManager::Update() {
@@ -28,14 +29,11 @@ void ConnManager::Update() {
   HandlerSet remove_set;
   {
     std::lock_guard<std::mutex> guard(this->mutex_);
-    for (const HandlerPtr& ptr : this->remove_handler_) {
-      this->ResetHandler(ptr->fd());
-    }
     for (const HandlerPtr& ptr : this->add_handler_) {
       this->AddHandler(ptr);
     }
-    add_set = this->add_handler_;
-    remove_set = this->remove_handler_;
+    std::swap(add_set, this->add_handler_);
+    std::swap(remove_set, this->remove_handler_);
     this->add_handler_.clear();
     this->remove_handler_.clear();
   }

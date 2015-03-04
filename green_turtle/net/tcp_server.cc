@@ -5,6 +5,7 @@
 #include "tcp_client.h"
 #include "timer.h"
 #include "timer_queue.h"
+#include "conn_manager.h"
 #include <system.h>
 
 using namespace green_turtle;
@@ -97,9 +98,8 @@ void TcpServer::Run() {
     size_t message_begin = System::GetMilliSeconds();
 
     if (loop_once_) loop_once_();
-
-    size_t timer_begin = System::GetMilliSeconds();
-    this->timer_queue_->Update(timer_begin);
+    this->timer_queue_->Update(System::GetMilliSeconds());
+    ConnManager::Instance().Update();
 
     size_t process_end = System::GetMilliSeconds();
     // time cost
