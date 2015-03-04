@@ -7,3 +7,6 @@
 [submodule "deps/gtest"]
 	path = deps/gtest
 	url = git@github.com:bmatheny/gtest.git
+[submodule "deps/sophia"]
+	path = deps/sophia
+	url = git@github.com:pmwkaa/sophia.git

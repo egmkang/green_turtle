@@ -25,7 +25,7 @@ TARGET_LINK_LIBRARIES(timer_test green_turtle)
 
 IF(HAS_LIBMYSQLCLIENT)
   ADD_EXECUTABLE(mysql_test mysql.cc)
-  TARGET_LINK_LIBRARIES(mysql_test green_turtle mysqlclient)
+  TARGET_LINK_LIBRARIES(mysql_test green_turtle mysqlclient_r)
 ENDIF(HAS_LIBMYSQLCLIENT)
 
 ADD_EXECUTABLE(format_test
