@@ -138,27 +138,17 @@ int32_t Logger::GenerateLogHeader(char *array, int8_t level) {
     t_time = current_time.first;
   }
 
-  array[size + 0] = t_time_str[0];
-  array[size + 1] = t_time_str[1];
-  array[size + 2] = t_time_str[2];
-  array[size + 3] = t_time_str[3];
-  array[size + 4] = t_time_str[4];
-  array[size + 5] = t_time_str[5];
-  array[size + 6] = t_time_str[6];
-  array[size + 7] = t_time_str[7];
+  memcpy(array + size, t_time_str, sizeof(t_time_str));
   size += sizeof(t_time_str);
 
-  *reinterpret_cast<uint32_t *>(array + size) =
-      *reinterpret_cast<uint32_t *>(
-           kMilliSecondsString[current_time.second % 1024]);
+  memcpy(array + size, kMilliSecondsString[current_time.second % 1024], sizeof(uint32_t));
   size += sizeof(uint32_t);
 
   array[size] = ' ';
   size += 1;
 
   if (level >= kLoggerLevel_Info && level <= kLoggerLevel_Fatal) {
-    *reinterpret_cast<uint64_t *>(array + size) =
-        *reinterpret_cast<uint64_t *>(LOGGER_LEVEL[level]);
+    memcpy(array + size, LOGGER_LEVEL[level], sizeof(LOGGER_LEVEL[0]));
     size += sizeof(LOGGER_LEVEL[0]) - 1;
   }
 
