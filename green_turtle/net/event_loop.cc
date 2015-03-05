@@ -4,13 +4,12 @@
 #include "event_handler.h"
 #include "timer_queue.h"
 #include "poller.h"
+#include "socket_config.h"
 #include <system.h>
 #include <logger.h>
 
 using namespace green_turtle;
 using namespace green_turtle::net;
-
-static size_t FrameTime = 20;
 
 EventLoop::EventLoop(int expected_size)
     : terminal_(false), loop_index_(0), timer_queue_(nullptr) {
@@ -36,7 +35,7 @@ void EventLoop::RemoveEventHandler(EventHandler *pEventHandler) {
 
 void EventLoop::LazyInitTimerQueue() {
   if (!timer_queue_) {
-    timer_queue_.reset(new TimerQueue(2048, 16));
+    timer_queue_.reset(new TimerQueue(SocketConfig::kTimerQueueSlotCount, SocketConfig::kTimerQueueFrameTime));
     timer_queue_->Update(System::GetMilliSeconds());
   }
 }
@@ -50,11 +49,6 @@ void EventLoop::ScheduleTimer(Timer *timer_ptr, uint64_t timer_interval,
 void EventLoop::CancelTimer(Timer *timer_ptr) {
   LazyInitTimerQueue();
   timer_queue_->CancelTimer(timer_ptr);
-}
-
-void EventLoop::SetFrameTime(int milliSeconds) {
-  assert(milliSeconds > 10);
-  FrameTime = milliSeconds;
 }
 
 void EventLoop::AddHandlerLater(EventHandler *pEventHandler) {
@@ -82,8 +76,8 @@ void EventLoop::Loop() {
     }
 
     size_t cost_time = System::GetMilliSeconds() - begin_time;
-    if (cost_time < FrameTime) {
-      System::Yield(FrameTime - cost_time);
+    if (cost_time < SocketConfig::kEventLoopFrameTime) {
+      System::Yield(SocketConfig::kEventLoopFrameTime - cost_time);
     }
 
     std::vector<HandlerPair> temp_queue;

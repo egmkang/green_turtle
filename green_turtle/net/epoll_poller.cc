@@ -4,18 +4,17 @@
 #include <string.h>
 #include "epoll_poller.h"
 #include "event_handler.h"
+#include "socket_config.h"
 
 using namespace green_turtle;
 using namespace green_turtle::net;
 
-static const int kInitEpollSize = 16;
-
 static int Epoll_Ctl(int epollfd, int operation, int fd, int events);
 
 EpollPoller::EpollPoller()
-    : Poller(kInitEpollSize),
-      epollfd_(::epoll_create(kInitEpollSize)),
-      events_(16),
+    : Poller(SocketConfig::kInitEventSize),
+      epollfd_(::epoll_create(SocketConfig::kInitEventSize)),
+      events_(SocketConfig::kInitEventSize),
       polling_(false) {}
 
 EpollPoller::~EpollPoller() { ::close(epollfd_); }

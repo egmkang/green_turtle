@@ -69,7 +69,7 @@ class EventHandler : green_turtle::NonCopyable,
   void set_event_loop(EventLoop* loop) { event_loop_ = loop; }
  public:
   void AddToConnManager();
-  void SetWindowSize(int size);
+  void SetWindowSize(int recv_size, int send_size);
   virtual void loop_balance(const std::vector<EventLoop*>& loops) {
     (void)loops;
   }

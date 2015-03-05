@@ -1,14 +1,13 @@
 #include <algorithm>
 #include "poll_poller.h"
 #include "event_handler.h"
+#include "socket_config.h"
 
 using namespace green_turtle;
 using namespace green_turtle::net;
 
-static const int kInitEventSize = 16;
-
 PollPoller::PollPoller()
-    : Poller(kInitEventSize), pollfds_(), polling_(false) {}
+    : Poller(SocketConfig::kInitEventSize), pollfds_(), polling_(false) {}
 
 PollPoller::~PollPoller() {}
 

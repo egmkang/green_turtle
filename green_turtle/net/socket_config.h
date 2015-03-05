@@ -1,4 +1,4 @@
-//Copyright 2012, egmkang wang.
+//Copyright 2015, egmkang wang.
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -29,61 +29,29 @@
 //
 // author: egmkang (egmkang@gmail.com)
 
-#ifndef __EVENT_LOOP__
-#define __EVENT_LOOP__
-#include <vector>
-#include <mutex>
-#include <deque>
-#include "event_handler.h"
-#include <noncopyable.h>
+#ifndef __SOCKET_CONFIG__
+#define __SOCKET_CONFIG__
+#include <stdint.h>
+#include <stddef.h>
 
 namespace green_turtle {
 namespace net {
 
-class Poller;
-class Timer;
-class TimerQueue;
-
-class EventLoop : NonCopyable {
- public:
-  EventLoop(int expected_size);
-  ~EventLoop();
-  void Ternimal() { terminal_ = true; }
-  void AddEventHandler(EventHandler *pEventHandler);
-  void RemoveEventHandler(EventHandler *pEventHandler);
-  void Loop();
-
- public:
-  void AddHandlerLater(EventHandler *pEventHandler);
-  void RemoveHandlerLater(EventHandler *pEventHandler);
-
- public:
-  // register a timer,unit ms
-  void ScheduleTimer(Timer *timer_ptr, uint64_t timer_interval,
-                     int64_t time_delay = 0);
-  // unregister a timer
-  void CancelTimer(Timer *timer_ptr);
-
- public:
-  int LoopIndex() const { return loop_index_; }
-  void SetLoopIndex(int index) { loop_index_ = index; }
-
- private:
-  void LazyInitTimerQueue();
-
- private:
-  bool terminal_;
-  int loop_index_;
-  std::unique_ptr<Poller> poller_;
-  std::unique_ptr<TimerQueue> timer_queue_;
-  std::vector<EventHandler *> fired_handler_;
-
-  typedef std::shared_ptr<EventHandler> SharedHandler;
-  typedef std::pair<bool, SharedHandler> HandlerPair;
-
-  std::mutex mutex_;
-  std::vector<HandlerPair> changed_handler_;
+struct SocketConfig
+{
+  static int32_t kAcceptBacklogCount;
+  static int32_t kInitEventSize;
+  static int32_t kSocketRecvBufferSize;
+  static int32_t kSocketSendBufferSize;
+  static int32_t kClientRecvBufferSize;
+  static int32_t kClientSendBufferSize;
+  static int32_t kBufferedSocketBufferSize;
+  static size_t kBufferedSocketRetrieveBufferSize;
+  static int32_t kTimerQueueSlotCount;
+  static int32_t kTimerQueueFrameTime;
+  static size_t kSocketRecvTimeOut;    //MilliSeconds
+  static size_t kEventLoopFrameTime;
 };
-}
-}
+
+}}
 #endif

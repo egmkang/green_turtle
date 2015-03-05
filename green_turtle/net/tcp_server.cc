@@ -6,13 +6,14 @@
 #include "timer.h"
 #include "timer_queue.h"
 #include "conn_manager.h"
+#include "socket_config.h"
 #include <system.h>
 
 using namespace green_turtle;
 using namespace green_turtle::net;
 
 TcpServer::TcpServer(int expected_size)
-    : timer_queue_(new TimerQueue(2048, 16)),
+    : timer_queue_(new TimerQueue(SocketConfig::kTimerQueueSlotCount, SocketConfig::kTimerQueueFrameTime)),
       is_terminal_(false),
       thread_count_(1),
       expected_size_(expected_size) {

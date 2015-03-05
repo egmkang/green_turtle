@@ -3,14 +3,14 @@
 #include <unistd.h>
 #include "kqueue_poller.h"
 #include "event_handler.h"
+#include "socket_config.h"
 
 using namespace green_turtle;
 using namespace green_turtle::net;
 
-static const int kInitKqueueSize = 16;
 
 KqueuePoller::KqueuePoller()
-    : Poller(kInitKqueueSize), kqfd_(::kqueue()), events_(16) {
+    : Poller(SocketConfig::kInitEventSize), kqfd_(::kqueue()), events_(SocketConfig::kInitEventSize) {
   assert(kqfd_ != -1);
 }
 

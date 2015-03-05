@@ -178,7 +178,7 @@ int main() {
   std::shared_ptr<TcpAcceptor> acceptor = std::make_shared<TcpAcceptor>(
       "127.0.0.1", 10001, std::bind(&NewEventHanlder, std::placeholders::_1,
                                         std::placeholders::_2));
-  acceptor->SetWindowSize(32 * 1024);
+  acceptor->SetWindowSize(32 * 1024, 32 * 1024);
   bool result = acceptor->Listen();
   assert(result);
   (void)result;

@@ -2,20 +2,18 @@
 #include "buffered_socket.h"
 #include "addr_info.h"
 #include "socket_option.h"
+#include "socket_config.h"
 #include "event_loop.h"
 #include <logger.h>
 
 using namespace green_turtle;
 using namespace green_turtle::net;
 
-const size_t kDefaultBufferSize = 1024;
-const size_t kMinLeftBufferSize = 128;
-
 BufferedSocket::BufferedSocket(int fd, const AddrInfo& addr)
     : EventHandler(fd),
       addr_(addr),
-      rcv_buffer_(new Buffer(kDefaultBufferSize)),
-      snd_buffer_(new Buffer(kDefaultBufferSize)),
+      rcv_buffer_(new Buffer(SocketConfig::kBufferedSocketBufferSize)),
+      snd_buffer_(new Buffer(SocketConfig::kBufferedSocketBufferSize)),
       write_lock_() {}
 
 BufferedSocket::~BufferedSocket() {}
@@ -75,7 +73,7 @@ int BufferedSocket::OnWrite() {
     return kOK;
   snd_buffer_->HasRead(send_size);
 
-  if (snd_buffer_->ReadableLength() < kMinLeftBufferSize) {
+  if (snd_buffer_->ReadableLength() < SocketConfig::kBufferedSocketRetrieveBufferSize) {
     snd_buffer_->Retrieve();
   }
   return kOK;

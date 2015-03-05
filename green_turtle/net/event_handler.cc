@@ -13,7 +13,7 @@ EventHandler::EventHandler(int fd)
       poll_idx_(-1),
       event_loop_(nullptr) {}
 
-EventHandler::~EventHandler() { SocketOption::DestoryFD(fd()); }
+EventHandler::~EventHandler() { this->Close(); }
 
 void EventHandler::AddToConnManager() {
   ConnManager::Instance().AddConn(this->shared_from_this());
@@ -34,14 +34,15 @@ void EventHandler::HandleEvent() {
   if (ret == kErr) {
     ConnManager::Instance().RemoveConn(this->shared_from_this());
     OnError();
+    Shutdown();
     return;
   }
   this->revents_ = kEventNone;
 }
 
-void EventHandler::SetWindowSize(int size) {
-  SocketOption::SetRecvBuffer(this->fd(), size);
-  SocketOption::SetSendBuffer(this->fd(), size);
+void EventHandler::SetWindowSize(int recv_size, int send_size) {
+  SocketOption::SetRecvBuffer(this->fd(), recv_size);
+  SocketOption::SetSendBuffer(this->fd(), send_size);
 }
 
 void EventHandler::Shutdown() {
