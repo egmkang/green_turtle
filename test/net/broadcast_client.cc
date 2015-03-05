@@ -82,7 +82,7 @@ static void RandMessage(TcpClient *pClient) {
   pClient->SendMessage(std::move(message));
 }
 
-#define CLIENT_NUM 300
+#define CLIENT_NUM 400
 int main() {
   EventLoop loop(CLIENT_NUM);
 

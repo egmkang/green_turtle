@@ -9,21 +9,22 @@ using namespace green_turtle;
 int main() {
   MySqlConnection conn;
   conn.Connect("192.168.1.250", 3306, "game", "game", "slug");
+  conn.SelectCharset("utf8");
 
   int64_t begin_time = System::GetMilliSeconds();
 
-  cout << conn.ExecSql("BEGIN;                                           ")
-       << endl;
-  cout << conn.ExecSql("delete testtestslug from test5;                  ")
-       << endl;
-  cout << conn.ExecSql("update test1 set money=money+10 where uin=1;     ")
-       << endl;
-  cout << conn.ExecSql("update test2 set money=money+400 where uin=2;    ")
-       << endl;
-  cout << conn.ExecSql("insert into test4 (uin,money) values (101, 3000);")
-       << endl;
-  cout << conn.ExecSql("COMMIT;                                          ")
-       << endl;
+  std::shared_ptr<ResultSet> result = conn.ExecSelect("select * from role_0");
+
+  while (result->IsValid()) {
+    uint32_t uin = result->at(0);
+    uint32_t server = result->at(1);
+    uint32_t sirdar_id = result->at(2);
+    std::string name = (char*)result->at(3);
+
+    cout << uin << "," << server << "," << sirdar_id << "," << name << endl;
+
+    result->Next();
+  }
 
   cout << "cost time : " << System::GetMilliSeconds() - begin_time << "ms"
        << endl;
@@ -34,6 +35,7 @@ int main() {
     conn.ExecSql("insert into test5 (money) values (3000);");
   cout << "cost time : " << System::GetMilliSeconds() - begin_time << "ms"
        << endl;
+
 
   return 0;
 }

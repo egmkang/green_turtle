@@ -49,6 +49,12 @@ int MySqlConnection::Connect(const char *host, unsigned short port,
   return 0;
 }
 
+int MySqlConnection::SelectCharset(const char *charset) {
+  std::string sql("set names ");
+  sql += charset;
+  return this->ExecSql(sql.c_str());
+}
+
 int MySqlConnection::ExecSql(const char *sql) {
   assert(sql);
   int ret = mysql_real_query(&conn_, sql, (unsigned long)strlen(sql));
@@ -91,12 +97,13 @@ unsigned long long MySqlConnection::GetNewID() {
   return mysql_insert_id(&conn_);
 }
 
-ResultSet *MySqlConnection::ExecSelect(const char *sql) {
+std::shared_ptr<ResultSet> MySqlConnection::ExecSelect(const char *sql) {
   int ret = mysql_real_query(&conn_, sql, (unsigned long)strlen(sql));
-  if (ret) return NULL;
-  MYSQL_RES *res = mysql_store_result(&conn_);
-  if (res) return new MySqlResultSet(res);
-  return NULL;
+  if (!ret) {
+    MYSQL_RES *res = mysql_store_result(&conn_);
+    if (res) return std::make_shared<MySqlResultSet>(res);
+  }
+  return std::shared_ptr<ResultSet>();
 }
 
 int MySqlConnection::EscapeString(char *to, const char *from,

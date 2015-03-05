@@ -58,6 +58,12 @@ class DBConnection : NonCopyable {
                       const char *passwd, const char *db_name) = 0;
 
   /**
+   * choose charset
+   * @param charset, such as "utf8"
+   */
+  virtual int SelectCharset(const char *charset) = 0;
+
+  /**
    * Execute the sql, and return lines affected(or error number)
    * @param sql sql that will be executed
    * @return lines affected. if lines < 0, that means the error number!!!
@@ -80,7 +86,7 @@ class DBConnection : NonCopyable {
    * @param sql sql will be executed
    * @return the result set of select
    */
-  virtual ResultSet *ExecSelect(const char *sql) = 0;
+  virtual std::shared_ptr<ResultSet> ExecSelect(const char *sql) = 0;
 
   /**
    * EscapeString, prevent sql injection
@@ -277,11 +283,12 @@ class MySqlConnection : public DBConnection {
 
   virtual int Connect(const char *host, unsigned short port, const char *user,
                       const char *passwd, const char *db_name);
+  virtual int SelectCharset(const char *charset);
   virtual int ExecSql(const char *sql);
   virtual int ExecSql(const SqlCommand &command);
   virtual unsigned long long GetNewID();
 
-  virtual ResultSet *ExecSelect(const char *sql);
+  virtual std::shared_ptr<ResultSet> ExecSelect(const char *sql);
   virtual int EscapeString(char *to, const char *from, unsigned long length);
 
  private:

@@ -38,8 +38,8 @@ static int SendMesageByPercent(int percent, const char* data, int size);
 static BroadCastTask* GetTask(int fd);
 
 static void PushMessage(int fd, Command* pCmd, int index) {
+  std::pair<int, Command*> pair(fd, pCmd);
   while (true) {
-    std::pair<int, Command*> pair(fd, pCmd);
     if (!queue_[index].Push(pair)) {
       System::Yield(0);
     } else {
@@ -95,7 +95,7 @@ void LoopOnce(TcpServer& server) {
       Command* pCmd = pair.second;
       int send_count = 0;
       if (pCmd->type == kCommandType_Echo) {
-        if (dis(gen) <= 75) {
+        if (dis(gen) <= 30) {
           send_count += SendMesageByPercent(75, (const char*)pCmd, pCmd->len);
         } else {
           BroadCastTask* pTask = GetTask(pair.first);

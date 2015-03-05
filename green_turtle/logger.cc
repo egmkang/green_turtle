@@ -11,12 +11,16 @@
 
 using namespace green_turtle;
 
-static char kMilliSecondsString[1024][5] = {};
+static char kMilliSecondsString[1024][4] = {};
 
 static inline void LazyInitMilliSecondsString() {
   if (kMilliSecondsString[0][0]) return;
   for (int32_t i = 0; i < 1024; ++i) {
-    snprintf(&kMilliSecondsString[i][0], sizeof(kMilliSecondsString[i]), ".%03d", i % 1000);
+    uint32_t base = i % 1000;
+    kMilliSecondsString[i][3] = "0123456789"[base % 10];
+    kMilliSecondsString[i][2] = "0123456789"[base / 10 % 10];
+    kMilliSecondsString[i][1] = "0123456789"[base / 100 % 10];
+    kMilliSecondsString[i][0] = '.';
   }
 }
 
