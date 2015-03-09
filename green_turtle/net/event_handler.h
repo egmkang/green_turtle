@@ -67,6 +67,7 @@ class EventHandler : green_turtle::NonCopyable,
   void HandleEvent();
   EventLoop* event_loop() const { return event_loop_; }
   void set_event_loop(EventLoop* loop) { event_loop_ = loop; }
+  uint64_t last_active_time() const { return last_active_time_; }
  public:
   void AddToConnManager();
   void SetWindowSize(int recv_size, int send_size);
@@ -86,6 +87,7 @@ class EventHandler : green_turtle::NonCopyable,
   int events_;  // request events
   int revents_;  // returned events
   int poll_idx_;  // poll index,for fast remove
+  uint64_t last_active_time_;
   EventLoop* event_loop_;
 };
 }

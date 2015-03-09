@@ -1,6 +1,7 @@
 #include "event_handler.h"
 #include "socket_option.h"
 #include "conn_manager.h"
+#include "system.h"
 #include <logger.h>
 
 using namespace green_turtle;
@@ -11,6 +12,7 @@ EventHandler::EventHandler(int fd)
       events_(kEventNone),
       revents_(kEventNone),
       poll_idx_(-1),
+      last_active_time_(System::GetMilliSeconds()),
       event_loop_(nullptr) {}
 
 EventHandler::~EventHandler() { this->Close(); }
