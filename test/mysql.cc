@@ -16,10 +16,10 @@ int main() {
   std::shared_ptr<ResultSet> result = conn.ExecSelect("select * from role_0");
 
   while (result->IsValid()) {
-    uint32_t uin = result->at(0);
-    uint32_t server = result->at(1);
-    uint32_t sirdar_id = result->at(2);
-    std::string name = (char*)result->at(3);
+    uint32_t uin = result->at(0).to_uint32();
+    uint32_t server = result->at(1).to_uint32();
+    uint32_t sirdar_id = result->at(2).to_uint32();
+    std::string name = result->at(3).to_c_str();
 
     cout << uin << "," << server << "," << sirdar_id << "," << name << endl;
 

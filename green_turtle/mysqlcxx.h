@@ -149,64 +149,29 @@ class ResultSet {
 struct SqlResultVarType {
   SqlResultVarType(const char *data, int len) : data(data), len(len) {}
 
-  /**
-   * current value is valid. SQL's NULL is not valid.
-   * @return always return true if value is NOT NULL.
-   */
   bool IsValid() const { return data && len; }
 
-  /**
-   * implicit convert to int
-   */
-  operator int() const { return atoi(data); }
-  /**
-   * implicit convert to unsigned int
-   */
-  operator unsigned int() const { return atoi(data); }
-  /**
-   * implicit convert to long
-   */
-  operator long() const { return atoll(data); }
-  /**
-   * implicit convert to unsigned long
-   */
-  operator unsigned long() const { return atoll(data); }
-  /**
-   * implicit convert to long long
-   */
-  operator long long() const { return atoll(data); }
-  /**
-   * implicit convert to unsigned long long
-   */
-  operator unsigned long long() const { return atoll(data); }
-  /**
-   * implicit convert to float
-   */
-  operator float() const { return atof(data); }
-  /**
-   * implicit convert to double
-   */
-  operator double() const { return atof(data); }
-  /**
-   * implicit convert to c string, if this value is end with '\0'
-   * or you must use GetRawData(). @see GetRawData
-   */
-  operator char *() const { return const_cast<char *>(data); }
+  explicit operator bool() const { return IsValid(); }
 
-  /**
-   * get the raw data of value, specifically the c string not end with '\0' or
-   * blob type.
-   * @param out dest location
-   * @param l dest buffer size
-   */
+  int32_t to_int32() const { return atoi(data); }
+
+  uint32_t to_uint32() const { return atoi(data); }
+
+  int64_t to_int64() const { return atoll(data); }
+
+  uint64_t to_uint64() const { return atoll(data); }
+
+  float to_float() const { return atof(data); }
+
+  double to_double() const { return atof(data); }
+
+  char* to_c_str() const { return const_cast<char *>(data); }
+
   int GetRawData(void *out, int l) {
     memcpy(out, data, len < l ? len : l);
     return len < l ? len : l;
   }
 
-  /**
-   * raw data, cannot hold it after ResultSet is disposed!!!
-   */
   const char *data;
   const int len;
 };
