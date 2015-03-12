@@ -94,6 +94,9 @@ class System {
     static thread_local int32_t tid = syscall(SYS_gettid);
     return tid;
   }
+
+  //get file modify time
+  static uint64_t GetFileModifyTime(const std::string& file_name);
 };
 };
 

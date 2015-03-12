@@ -130,7 +130,6 @@ MySqlResultSet::MySqlResultSet(MYSQL_RES *result)
 }
 
 MySqlResultSet::~MySqlResultSet() {
-  // mysql_free_result(result);
 }
 
 int MySqlResultSet::FieldCount() const { return this->total_fields; }

@@ -35,24 +35,61 @@
 #include <singleton.h>
 #include <unordered_map>
 #include <memory>
+#include <functional>
 #include <assert.h>
+#include <system.h>
 
 namespace green_turtle {
+
+struct XmlDocInfo {
+  std::string file_name;
+  std::shared_ptr<pugi::xml_document> shared_doc;
+  uint64_t modify_time;
+  std::function<bool(void)> parse_file;
+};
+
 class XmlDocCache : public Singleton<XmlDocCache> {
  public:
-  typedef pugi::xml_parse_status parse_status;
+  typedef std::pair<bool, pugi::xml_parse_status> parse_result;
   typedef pugi::xml_node node_type;
 
  public:
-  parse_status LoadFile(const std::string& file_name) {
-    if (container_.find(file_name) != container_.end()) return pugi::status_ok;
+  parse_result LoadFile(const std::string& file_name, std::function<bool(void)> parse_file) {
+    if (container_.find(file_name) != container_.end()) return std::make_pair(true, pugi::status_ok);
 
-    shared_doc doc = std::make_shared<pugi::xml_document>();
+    std::shared_ptr<pugi::xml_document> doc = std::make_shared<pugi::xml_document>();
     pugi::xml_parse_result result = doc->load_file(file_name.c_str());
     if (result.status == pugi::status_ok) {
-      container_[file_name] = doc;
+      XmlDocInfo info = {file_name, doc, System::GetFileModifyTime(file_name), parse_file};
+      container_[file_name] = info;
+      if (!parse_file()) {
+        container_.erase(file_name);
+        return std::make_pair(false, pugi::status_ok);
+      }
     }
-    return result.status;
+    return std::make_pair(true, result.status);
+  }
+
+  parse_result ReloadFile(bool need_abort = false) {
+    for (container_type::iterator iter = container_.begin();
+         iter != container_.end(); ++iter) {
+      const std::string& file_name = iter->first;
+      XmlDocInfo& doc_info = iter->second;
+      uint64_t file_modify_time = System::GetFileModifyTime(file_name);
+      if (file_modify_time != doc_info.modify_time) {
+        std::shared_ptr<pugi::xml_document> doc =
+            std::make_shared<pugi::xml_document>();
+        pugi::xml_parse_result result = doc->load_file(file_name.c_str());
+        if (result.status == pugi::status_ok) {
+          doc_info.shared_doc = doc;
+
+          if (!doc_info.parse_file() && need_abort) {
+            return std::make_pair(false, result.status);
+          }
+        }
+      }
+    }
+    return std::make_pair(true, pugi::status_ok);
   }
 
   template <typename T>
@@ -61,7 +98,7 @@ class XmlDocCache : public Singleton<XmlDocCache> {
     container_type::const_iterator file_iter = container_.find(file_name);
     if (file_iter == container_.end()) return false;
 
-    pugi::xpath_node_set nodes = file_iter->second->select_nodes(query);
+    pugi::xpath_node_set nodes = file_iter->second.shared_doc->select_nodes(query);
     for (pugi::xpath_node_set::const_iterator iter = nodes.begin();
          iter != nodes.end(); ++iter) {
       node_type node = (*iter).node();
@@ -76,7 +113,7 @@ class XmlDocCache : public Singleton<XmlDocCache> {
     container_type::const_iterator file_iter = container_.find(file_name);
     if (file_iter == container_.end()) return false;
 
-    pugi::xpath_node_set nodes = file_iter->second->select_nodes(query);
+    pugi::xpath_node_set nodes = file_iter->second.shared_doc->select_nodes(query);
     pugi::xpath_node_set::const_iterator iter = nodes.begin();
     if (iter != nodes.end()) {
       node_type node = (*iter).node();
@@ -89,8 +126,7 @@ class XmlDocCache : public Singleton<XmlDocCache> {
   void Clear(const std::string& file_name) { container_.erase(file_name); }
 
  private:
-  typedef std::shared_ptr<pugi::xml_document> shared_doc;
-  typedef std::unordered_map<std::string, shared_doc> container_type;
+  typedef std::unordered_map<std::string, XmlDocInfo> container_type;
 
   container_type container_;
 };
