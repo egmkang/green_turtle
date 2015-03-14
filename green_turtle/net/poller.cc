@@ -13,17 +13,17 @@
 using namespace green_turtle;
 using namespace green_turtle::net;
 
-Poller::Poller(int init_size) : event_handlers_(init_size) {}
+Poller::Poller(int init_size) : event_handlers_() {}
 
 Poller::~Poller() { this->event_handlers_.clear(); }
 
 void Poller::SetEventHandler(int fd, EventHandler *handler) {
   assert(fd > 0);
-  if (fd >= (int)event_handlers_.size()) {
-    event_handlers_.resize(event_handlers_.size() * 2);
+  if (handler) {
+    event_handlers_[fd] = handler->shared_from_this();
+  } else {
+    event_handlers_.erase(fd);
   }
-  assert(fd < (int)event_handlers_.size());
-  event_handlers_[fd] = handler ? handler->shared_from_this() : std::shared_ptr<EventHandler>();
 }
 
 Poller *Poller::CreatePoller(int expected_size) {

@@ -32,6 +32,7 @@
 #ifndef __POLLER__
 #define __POLLER__
 #include <assert.h>
+#include <unordered_map>
 #include <vector>
 #include <memory>
 #include <noncopyable.h>
@@ -63,15 +64,16 @@ class Poller : green_turtle::NonCopyable {
  protected:
   void SetEventHandler(int fd, EventHandler* handler);
   inline EventHandler* GetEventHandler(int fd) {
-    assert(fd <= (int)event_handlers_.size());
-    return event_handlers_[fd].get();
+    container_type::iterator iter = event_handlers_.find(fd);
+    return iter != event_handlers_.end() ? iter->second.get() : nullptr;
   }
 
  public:
   static Poller* CreatePoller(int expected_size);
 
  private:
-  std::vector<std::shared_ptr<EventHandler>> event_handlers_;
+  typedef std::unordered_map<int32_t, std::shared_ptr<EventHandler>> container_type;
+  container_type event_handlers_;
 };
 }
 }
