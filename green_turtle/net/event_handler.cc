@@ -24,6 +24,7 @@ void EventHandler::AddToConnManager() {
 void EventHandler::HandleEvent() {
   int ret = kOK;
   if (this->events_ & this->revents_ & kEventReadable) {
+    last_active_time_ = System::GetMilliSeconds();
     ret = OnRead();
   }
   if (ret == kErr) {
