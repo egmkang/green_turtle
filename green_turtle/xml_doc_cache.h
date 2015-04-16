@@ -124,6 +124,12 @@ class XmlDocCache : public Singleton<XmlDocCache> {
 
   void Clear() { container_.clear(); }
   void Clear(const std::string& file_name) { container_.erase(file_name); }
+  void LoadComplete() {
+    for (container_type::iterator iter = container_.begin();
+         iter != container_.end(); ++iter) {
+        iter->second.shared_doc.reset();
+    }
+  }
 
  private:
   typedef std::unordered_map<std::string, XmlDocInfo> container_type;

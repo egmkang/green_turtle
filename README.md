@@ -5,8 +5,9 @@
 * [ ] samples
 * [ ] UnitTest
 * [ ] compress
-* [D] XML Config parse
-* [D] modify the echo sample
+* [ ] using libmariadbclient's nonblocking api
+* [ ] modify the echo sample
+* [x] XML Config parse
 * [x] remove EventLoop's TimerQueue
 * [x] complete StringSlice
 * [x] VectorMap
