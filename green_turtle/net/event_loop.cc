@@ -2,7 +2,6 @@
 #include <assert.h>
 #include "event_loop.h"
 #include "event_handler.h"
-#include "timer_queue.h"
 #include "poller.h"
 #include "socket_config.h"
 #include <system.h>
@@ -12,7 +11,7 @@ using namespace green_turtle;
 using namespace green_turtle::net;
 
 EventLoop::EventLoop(int expected_size)
-    : terminal_(false), loop_index_(0), timer_queue_(nullptr) {
+    : terminal_(false), loop_index_(0), check_timeout_(System::GetSeconds()) {
   poller_.reset(Poller::CreatePoller(expected_size));
   assert(poller_);
 }
@@ -21,7 +20,6 @@ EventLoop::~EventLoop() {
   this->fired_handler_.clear();
   this->changed_handler_.clear();
   this->poller_.reset(nullptr);
-  this->timer_queue_.reset(nullptr);
 }
 
 void EventLoop::AddEventHandler(EventHandler *pEventHandler) {
@@ -31,24 +29,6 @@ void EventLoop::AddEventHandler(EventHandler *pEventHandler) {
 
 void EventLoop::RemoveEventHandler(EventHandler *pEventHandler) {
   poller_->RemoveEventHandler(pEventHandler);
-}
-
-void EventLoop::LazyInitTimerQueue() {
-  if (!timer_queue_) {
-    timer_queue_.reset(new TimerQueue(SocketConfig::kTimerQueueSlotCount, SocketConfig::kTimerQueueFrameTime));
-    timer_queue_->Update(System::GetMilliSeconds());
-  }
-}
-
-void EventLoop::ScheduleTimer(Timer *timer_ptr, uint64_t timer_interval,
-                              int64_t time_delay) {
-  LazyInitTimerQueue();
-  timer_queue_->ScheduleTimer(timer_ptr, timer_interval, time_delay);
-}
-
-void EventLoop::CancelTimer(Timer *timer_ptr) {
-  LazyInitTimerQueue();
-  timer_queue_->CancelTimer(timer_ptr);
 }
 
 void EventLoop::AddHandlerLater(EventHandler *pEventHandler) {
@@ -67,12 +47,19 @@ void EventLoop::Loop() {
   while (!this->terminal_) {
     size_t begin_time = System::GetMilliSeconds();
 
-    if (timer_queue_) timer_queue_->Update(begin_time);
-
     fired_handler_.clear();
     poller_->PollOnce(0, fired_handler_);
     for (auto handler : fired_handler_) {
       handler->HandleEvent();
+    }
+
+    if (System::GetSeconds() > this->check_timeout_) {
+      this->check_timeout_ = System::GetSeconds();
+      fired_handler_.clear();
+      poller_->CheckEventHandlerTimeOut(fired_handler_);
+      for (auto handler : fired_handler_) {
+        this->RemoveHandlerLater(handler);
+      }
     }
 
     size_t cost_time = System::GetMilliSeconds() - begin_time;

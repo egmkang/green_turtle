@@ -68,6 +68,7 @@ class EventHandler : green_turtle::NonCopyable,
   EventLoop* event_loop() const { return event_loop_; }
   void set_event_loop(EventLoop* loop) { event_loop_ = loop; }
   uint64_t last_active_time() const { return last_active_time_; }
+  bool is_timeout() const;
  public:
   void AddToConnManager();
   void SetWindowSize(int recv_size, int send_size);

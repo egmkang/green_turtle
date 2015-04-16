@@ -34,6 +34,7 @@
 #include <vector>
 #include <mutex>
 #include <deque>
+#include <system.h>
 #include "event_handler.h"
 #include <noncopyable.h>
 
@@ -42,7 +43,6 @@ namespace net {
 
 class Poller;
 class Timer;
-class TimerQueue;
 
 class EventLoop : NonCopyable {
  public:
@@ -58,24 +58,14 @@ class EventLoop : NonCopyable {
   void RemoveHandlerLater(EventHandler *pEventHandler);
 
  public:
-  // register a timer,unit ms
-  void ScheduleTimer(Timer *timer_ptr, uint64_t timer_interval,
-                     int64_t time_delay = 0);
-  // unregister a timer
-  void CancelTimer(Timer *timer_ptr);
-
- public:
   int LoopIndex() const { return loop_index_; }
   void SetLoopIndex(int index) { loop_index_ = index; }
 
  private:
-  void LazyInitTimerQueue();
-
- private:
   bool terminal_;
   int loop_index_;
+  time_t check_timeout_;
   std::unique_ptr<Poller> poller_;
-  std::unique_ptr<TimerQueue> timer_queue_;
   std::vector<EventHandler *> fired_handler_;
 
   typedef std::shared_ptr<EventHandler> SharedHandler;

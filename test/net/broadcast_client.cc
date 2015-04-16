@@ -1,4 +1,5 @@
 #include <net/tcp_client.h>
+#include <net/tcp_server.h>
 #include <net/event_loop.h>
 #include <net/timer_queue.h>
 #include <net/timer.h>
@@ -25,6 +26,8 @@ static long recv_message_count[3] = {0};
 
 static void RandMessage(TcpClient *pClient);
 
+static TcpServer *server = nullptr;
+
 class BroadCastClient : public TcpClient, public Timer {
  public:
   BroadCastClient(const std::string &ip, unsigned short port)
@@ -47,7 +50,7 @@ class BroadCastClient : public TcpClient, public Timer {
 
   virtual void OnTimeOut(uint64_t current_time) {
     (void)current_time;
-    this->event_loop()->ScheduleTimer(this, next_timer(gen));
+    server->ScheduleTimer(this, next_timer(gen));
     RandMessage(this);
   }
 };
@@ -84,7 +87,8 @@ static void RandMessage(TcpClient *pClient) {
 
 #define CLIENT_NUM 400
 int main() {
-  EventLoop loop(CLIENT_NUM);
+  server = new TcpServer();
+  server->SetThreadCount(1);
 
   for (int i = 0; i < CLIENT_NUM; ++i) {
     std::shared_ptr<BroadCastClient> client =
@@ -93,10 +97,9 @@ int main() {
     assert(!errorCode);
     (void)errorCode;
     client->set_events(kEventReadable | kEventWriteable);
-
-    loop.AddEventHandler(client.get());
-    loop.ScheduleTimer(client.get(), next_timer(gen));
+    server->AddClient(client.get());
+    server->ScheduleTimer(client.get(), next_timer(gen));
   }
-  loop.Loop();
+  server->Run();
   return 0;
 }

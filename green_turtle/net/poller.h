@@ -61,6 +61,7 @@ class Poller : green_turtle::NonCopyable {
   virtual void PollOnce(int timeout,
                         std::vector<EventHandler*>& fired_handlers) = 0;
 
+  void CheckEventHandlerTimeOut(std::vector<EventHandler*>& fired_handlers);
  protected:
   void SetEventHandler(int fd, EventHandler* handler);
   inline EventHandler* GetEventHandler(int fd) {

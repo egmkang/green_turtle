@@ -2,12 +2,12 @@
 0.2
 * [ ] basic optimize
 * [ ] tcp client reconnect(think about using a queue)
-* [ ] modify the echo sample
 * [ ] samples
-* [ ] FreeBSD 10.1 Support
 * [ ] UnitTest
-* [ ] XML Config parse
 * [ ] compress
+* [D] XML Config parse
+* [D] modify the echo sample
+* [x] remove EventLoop's TimerQueue
 * [x] complete StringSlice
 * [x] VectorMap
 * [x] Delete/Add queue

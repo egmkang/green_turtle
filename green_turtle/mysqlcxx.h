@@ -149,9 +149,9 @@ class ResultSet {
 struct SqlResultVarType {
   SqlResultVarType(const char *data, int len) : data(data), len(len) {}
 
-  bool IsValid() const { return data && len; }
+  bool is_valid() const { return data && len; }
 
-  explicit operator bool() const { return IsValid(); }
+  explicit operator bool() const { return is_valid(); }
 
   int32_t to_int32() const { return atoi(data); }
 
@@ -167,7 +167,7 @@ struct SqlResultVarType {
 
   char* to_c_str() const { return const_cast<char *>(data); }
 
-  int GetRawData(void *out, int l) {
+  int copy(void *out, int l) {
     memcpy(out, data, len < l ? len : l);
     return len < l ? len : l;
   }

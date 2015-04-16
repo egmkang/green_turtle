@@ -1,5 +1,6 @@
 #include "event_handler.h"
 #include "socket_option.h"
+#include "socket_config.h"
 #include "conn_manager.h"
 #include "system.h"
 #include <logger.h>
@@ -54,3 +55,8 @@ void EventHandler::Shutdown() {
 }
 
 void EventHandler::Close() { SocketOption::DestoryFD(fd()); }
+
+bool EventHandler::is_timeout() const {
+  return System::GetMilliSeconds() - this->last_active_time() >=
+         SocketConfig::kSocketRecvTimeOut;
+}
