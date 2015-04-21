@@ -51,6 +51,7 @@ struct SocketConfig
   static int32_t kTimerQueueFrameTime;
   static size_t kSocketRecvTimeOut;    //MilliSeconds
   static size_t kEventLoopFrameTime;
+  static size_t kIoLoopFrameTime;
 };
 
 }}

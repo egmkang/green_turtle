@@ -50,7 +50,7 @@ class TcpAcceptor : public EventHandler {
 
  public:
   bool Listen();
-  virtual void loop_balance(const std::vector<EventLoop*>& loops);
+  virtual void loop_balance(const std::vector<IoLoop*>& loops);
 
  protected:
   virtual int OnRead();
@@ -60,7 +60,7 @@ class TcpAcceptor : public EventHandler {
  private:
   int Accept(AddrInfo& info);
   std::unique_ptr<AddrInfo> addr_;
-  std::vector<EventLoop*> loops_;
+  std::vector<IoLoop*> loops_;
   size_t idx_;  // load balance
   std::function<std::shared_ptr<EventHandler>(int, const AddrInfo&)> creator;
 };

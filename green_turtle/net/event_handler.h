@@ -50,7 +50,7 @@ enum {
   kEventWriteable = 0x2,
 };
 
-class EventLoop;
+class IoLoop;
 
 class EventHandler : green_turtle::NonCopyable,
                      public std::enable_shared_from_this<EventHandler> {
@@ -65,14 +65,14 @@ class EventHandler : green_turtle::NonCopyable,
   int index() const { return poll_idx_; }
   void set_index(int idx) { poll_idx_ = idx; }
   void HandleEvent();
-  EventLoop* event_loop() const { return event_loop_; }
-  void set_event_loop(EventLoop* loop) { event_loop_ = loop; }
+  IoLoop* event_loop() const { return event_loop_; }
+  void set_event_loop(IoLoop* loop) { event_loop_ = loop; }
   uint64_t last_active_time() const { return last_active_time_; }
   bool is_timeout() const;
  public:
   void AddToConnManager();
   void SetWindowSize(int recv_size, int send_size);
-  virtual void loop_balance(const std::vector<EventLoop*>& loops) {
+  virtual void loop_balance(const std::vector<IoLoop*>& loops) {
     (void)loops;
   }
   virtual int OnError() = 0;
@@ -89,7 +89,7 @@ class EventHandler : green_turtle::NonCopyable,
   int revents_;  // returned events
   int poll_idx_;  // poll index,for fast remove
   uint64_t last_active_time_;
-  EventLoop* event_loop_;
+  IoLoop* event_loop_;
 };
 }
 }

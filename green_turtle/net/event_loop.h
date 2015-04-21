@@ -32,47 +32,57 @@
 #ifndef __EVENT_LOOP__
 #define __EVENT_LOOP__
 #include <vector>
-#include <mutex>
-#include <deque>
-#include <system.h>
-#include "event_handler.h"
+#include <thread>
+#include <functional>
 #include <noncopyable.h>
+#include "io_loop.h"
+#include "timer.h"
 
 namespace green_turtle {
 namespace net {
 
-class Poller;
-class Timer;
+class EventHandler;
+class TcpAcceptor;
+class TcpClient;
+class TimerQueue;
 
-class EventLoop : NonCopyable {
+class EventLoop : green_turtle::NonCopyable {
  public:
-  EventLoop(int expected_size);
+  // default using epoll or kequeue
+  // if your want to use poll, please set this number small than 128
+  EventLoop(int expected_size = 1024);
   ~EventLoop();
-  void Ternimal() { terminal_ = true; }
-  void AddEventHandler(EventHandler *pEventHandler);
-  void RemoveEventHandler(EventHandler *pEventHandler);
-  void Loop();
 
  public:
-  void AddHandlerLater(EventHandler *pEventHandler);
-  void RemoveHandlerLater(EventHandler *pEventHandler);
+  void AddAcceptor(TcpAcceptor *acceptor);
+  void AddClient(TcpClient *client);
+  void AddHandler(EventHandler *handler);
+  void SetThreadCount(int count);
+  void Run();
+  void Terminal();
 
  public:
-  int LoopIndex() const { return loop_index_; }
-  void SetLoopIndex(int index) { loop_index_ = index; }
+  // register a timer,unit ms
+  void ScheduleTimer(Timer *timer_ptr, uint64_t timer_interval,
+                     int64_t time_delay = 0);
+  // unregister a timer
+  void CancelTimer(Timer *timer_ptr);
+  void SetLoopCallBack(std::function<void(void)> loop) { loop_once_ = loop; }
 
  private:
-  bool terminal_;
-  int loop_index_;
-  time_t check_timeout_;
-  std::unique_ptr<Poller> poller_;
-  std::vector<EventHandler *> fired_handler_;
+  void InitEventLoop();
+  void InitThreads();
 
+ private:
   typedef std::shared_ptr<EventHandler> SharedHandler;
-  typedef std::pair<bool, SharedHandler> HandlerPair;
-
-  std::mutex mutex_;
-  std::vector<HandlerPair> changed_handler_;
+  std::vector<IoLoop*> loops_;
+  std::vector<std::thread *> threads_;
+  std::vector<SharedHandler> handlers_;
+  std::unique_ptr<TimerQueue> timer_queue_;
+  bool is_terminal_;
+  int thread_count_;
+  int expected_size_;
+  std::function<void(void)> loop_once_;
 };
 }
 }

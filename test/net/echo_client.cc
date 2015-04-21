@@ -81,9 +81,9 @@ int main(int argc, char** argv) {
     client->SendMessage(std::make_shared<EchoMessage>(str));
     free(str);
 
-    loop.AddEventHandler(client.get());
+    loop.AddHandler(client.get());
   }
 
-  loop.Loop();
+  loop.Run();
   return 0;
 }

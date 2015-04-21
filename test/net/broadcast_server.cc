@@ -1,5 +1,6 @@
 #include <net/tcp_acceptor.h>
-#include <net/tcp_server.h>
+#include <net/event_loop.h>
+#include <net/io_loop.h>
 #include <net/buffered_socket.h>
 #include <net/event_loop.h>
 #include <net/conn_manager.h>
@@ -87,7 +88,7 @@ void AddTask(const std::vector<std::shared_ptr<EventHandler>>& set) {
   }
 }
 
-void LoopOnce(TcpServer& server) {
+void LoopOnce(EventLoop& server) {
   (void)server;
   for (int idx = 0; idx < THRD_COUNT; ++idx) {
     std::pair<int, Command*> pair(0, nullptr);
@@ -185,7 +186,7 @@ int main() {
 
   PrintMessageCount timer;
 
-  TcpServer server(1024);
+  EventLoop server(1024);
   server.AddAcceptor(acceptor.get());
   server.SetThreadCount(2);
   server.ScheduleTimer(&timer, 2000);

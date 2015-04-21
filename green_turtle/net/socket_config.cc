@@ -19,3 +19,4 @@ int32_t SocketConfig::kTimerQueueSlotCount = 2048;
 int32_t SocketConfig::kTimerQueueFrameTime = 16;
 
 size_t SocketConfig::kEventLoopFrameTime = 20;
+size_t SocketConfig::kIoLoopFrameTime = 20;

@@ -72,7 +72,7 @@ int TcpAcceptor::OnError() {
   }
   return kOK;
 }
-void TcpAcceptor::loop_balance(const std::vector<EventLoop *> &loops) {
+void TcpAcceptor::loop_balance(const std::vector<IoLoop *> &loops) {
   this->loops_ = loops;
 }
 

@@ -29,60 +29,50 @@
 //
 // author: egmkang (egmkang@gmail.com)
 
-#ifndef __tcp__server__
-#define __tcp__server__
+#ifndef __IO_LOOP__
+#define __IO_LOOP__
 #include <vector>
-#include <thread>
-#include <functional>
+#include <mutex>
+#include <deque>
+#include <system.h>
+#include "event_handler.h"
 #include <noncopyable.h>
-#include "timer.h"
 
 namespace green_turtle {
 namespace net {
 
-class EventHandler;
-class EventLoop;
-class TcpAcceptor;
-class TcpClient;
-class TimerQueue;
-class TcpServer;
+class Poller;
+class Timer;
 
-class TcpServer : green_turtle::NonCopyable {
+class IoLoop : NonCopyable {
  public:
-  // default using epoll or kequeue
-  // if your want to use poll, please set this number small than 128
-  TcpServer(int expected_size = 1024);
-  ~TcpServer();
+  IoLoop(int expected_size);
+  ~IoLoop();
+  void Ternimal() { terminal_ = true; }
+  void AddEventHandler(EventHandler *pEventHandler);
+  void RemoveEventHandler(EventHandler *pEventHandler);
+  void Loop();
 
  public:
-  void AddAcceptor(TcpAcceptor *acceptor);
-  void AddClient(TcpClient *client);
-  void SetThreadCount(int count);
-  void Run();
-  void Terminal();
+  void AddHandlerLater(EventHandler *pEventHandler);
+  void RemoveHandlerLater(EventHandler *pEventHandler);
 
  public:
-  // register a timer,unit ms
-  void ScheduleTimer(Timer *timer_ptr, uint64_t timer_interval,
-                     int64_t time_delay = 0);
-  // unregister a timer
-  void CancelTimer(Timer *timer_ptr);
-  void SetLoopCallBack(std::function<void(void)> loop) { loop_once_ = loop; }
+  int LoopIndex() const { return loop_index_; }
+  void SetLoopIndex(int index) { loop_index_ = index; }
 
  private:
-  void InitEventLoop();
-  void InitThreads();
+  bool terminal_;
+  int loop_index_;
+  time_t check_timeout_;
+  std::unique_ptr<Poller> poller_;
+  std::vector<EventHandler *> fired_handler_;
 
- private:
   typedef std::shared_ptr<EventHandler> SharedHandler;
-  std::vector<EventLoop *> loops_;
-  std::vector<std::thread *> threads_;
-  std::vector<SharedHandler> handlers_;
-  std::unique_ptr<TimerQueue> timer_queue_;
-  bool is_terminal_;
-  int thread_count_;
-  int expected_size_;
-  std::function<void(void)> loop_once_;
+  typedef std::pair<bool, SharedHandler> HandlerPair;
+
+  std::mutex mutex_;
+  std::vector<HandlerPair> changed_handler_;
 };
 }
 }

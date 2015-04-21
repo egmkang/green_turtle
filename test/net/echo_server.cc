@@ -1,5 +1,5 @@
 #include <net/tcp_acceptor.h>
-#include <net/tcp_server.h>
+#include <net/event_loop.h>
 #include <net/buffered_socket.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -75,7 +75,7 @@ int main(int argc, char** argv) {
 
   PrintMessageCount timer;
 
-  TcpServer server(1024);
+  EventLoop server(1024);
   server.AddAcceptor(acceptor.get());
   server.SetThreadCount(3);
   server.ScheduleTimer(&timer, 2000);

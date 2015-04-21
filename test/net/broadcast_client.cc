@@ -1,5 +1,5 @@
 #include <net/tcp_client.h>
-#include <net/tcp_server.h>
+#include <net/event_loop.h>
 #include <net/event_loop.h>
 #include <net/timer_queue.h>
 #include <net/timer.h>
@@ -26,7 +26,7 @@ static long recv_message_count[3] = {0};
 
 static void RandMessage(TcpClient *pClient);
 
-static TcpServer *server = nullptr;
+static EventLoop *server = nullptr;
 
 class BroadCastClient : public TcpClient, public Timer {
  public:
@@ -87,7 +87,7 @@ static void RandMessage(TcpClient *pClient) {
 
 #define CLIENT_NUM 400
 int main() {
-  server = new TcpServer();
+  server = new EventLoop();
   server->SetThreadCount(1);
 
   for (int i = 0; i < CLIENT_NUM; ++i) {
