@@ -36,3 +36,4 @@ SET_TARGET_PROPERTIES(lz4 PROPERTIES
   COMPILE_FLAGS "-O3 -g -std=c99 -Wall -Wextra -Wundef -Wshadow -Wstrict-prototypes -DLZ4_VERSION=\"${LZ4VERSION}\""
   )
 
+ADD_SUBDIRECTORY(sophia)

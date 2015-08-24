@@ -1,12 +1,11 @@
 ## ToDoList:
 0.2
-* [ ] basic optimize
+* [D] basic optimize
 * [ ] tcp client reconnect(think about using a queue)
-* [ ] samples
+* [D] samples(key/value store server)
 * [ ] UnitTest
 * [ ] compress
-* [ ] using libmariadbclient's nonblocking api
-* [ ] modify the echo sample
+* [x] modify the echo sample
 * [x] XML Config parse
 * [x] remove EventLoop's TimerQueue
 * [x] complete StringSlice
