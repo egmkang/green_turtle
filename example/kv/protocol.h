@@ -2,6 +2,7 @@
 #define __PROTOCOL_H__
 #include <stdint.h>
 #include <string>
+#include <string.h>
 
 //magic code
 enum {
@@ -42,9 +43,34 @@ struct MessageHead {
 
 #pragma pack ()
 
+template <typename T>
+inline T Decode(uint8_t **ptr) {
+  T value = *reinterpret_cast<T*>(*ptr);
+  ptr += sizeof(value);
+  return value;
+}
+
 //little endian
 //4byte len; raw data
-std::string DecodeString(void **ptr);
-void EncodeString(void **ptr, const std::string& str);
+template <>
+inline std::string Decode(uint8_t **ptr) {
+  int32_t str_len = Decode<int32_t>(ptr);
+  std::string str(*ptr, *ptr + str_len);
+  *ptr += str_len;
+  return str;
+}
+
+template <typename T>
+inline void Encode(uint8_t **ptr, const T &value) {
+  *reinterpret_cast<T*>(*ptr) = value;
+  *ptr += sizeof(value);
+}
+
+template <>
+inline void Encode(uint8_t **ptr, const std::string &value) {
+  Encode<int32_t>(ptr, value.length());
+  memcpy(*ptr, &*value.begin(), value.length());
+  *ptr += value.length();
+}
 
 #endif
