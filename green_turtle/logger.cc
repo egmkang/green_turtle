@@ -160,15 +160,14 @@ int32_t Logger::GenerateLogHeader(char *array, int8_t level) {
 }
 
 static std::shared_ptr<Logger> DefaultLogger;
-static std::mutex kLock;
 
 Logger &Logger::Default() {
-  std::lock_guard<std::mutex> guard(kLock);
   if (!DefaultLogger) DefaultLogger = std::make_shared<Logger>("./default_logger.log", nullptr, kLoggerLevel_Debug);
   return *DefaultLogger;
 }
 
-void Logger::InitDefaultLogger(const char *file_name, const char *link_name,
+Logger& Logger::InitDefaultLogger(const char *file_name, const char *link_name,
                        int8_t log_level/*= kLoggerLevel_Debug*/){
   DefaultLogger = std::make_shared<Logger>(file_name, link_name, log_level);
+  return *DefaultLogger;
 }

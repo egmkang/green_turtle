@@ -4,6 +4,8 @@
 #include <string>
 #include <string.h>
 
+#define VERSION "0.1"
+
 //magic code
 enum {
   PROTOCOL_REQUEST  = 0x80,
@@ -33,7 +35,7 @@ enum {
 
 //little endian
 struct MessageHead {
- uint32_t length;
+ uint32_t length; //total length, including head
  uint8_t magic;
  uint8_t opcode;
  uint16_t affinity;

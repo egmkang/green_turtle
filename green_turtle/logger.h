@@ -137,12 +137,12 @@ class Logger {
   }
 
  public:
-  static Logger &Default();
   //!!!
   //NOT THREAD SAFE
   //!!!
-  void InitDefaultLogger(const char *file_name, const char *link_name,
-         int8_t log_level = kLoggerLevel_Debug);
+  static Logger &Default();
+  static Logger &InitDefaultLogger(const char *file_name, const char *link_name,
+                                   int8_t log_level = kLoggerLevel_Debug);
 
  private:
   void FormatMessage(int level, const char *pattern, va_list ap,

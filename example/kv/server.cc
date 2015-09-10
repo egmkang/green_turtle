@@ -7,13 +7,14 @@
 #include <system.h>
 #include <logger.h>
 #include "protocol.h"
+#include "message_loop.h"
 #include <blocking_queue.h>
 #include <sophia.h>
 
 using namespace green_turtle;
 using namespace green_turtle::net;
 
-Logger& logger = Logger::Default();
+Logger& logger = Logger::InitDefaultLogger("./log.txt", nullptr);
 
 class IoTask : public BufferedSocket {
  public:
@@ -22,36 +23,6 @@ class IoTask : public BufferedSocket {
     printf("IoTask will be disposed, %p\n", this);
   }
  protected:
-  void ProcessOneMessage(MessageHead* msg) {
-    uint8_t* data = reinterpret_cast<uint8_t*>(msg) + sizeof(*msg);
-    (void)data;
-
-    switch (msg->opcode) {
-      case PROTOCOL_CMD_VERSION:
-        break;
-      case PROTOCOL_CMD_NOOP:
-        break;
-      case PROTOCOL_CMD_ERROR:
-        break;
-      case PROTOCOL_CMD_GET:
-        break;
-      case PROTOCOL_CMD_SET:
-        break;
-      case PROTOCOL_CMD_DEL:
-        break;
-      case PROTOCOL_CMD_APPEND:
-        break;
-      case PROTOCOL_CMD_INC:
-        break;
-      case PROTOCOL_CMD_DEC:
-        break;
-      case PROTOCOL_CMD_FLUSH:
-        break;
-      default:
-        ERROR_LOG(logger)("%s MSG:%02x not found", __PRETTY_FUNCTION__, msg->opcode);
-        break;
-    }
-  }
 
   virtual void Decoding(Buffer& data) {
     while (true) {
@@ -59,8 +30,15 @@ class IoTask : public BufferedSocket {
       if (size >= int32_t(sizeof(MessageHead))) {
         int32_t msg_len = *reinterpret_cast<int32_t*>(data.BeginRead());
         if (size >= msg_len) {
-          this->ProcessOneMessage(
-              reinterpret_cast<MessageHead*>(data.BeginRead()));
+
+          uint8_t *msg = new uint8_t[msg_len];
+          memcpy(msg, data.BeginRead(), msg_len);
+          MessageLoopPool::Instance()
+              .GetMessageLoop(reinterpret_cast<MessageHead*>(msg)->affinity)
+              .PushMessage(
+                  std::static_pointer_cast<green_turtle::net::BufferedSocket>(
+                      this->shared_from_this()),
+                  std::unique_ptr<uint8_t[]>(msg));
           data.HasRead(msg_len);
         } else {
           break;
@@ -71,6 +49,8 @@ class IoTask : public BufferedSocket {
 };
 
 int main(int argc, char** argv) {
+  (void)argc;
+  (void)argv;
   signal(SIGPIPE, SIG_IGN);
 
   std::shared_ptr<TcpAcceptor> acceptor = std::make_shared<TcpAcceptor>(

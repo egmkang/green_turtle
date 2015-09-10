@@ -8,8 +8,15 @@ using namespace green_turtle;
 
 int main() {
   MySqlConnection conn;
-  conn.Connect("192.168.1.250", 3306, "game", "game", "slug");
+  conn.Connect("192.168.16.151", 3306, "root", "1q2w3e", "zhanjian");
   conn.SelectCharset("utf8");
+
+  std::string name = "哈哈哈";
+  char out[128] = {0};
+  {
+    int result = conn.EscapeString(out, name.c_str(), name.length());
+    cout << result << ":" << out << endl;
+  }
 
   int64_t begin_time = System::GetMilliSeconds();
 
@@ -28,14 +35,6 @@ int main() {
 
   cout << "cost time : " << System::GetMilliSeconds() - begin_time << "ms"
        << endl;
-
-  begin_time = System::GetMilliSeconds();
-
-  for (int i = 0; i < 300; ++i)
-    conn.ExecSql("insert into test5 (money) values (3000);");
-  cout << "cost time : " << System::GetMilliSeconds() - begin_time << "ms"
-       << endl;
-
 
   return 0;
 }
