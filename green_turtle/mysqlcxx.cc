@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <assert.h>
+#include <mutex>
 #include <string.h>
 #include "mysqlcxx.h"
 
@@ -26,16 +27,19 @@ void MySqlCommand::SetParam(int index, int type, const void *data, int len) {
 }
 
 MySqlConnection::MySqlConnection() {
+  static std::once_flag flag;
+  std::call_once(flag, []() { mysql_library_init(0, nullptr, nullptr); });
   memset(&conn_, 0, sizeof(conn_));
+
   mysql_init(&conn_);
+  mysql_thread_init();
   mysql_options(&conn_, MYSQL_OPT_RECONNECT, "1");
 }
 
 MySqlConnection::~MySqlConnection() {
   mysql_close(&conn_);
+  mysql_thread_end();
   memset(&conn_, 0, sizeof(conn_));
-  mysql_init(&conn_);
-  mysql_options(&conn_, MYSQL_OPT_RECONNECT, "1");
 }
 
 int MySqlConnection::Connect(const char *host, unsigned short port,
