@@ -1,8 +1,8 @@
 ## ToDoList:
 0.2
-* [D] basic optimize
+* [ ] basic optimize
 * [ ] tcp client reconnect(think about using a queue)
-* [D] samples(key/value store server)
+* [ ] samples(key/value store server)
 * [ ] UnitTest
 * [ ] compress
 * [x] modify the echo sample
