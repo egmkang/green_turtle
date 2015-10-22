@@ -2,3 +2,4 @@ bin/*
 build/*
 qt-build/*
 CMakeLists.txt.*
+.ycm_extra_conf.pyc

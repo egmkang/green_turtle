@@ -37,7 +37,7 @@ import ycm_core
 flags = [
 '-Wall',
 '-Wextra',
-'-Werror',
+#'-Werror',
 '-Wno-long-long',
 '-Wno-variadic-macros',
 '-fexceptions',
@@ -59,7 +59,6 @@ flags = [
 '-x',
 'c++',
 '-I', '.',
-'-I', '/usr/include/mysql',
 '-I', '/home/egmkang/code/green_turtle/green_turtle',
 '-I', '/home/egmkang/code/green_turtle/deps',
 '-I', '/home/egmkang/code/green_turtle/deps/gtest-1.7.0/include',

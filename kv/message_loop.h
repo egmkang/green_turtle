@@ -8,8 +8,10 @@
 #include <singleton.h>
 #include <vector>
 
+typedef std::shared_ptr<green_turtle::net::BufferedSocket> BufferedSocketPtr;
+
 struct Request {
-  std::shared_ptr<green_turtle::net::BufferedSocket> handler;
+  BufferedSocketPtr handler;
   std::unique_ptr<uint8_t[]> msg;
   void reset() {
     handler.reset();
@@ -22,18 +24,18 @@ class MessageLoop : green_turtle::NonCopyable {
   MessageLoop() : terminal_(false) {}
 
   void PushMessage(
-      std::shared_ptr<green_turtle::net::BufferedSocket>&& handler,
+      BufferedSocketPtr&& handler,
       std::unique_ptr<uint8_t[]>&& msg);
 
   void Loop();
   template <typename... T>
-  static void Send(std::shared_ptr<green_turtle::net::BufferedSocket>& handler,
+  static void Send(BufferedSocketPtr& handler,
                    MessageHead& head, const T&... args) {
     //TODO:egmkang
   }
 
   void DispatchMessage(
-      std::shared_ptr<green_turtle::net::BufferedSocket>& handler,
+      BufferedSocketPtr& handler,
       std::unique_ptr<uint8_t[]>& msg);
 
   void terminal() { this->terminal_ = true; }

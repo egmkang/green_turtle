@@ -4,7 +4,7 @@
 extern green_turtle::Logger& logger;
 
 void MessageLoop::PushMessage(
-    std::shared_ptr<green_turtle::net::BufferedSocket>&& handler,
+    BufferedSocketPtr&& handler,
     std::unique_ptr<uint8_t[]>&& msg) {
   Request req = {std::move(handler), std::move(msg)};
   queue_.Push(std::move(req));
@@ -34,11 +34,12 @@ void MessageLoopPool::Init(int32_t loop_count) {
 }
 
 void MessageLoop::DispatchMessage(
-    std::shared_ptr<green_turtle::net::BufferedSocket>& handler,
+    BufferedSocketPtr& handler,
     std::unique_ptr<uint8_t[]>& msg) {
   (void)handler;
   MessageHead* head = reinterpret_cast<MessageHead*>(msg.get());
   uint8_t* data = reinterpret_cast<uint8_t*>(msg.get()) + sizeof(*head);
+  (void)data;
 
   MessageHead response;
   response.magic = PROTOCOL_RESPONSE;

@@ -1,6 +1,7 @@
 #include "system.h"
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <string>
 
 using namespace green_turtle;
 
