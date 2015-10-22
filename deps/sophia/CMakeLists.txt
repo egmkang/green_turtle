@@ -1,0 +1,43 @@
+CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
+PROJECT(sophia)
+
+INCLUDE_DIRECTORIES(sophia/std)
+INCLUDE_DIRECTORIES(sophia/format)
+INCLUDE_DIRECTORIES(sophia/runtime)
+INCLUDE_DIRECTORIES(sophia/object)
+INCLUDE_DIRECTORIES(sophia/version)
+INCLUDE_DIRECTORIES(sophia/log)
+INCLUDE_DIRECTORIES(sophia/database)
+INCLUDE_DIRECTORIES(sophia/index)
+INCLUDE_DIRECTORIES(sophia/transaction)
+INCLUDE_DIRECTORIES(sophia/repository)
+INCLUDE_DIRECTORIES(sophia/environment)
+INCLUDE_DIRECTORIES(sophia/sophia)
+
+IF(NOT CMAKE_BUILD_TYPE)
+ SET(CMAKE_BUILD_TYPE "Release")
+ENDIF()
+
+SET(C_FLAGS
+ -std=c99
+ -pedantic
+ -Wextra
+ -Wall
+ -Wno-unused-function
+ -fPIC
+ -fno-stack-protector
+ -fvisibility=hidden
+ )
+
+SET(CMAKE_C_FLAGS_DEBUG "-DSS_INJECTION_ENABLE -g")
+SET(CMAKE_C_FLAGS_RELEASE "-O2")
+
+FILE(GLOB SRC sophia/*/*.h sophia/*/*.c)
+
+SOURCE_GROUP("" FILES ${SRC})
+
+ADD_LIBRARY(sophia SHARED
+ ${SRC}
+ )
+SET_TARGET_PROPERTIES(sophia PROPERTIES
+ LIBRARY_OUTPUT_DIRECTORY ../../bin)

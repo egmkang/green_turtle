@@ -1,0 +1,48 @@
+
+# sophia build configuration
+#
+
+SOPHIA_VMAJOR   = 2
+SOPHIA_VMINOR   = 1
+SOPHIA_BUILD   := $(shell git rev-parse --short HEAD)
+SOPHIA_DIRS     = std \
+                  format \
+                  runtime \
+                  object \
+                  version \
+                  log \
+                  database \
+                  index \
+                  transaction \
+                  repository \
+                  environment \
+                  sophia
+
+ifndef buildworld
+INCLUDE_A       =
+INCLUDE_B       = $(addprefix -I../, $(SOPHIA_DIRS))
+INCLUDE_C       = -I../
+INCLUDE         = $(INCLUDE_A) $(INCLUDE_B) $(INCLUDE_C)
+else
+INCLUDE_A       = $(addprefix -I, $(SOPHIA_DIRS))
+INCLUDE_B       = 
+INCLUDE         = $(INCLUDE_A) $(INCLUDE_B)
+endif
+
+CFLAGS_INCLUDE  = -pthread $(INCLUDE)
+CFLAGS_DEBUG    = -DSR_INJECTION_ENABLE
+CFLAGS_OPT      = -O0
+CFLAGS_STRICT   = -std=c99 -pedantic -Wextra -Wall -fsyntax-only
+CFLAGS_BUILD    = -DSOPHIA_BUILD='"${SOPHIA_BUILD}"'
+CFLAGS_SOPHIA   = $(CFLAGS_INCLUDE) \
+                  $(CFLAGS_DEBUG) \
+                  $(CFLAGS_OPT) \
+                  $(CFLAGS_STRICT) \
+                  $(CFLAGS_BUILD) \
+                  $(CFLAGS)
+
+CC             ?= gcc
+E               = @echo
+Q               = @
+
+# vim: syntax=make
