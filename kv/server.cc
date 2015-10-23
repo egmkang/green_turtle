@@ -19,19 +19,16 @@ Logger& logger = Logger::InitDefaultLogger("./log.txt", nullptr);
 class IoTask : public BufferedSocket {
  public:
   IoTask(int fd, const AddrInfo& addr) : BufferedSocket(fd, addr) {}
-  ~IoTask(){
-    printf("IoTask will be disposed, %p\n", this);
-  }
- protected:
+  ~IoTask() { DEBUG_LOG(logger)("IoTask will be disposed, 0x", HexPtr(this)); }
 
+ protected:
   virtual void Decoding(Buffer& data) {
     while (true) {
       int32_t size = data.ReadableLength();
       if (size >= int32_t(sizeof(MessageHead))) {
         int32_t msg_len = *reinterpret_cast<int32_t*>(data.BeginRead());
         if (size >= msg_len) {
-
-          uint8_t *msg = new uint8_t[msg_len];
+          uint8_t* msg = new uint8_t[msg_len];
           memcpy(msg, data.BeginRead(), msg_len);
           MessageLoopPool::Instance()
               .GetMessageLoop(reinterpret_cast<MessageHead*>(msg)->affinity)
@@ -52,6 +49,8 @@ int main(int argc, char** argv) {
   (void)argc;
   (void)argv;
   signal(SIGPIPE, SIG_IGN);
+
+  MessageLoopPool::Instance().Init();
 
   std::shared_ptr<TcpAcceptor> acceptor = std::make_shared<TcpAcceptor>(
       "0.0.0.0", 10001, [](int fd, const AddrInfo& addr) {

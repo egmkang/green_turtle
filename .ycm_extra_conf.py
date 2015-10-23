@@ -63,6 +63,7 @@ flags = [
 '-I', '/home/egmkang/code/green_turtle/deps',
 '-I', '/home/egmkang/code/green_turtle/deps/gtest-1.7.0/include',
 '-I', '/home/egmkang/code/green_turtle/deps/pugixml/src',
+'-I', '/home/egmkang/code/green_turtle/deps/sophia/sophia/sophia',
 ]
 
 

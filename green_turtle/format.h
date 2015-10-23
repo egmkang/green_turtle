@@ -176,6 +176,8 @@ inline int32_t __ToHex(T v, char *buffer, int32_t left) {
   return length;
 }
 
+#define HexPtr(P) Hex(uint64_t(P), 4)
+
 #define HEX_INTEGER(TYPE)                                 \
 inline int32_t ToHex(TYPE v, char *buffer, int32_t left) {\
   return __ToHex(v, buffer, left);                        \
@@ -216,6 +218,12 @@ inline void ToUpper(char *buffer, int32_t len){
   }
 }
 
+//inline int32_t ToString(void *ptr, char *buffer, int32_t left) {
+//  buffer[0] = '0';
+//  buffer[1] = 'x';
+//  return __ToHex(int64_t(ptr), buffer + 2, left - 2) + 2;
+//}
+
 template <typename T>
 inline int32_t ToString(AlignValue<T> align, char *buffer, int32_t left) {
   int32_t length = ToHex(align.value, buffer, left);
@@ -243,6 +251,7 @@ inline int32_t ToString(AlignValue<T> align, char *buffer, int32_t left) {
 }
 
 inline int32_t __Format(char *buffer, int32_t left, int32_t sum) {
+  (void)left;
   buffer[0] = 0;
   return sum;
 }

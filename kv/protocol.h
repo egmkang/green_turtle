@@ -20,7 +20,7 @@ enum {
  PROTOCOL_CMD_GET     = 0x04, //REQUEST: one string; RESPONSE: one string
  PROTOCOL_CMD_SET     = 0x05, //REQUEST: one string; RESPONSE: no body
  PROTOCOL_CMD_DEL     = 0x06, //REQUEST: one string; RESPONSE: no body
- PROTOCOL_CMD_APPEND  = 0x07, //REQUEST: one string; RESPONSE: no body
+ PROTOCOL_CMD_APPEND  = 0x07, //REQUEST: two string; RESPONSE: no body
  PROTOCOL_CMD_INC     = 0x08, //REQUEST: one string; RESPONSE: one string(int64_t default 1)
  PROTOCOL_CMD_DEC     = 0x09, //REQUEST: one string; RESPONSE: one string(int64_t default 1)
  PROTOCOL_CMD_FLUSH   = 0x0A, //REQUEST: no body; RESPONSE: no body
@@ -39,7 +39,6 @@ struct MessageHead {
  uint8_t magic;
  uint8_t opcode;
  uint16_t affinity;
- uint64_t cas;
  uint32_t seq;
 };
 
@@ -60,19 +59,6 @@ inline std::string Decode(uint8_t **ptr) {
   std::string str(*ptr, *ptr + str_len);
   *ptr += str_len;
   return str;
-}
-
-template <typename T>
-inline void Encode(uint8_t **ptr, const T &value) {
-  *reinterpret_cast<T*>(*ptr) = value;
-  *ptr += sizeof(value);
-}
-
-template <>
-inline void Encode(uint8_t **ptr, const std::string &value) {
-  Encode<int32_t>(ptr, value.length());
-  memcpy(*ptr, &*value.begin(), value.length());
-  *ptr += value.length();
 }
 
 #endif

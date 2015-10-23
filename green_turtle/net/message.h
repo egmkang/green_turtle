@@ -57,7 +57,7 @@ class MemberPtr {
     message_ = message->shared_from_this();
   }
   T* get() const {
-    return static_cast<T*>(static_cast<char*>(message_->data()) + offset_);
+    return static_cast<T*>(reinterpret_cast<void*>(reinterpret_cast<char*>(message_->data()) + offset_));
   }
   T* operator->() const { return get(); }
   T& operator*() const { return *get(); }
@@ -85,10 +85,13 @@ class MessageBuffer : public Message {
   template <typename T>
   void Append(const T& v) {
     int offset = MakeSpace(sizeof(v));
-    T* ptr = static_cast<T*>(const_cast<char*>(this->buffer_.c_str() + offset));
+    T* ptr = reinterpret_cast<T*>(reinterpret_cast<void*>(const_cast<char*>(this->buffer_.c_str() + offset)));
     *ptr = v;
   }
 
+  void Append(std::string&& s) {
+    this->Append(s.c_str(), s.length());
+  }
   void Append(const char* str) { buffer_.append(str); }
   void Append(const void* data, int size) {
     buffer_.append(static_cast<const char*>(data), size);

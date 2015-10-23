@@ -4,6 +4,7 @@
 #include <noncopyable.h>
 #include <blocking_queue.h>
 #include <net/buffered_socket.h>
+#include <net/message.h>
 #include <memory>
 #include <singleton.h>
 #include <vector>
@@ -28,11 +29,6 @@ class MessageLoop : green_turtle::NonCopyable {
       std::unique_ptr<uint8_t[]>&& msg);
 
   void Loop();
-  template <typename... T>
-  static void Send(BufferedSocketPtr& handler,
-                   MessageHead& head, const T&... args) {
-    //TODO:egmkang
-  }
 
   void DispatchMessage(
       BufferedSocketPtr& handler,
@@ -42,6 +38,7 @@ class MessageLoop : green_turtle::NonCopyable {
 
  private:
   green_turtle::BlockingQueue<Request> queue_;
+  green_turtle::BlockingQueue<Request>::container_type process_queue_;
   bool terminal_;
 };
 
