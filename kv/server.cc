@@ -9,6 +9,7 @@
 #include "protocol.h"
 #include "message_loop.h"
 #include <blocking_queue.h>
+#include <iostream>
 #include <sophia.h>
 
 using namespace green_turtle;
@@ -45,10 +46,24 @@ class IoTask : public BufferedSocket {
   }
 };
 
+extern void benchmark();
+extern int32_t kThreadCount;
+extern int32_t kRandomWriteCount;
+
 int main(int argc, char** argv) {
   (void)argc;
   (void)argv;
   signal(SIGPIPE, SIG_IGN);
+
+  kThreadCount = 4;
+  kRandomWriteCount = 1250000;
+
+  int64_t begin = green_turtle::System::GetMilliSeconds();
+  benchmark();
+  int64_t end = green_turtle::System::GetMilliSeconds();
+  std::cout << "ThreadCount:" << kThreadCount << std::endl
+    << "RecordCount:" << kThreadCount * kRandomWriteCount << std::endl
+    << "QPS:" << kThreadCount * kRandomWriteCount / (end - begin) * 1000 << std::endl;
 
   MessageLoopPool::Instance().Init();
 

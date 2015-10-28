@@ -42,7 +42,6 @@ namespace green_turtle {
 namespace net {
 
 class Poller;
-class Timer;
 
 class IoLoop : NonCopyable {
  public:

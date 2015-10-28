@@ -4,6 +4,7 @@ MESSAGE(${CMAKE_SOURCE_DIR}/deps/sophia/sophia/sophia)
 ADD_EXECUTABLE(kv_server
  server.cc
  message_loop.cc
+ bench.cc
 )
 
 ADD_EXECUTABLE(kv_client
