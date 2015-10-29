@@ -49,6 +49,8 @@ int MySqlConnection::Connect(const char *host, unsigned short port,
   MYSQL *mysql = mysql_real_connect(&conn_, host, user, passwd, db_name,
                                     (unsigned int)(port), NULL, 0);
   if (!mysql) return -1;
+  my_bool reconnect = 1;
+  mysql_options(&conn_, MYSQL_OPT_RECONNECT, &reconnect);
   mysql_select_db(&conn_, db_name);
   return 0;
 }
