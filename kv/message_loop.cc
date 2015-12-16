@@ -3,7 +3,7 @@
 #include <logger.h>
 
 using namespace green_turtle::net;
-extern green_turtle::Logger& logger;
+extern green_turtle::Logger* logger;
 
 static inline void __Append(std::shared_ptr<MessageBuffer>& buffer) {
   (void)buffer;

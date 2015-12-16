@@ -81,6 +81,6 @@ void IoLoop::Loop() {
     }
 
     if (!this->loop_index_)
-      Logger::Default().Flush();
+      Logger::Default()->Flush();
   }
 }

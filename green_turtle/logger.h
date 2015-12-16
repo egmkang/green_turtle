@@ -140,8 +140,8 @@ class Logger {
   //!!!
   //NOT THREAD SAFE
   //!!!
-  static Logger &Default();
-  static Logger &InitDefaultLogger(const char *file_name, const char *link_name,
+  static Logger *Default();
+  static Logger *InitDefaultLogger(const char *file_name, const char *link_name,
                                    int8_t log_level = kLoggerLevel_Debug);
 
  private:
@@ -165,11 +165,11 @@ class Logger {
 }
 
 
-#define INFO_LOG(LOGGER) if (LOGGER.log_level() <= green_turtle::kLoggerLevel_Info) LOGGER.LogInfo
-#define DEBUG_LOG(LOGGER) if (LOGGER.log_level() <= green_turtle::kLoggerLevel_Debug) LOGGER.LogDebug
-#define TRACE_LOG(LOGGER) if (LOGGER.log_level() <= green_turtle::kLoggerLevel_Trace) LOGGER.LogTrace
-#define WARN_LOG(LOGGER) if (LOGGER.log_level() <= green_turtle::kLoggerLevel_Warn) LOGGER.LogWarn
-#define ERROR_LOG(LOGGER) if (LOGGER.log_level() <= green_turtle::kLoggerLevel_Error) LOGGER.LogError
-#define FATAL_LOG(LOGGER) if (LOGGER.log_level() <= green_turtle::kLoggerLevel_Fatal) LOGGER.LogFatal
+#define INFO_LOG(LOGGER) if (LOGGER && LOGGER->log_level() <= green_turtle::kLoggerLevel_Info) LOGGER->LogInfo
+#define DEBUG_LOG(LOGGER) if (LOGGER && LOGGER->log_level() <= green_turtle::kLoggerLevel_Debug) LOGGER->LogDebug
+#define TRACE_LOG(LOGGER) if (LOGGER && LOGGER->log_level() <= green_turtle::kLoggerLevel_Trace) LOGGER->LogTrace
+#define WARN_LOG(LOGGER) if (LOGGER && LOGGER->log_level() <= green_turtle::kLoggerLevel_Warn) LOGGER->LogWarn
+#define ERROR_LOG(LOGGER) if (LOGGER && LOGGER->log_level() <= green_turtle::kLoggerLevel_Error) LOGGER->LogError
+#define FATAL_LOG(LOGGER) if (LOGGER && LOGGER->log_level() <= green_turtle::kLoggerLevel_Fatal) LOGGER->LogFatal
 
 #endif

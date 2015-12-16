@@ -97,6 +97,9 @@ class System {
 
   //get file modify time
   static uint64_t GetFileModifyTime(const std::string& file_name);
+
+  //mkdir
+  static void MkDir(const char* path);
 };
 };
 

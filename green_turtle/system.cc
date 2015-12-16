@@ -15,3 +15,5 @@ uint64_t System::GetFileModifyTime(const std::string& file_name) {
 
   return file_stat.st_mtim.tv_sec;
 }
+
+void System::MkDir(const char* path) { mkdir(path, 0755); }

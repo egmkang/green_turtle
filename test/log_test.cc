@@ -10,7 +10,7 @@ const int kThreadCount = 1;
 const long kMaxLogCount = 1000000;
 
 int main() {
-  green_turtle::Logger logger("test.txt.1", "test.txt");
+  green_turtle::Logger *logger = new green_turtle::Logger("test.txt.1", "test.txt");
   std::atomic_long count(0);
   std::thread *threads[kThreadCount];
 
@@ -30,7 +30,7 @@ int main() {
 
   while (count < kMaxLogCount) {
     green_turtle::System::Yield(20);
-    logger.Flush();
+    logger->Flush();
   }
 
   for (int i = 0; i < kThreadCount; ++i) {
@@ -38,7 +38,7 @@ int main() {
     delete threads[i];
   }
 
-  logger.Write("thread ", green_turtle::System::GetThreadID(), " write log, random_num ", rand());
+  logger->Write("thread ", green_turtle::System::GetThreadID(), " write log, random_num ", rand());
   time_t end = green_turtle::System::GetMilliSeconds();
   std::cout << int(double(kMaxLogCount) / (end - begin) * 1000) << std::endl;
 

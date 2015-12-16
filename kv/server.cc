@@ -15,7 +15,7 @@
 using namespace green_turtle;
 using namespace green_turtle::net;
 
-Logger& logger = Logger::InitDefaultLogger("./log.txt", nullptr);
+Logger* logger = Logger::InitDefaultLogger("./log.txt", nullptr);
 
 class IoTask : public BufferedSocket {
  public:
